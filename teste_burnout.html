@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teste de Burnout — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--salmao:#ff8a73;--azul:#1d3557;--cinza:#f8f9fb}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--cinza);color:#333;line-height:1.7}
+header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff}
+.logo{display:flex;align-items:center;gap:.5rem}
+.logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem}
+nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600}
+nav a:hover{text-decoration:underline}
+main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.05)}
+h2{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem}
+.btn{background:var(--salmao);color:#fff;padding:.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:inline-block;margin-top:1rem;text-decoration:none}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid #dde3ee}
+.btn:hover{background:#ff7458}
+.question{margin-bottom:1.2rem}
+.result-box{margin-top:2rem;padding:1.5rem;border-radius:8px;background:#fef5f4}
+footer{text-align:center;padding:2rem;color:#666;font-size:.9rem}
+</style>
+<script>
+const SUPABASE_URL="https://gqwgyresqsuciikmymkd.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const PRECO_BC=10;
+</script>
+</head>
+<body>
+<header>
+  <div class="logo"><img src="assets/logo.svg" width="32" height="32" alt=""><h1>Braintest</h1></div>
+  <nav>
+    <a href="index.html">Início</a><a href="carteira.html">Carteira</a><a href="sobre.html">Sobre</a>
+    <span id="user-info"></span>
+    <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
+  </nav>
+</header>
+
+<main>
+  <h2>Teste de Burnout</h2>
+  <p>Triagem de esgotamento físico, mental e emocional. Não substitui avaliação profissional.</p>
+
+  <form id="burnoutForm" style="margin-top:1.5rem;">
+    <div id="questions"></div>
+    <button type="submit" class="btn">Enviar respostas</button>
+  </form>
+
+  <div id="resultado" class="result-box" style="display:none;"></div>
+</main>
+
+<footer>© 2025 Braintest — Todos os direitos reservados.</footer>
+
+<script>
+const perguntas=[
+"Você sente cansaço constante mesmo após descansar?","Sente que perdeu o entusiasmo com atividades que antes gostava?","Tem dificuldade para se concentrar em tarefas simples?","Sente-se irritado(a) ou impaciente com frequência?","Percebe queda no seu desempenho no trabalho ou estudos?","Sente dores de cabeça, tensão muscular ou insônia regularmente?","Evita interações sociais por sentir esgotamento?","Tem a sensação de estar no limite emocional?","Sente que seu trabalho deixou de ter propósito ou valor?","Sente vontade frequente de desistir de responsabilidades?","Sente falta de energia mesmo em dias leves?","Sente-se sobrecarregado(a) e sem tempo para si?","Tem crises de choro, ansiedade ou desânimo sem motivo aparente?","Percebe dificuldade em relaxar, mesmo fora do horário de trabalho?","Sente-se desvalorizado(a) ou reconhecido(a) insuficientemente?","Perdeu o interesse em cuidar da sua saúde física?","Evita pensar em assuntos relacionados ao trabalho?","Sente que não tem controle sobre seu tempo ou resultados?","Fica doente com mais frequência devido ao estresse?","Sente que está em um ciclo de esgotamento contínuo?"];
+const respostas=["Nunca","Raramente","Às vezes","Frequentemente","Sempre"];
+
+const qDiv=document.getElementById("questions");
+perguntas.forEach((q,i)=>{
+  const d=document.createElement("div"); d.classList.add("question");
+  d.innerHTML=`<label>${i+1}. ${q}</label><br>`+respostas.map((r,idx)=>`<label><input type="radio" name="q${i}" value="${idx}"> ${r}</label>`).join("<br>");
+  qDiv.appendChild(d);
+});
+
+document.getElementById("burnoutForm").addEventListener("submit",(e)=>{
+  e.preventDefault();
+  let score=0; perguntas.forEach((_,i)=>{ const v=document.querySelector(`input[name="q${i}"]:checked`); if(v) score+=parseInt(v.value); });
+  const media=score/perguntas.length;
+  let msg=""; if(media<1.5) msg="Baixo risco de Burnout."; else if(media<2.5) msg="Sinais moderados de estresse e possível início de esgotamento."; else msg="Alto risco de Burnout. Atenção recomendada.";
+  const box=document.getElementById("resultado");
+  box.innerHTML=`<h3>Resultado da triagem:</h3><p>${msg}</p>
+  <p style="margin-top:1rem;">Relatório premium completo: <strong>${PRECO_BC} Braincoins</strong>.</p>
+  <button class="btn" onclick="comprarRelatorio()">Comprar com Braincoins (${PRECO_BC} BC)</button>`;
+  box.style.display="block"; window.scrollTo({top:box.offsetTop,behavior:'smooth'});
+});
+
+// Sessão
+document.addEventListener("DOMContentLoaded",async()=>{
+  const {data:{user}}=await sb.auth.getUser();
+  const ui=document.getElementById("user-info"); const out=document.getElementById("logout-btn");
+  if(user){ ui.textContent=`👤 ${user.email}`; out.style.display="inline-block"; }
+});
+async function logout(){ await sb.auth.signOut(); location.reload(); }
+
+// Débito Braincoin
+async function comprarRelatorio(){
+  const { data:{user} } = await sb.auth.getUser();
+  if(!user){ alert("Faça login para continuar."); return; }
+  const preco=PRECO_BC*100;
+  const { data:wallet } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
+  const saldo=wallet?.balance_cents ?? 0;
+  if(saldo<preco){ alert("Saldo insuficiente. Adicione Braincoins."); location.href="carteira.html"; return; }
+  const novo=saldo-preco;
+  const { data:upd, error:err } = await sb.from('wallets').update({ balance_cents:novo }).eq('user_id',user.id).eq('balance_cents',saldo).select();
+  if(err || !upd || !upd.length){ alert("Não foi possível concluir a compra. Tente novamente."); return; }
+  await sb.from('wallet_transactions').insert({ user_id:user.id, kind:'spend', amount_cents:preco, description:'Relatório Premium Burnout' });
+  location.href="burnout-premium.html";
+}
+</script>
+</body>
+</html>

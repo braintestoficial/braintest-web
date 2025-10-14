@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Braintest — Plataforma</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --salmao:#ff8a73; --salmao-2:#ff7458;
+    --azul:#1d3557; --azul-2:#0f223c;
+    --bg:#f6f7fb; --card:#ffffff; --borda:#e9ecf2; --texto:#2b2b2b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto);}
+  a{text-decoration:none;color:inherit}
+
+  /* LAYOUT BASE */
+  .app{display:flex;min-height:100vh;min-width:0;}
+  .sidebar{
+    flex:0 0 260px; width:260px; background:var(--azul); color:#fff;
+    display:flex; flex-direction:column; border-right:1px solid #0c1a2d;
+    position:sticky; top:0; height:100vh; overflow:auto;
+  }
+  .main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;}
+
+  /* Mobile/off-canvas */
+  .overlay{display:none;}
+  @media(max-width:720px){
+    .sidebar{
+      position:fixed; inset:0 auto 0 0; height:100vh; transform:translateX(-100%);
+      transition:transform .25s ease; z-index:30;
+    }
+    .sidebar.open{ transform:translateX(0) }
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:20;display:none}
+    .overlay.open{display:block}
+  }
+
+  /* Sidebar conteúdo */
+  .brand{display:flex;align-items:center;gap:.6rem;padding:1rem;border-bottom:1px solid #0c1a2d;}
+  .brand img{width:28px;height:28px}
+  .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;letter-spacing:.2px}
+
+  .user-box{padding:1rem;border-bottom:1px solid #0c1a2d;}
+  .user-row{display:flex;align-items:center;gap:.75rem;}
+  .avatar{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--azul);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .user-meta{display:flex;flex-direction:column;}
+  .user-meta small{opacity:.8}
+  .saldo{margin-top:.8rem;padding:.6rem .8rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;display:flex;justify-content:space-between;font-weight:600}
+  .saldo .add{color:#fff;background:var(--salmao);border:none;border-radius:6px;padding:.2rem .5rem;cursor:pointer}
+  .saldo .add:hover{background:var(--salmao-2)}
+
+  nav.side{padding:.6rem 0;flex:1;overflow:auto}
+  .item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;color:#cfe2ff;opacity:.95;}
+  .item:hover{background:rgba(255,255,255,.06)}
+  .item.active{background:rgba(255,255,255,.12);color:#fff;}
+  .item .icon{width:22px;text-align:center;font-weight:700}
+
+  .bottom{padding:1rem;border-top:1px solid #0c1a2d;}
+  .logout-btn{width:100%;background:#fff;color:var(--azul);border:none;border-radius:8px;padding:.6rem 1rem;font-weight:700;cursor:pointer}
+  .logout-btn:hover{background:#f0f4ff}
+
+  /* Topbar + conteúdo */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-bottom:1px solid var(--borda);background:#fff;position:sticky;top:0;z-index:10}
+  .left{display:flex;align-items:center;gap:.8rem}
+  .burger{display:none}
+  @media(max-width:720px){
+    .burger{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--borda);border-radius:8px;background:#fff}
+  }
+  .search{display:flex;align-items:center;background:#fff;border:1px solid var(--borda);border-radius:10px;padding:.5rem .8rem;min-width:260px}
+  .search input{border:none;outline:none;width:100%;font-size:.95rem}
+  .right{display:flex;align-items:center;gap:1rem}
+  .pill{background:#fff;border:1px solid var(--borda);padding:.45rem .75rem;border-radius:999px;font-weight:600}
+  .login-btn{background:var(--salmao);color:#fff;border:none;border-radius:8px;padding:.55rem 1rem;font-weight:700;cursor:pointer}
+  .login-btn:hover{background:var(--salmao-2)}
+
+  .content{padding:1.5rem;display:grid;gap:1rem;grid-template-columns:1fr;max-width:1100px;margin:0 auto; width:100%}
+  .section{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:1.2rem 1.2rem 1.3rem;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .section h2{font-family:'Poppins',sans-serif;color:var(--azul);margin-bottom:.5rem}
+  .muted{color:#6b7380}
+
+  .cards{display:grid;gap:1rem;grid-template-columns:repeat(3,1fr)}
+  @media(max-width:960px){ .cards{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:560px){ .cards{grid-template-columns:1fr} }
+  .card{border:1px solid var(--borda);border-radius:12px;background:#fff;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
+  .card h3{font-size:1rem;color:#0e1d33}
+  .tag{display:inline-flex;align-items:center;gap:.35rem;background:#f7f9ff;border:1px solid var(--borda);padding:.25rem .55rem;border-radius:999px;font-size:.8rem}
+  .cta{margin-top:auto;display:flex;gap:.5rem}
+  .btn{background:var(--salmao);color:#fff;border:none;border-radius:8px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+  .btn:hover{background:var(--salmao-2)}
+  .btn.secondary:hover{background:#f7f9ff}
+  .soon{opacity:.75}
+  .soon .btn{pointer-events:none;opacity:.6}
+
+  /* Modal Auth */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);z-index:40}
+  .modal.open{display:flex}
+  .auth-box{width:100%;max-width:420px;background:#fff;border-radius:14px;border:1px solid var(--borda);padding:1.2rem}
+  .auth-box h3{font-family:'Poppins',sans-serif;color:var(--azul);margin-bottom:.75rem}
+  .field{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
+  .field input{border:1px solid var(--borda);border-radius:10px;padding:.65rem .8rem;font-size:.95rem}
+  .row{display:flex;gap:.6rem;margin-top:.7rem}
+  .gbtn{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:.6rem .8rem;display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:600}
+  .gbtn img{width:18px;height:18px}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="assets/logo.svg" alt="logo">
+      <h1>Braintest</h1>
+    </div>
+
+    <div class="user-box" id="userBox">
+      <div class="user-row">
+        <div class="avatar" id="avatar">BT</div>
+        <div class="user-meta">
+          <strong id="uemail">Visitante</strong>
+          <small>Bem-vindo(a)!</small>
+        </div>
+      </div>
+      <div class="saldo">
+        <span>💰 <span id="saldoBC">0.00</span> Braincoins</span>
+        <button class="add" onclick="location.href='carteira.html'">+ Comprar</button>
+      </div>
+    </div>
+
+    <nav class="side" id="sidenav">
+      <a href="#" class="item active" data-section="home"><span class="icon">🏠</span> <span class="label">Início</span></a>
+      <a href="#" class="item" data-section="testes"><span class="icon">🧠</span> <span class="label">Testes</span></a>
+      <a href="carteira.html" class="item"><span class="icon">💰</span> <span class="label">Carteira</span></a>
+      <a href="#" class="item" data-section="assinaturas"><span class="icon">⭐</span> <span class="label">Assinaturas</span></a>
+      <a href="#" class="item" data-section="jogos"><span class="icon">🎮</span> <span class="label">Jogos</span></a>
+      <a href="#" class="item" data-section="historico"><span class="icon">📈</span> <span class="label">Histórico</span></a>
+      <a href="#" class="item" data-section="config"><span class="icon">⚙️</span> <span class="label">Configurações</span></a>
+    </nav>
+
+    <div class="bottom">
+      <button class="logout-btn" id="logoutBtn" style="display:none;">Sair</button>
+    </div>
+  </aside>
+
+  <!-- Overlay mobile -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main -->
+  <section class="main">
+    <div class="topbar">
+      <div class="left">
+        <button class="burger" id="burger">☰</button>
+        <div class="search">
+          <input type="text" placeholder="Buscar testes, jogos, relatórios..." />
+        </div>
+      </div>
+      <div class="right">
+        <div class="pill">Moeda: Braincoin</div>
+        <button class="login-btn" id="loginOpenBtn">Entrar / Criar conta</button>
+      </div>
+    </div>
+
+    <div class="content" id="content">
+      <!-- HOME -->
+      <div class="section" data-view="home">
+        <h2>Bem-vindo(a) à Braintest</h2>
+        <p class="muted">Plataforma de inteligência lógica e emocional. Faça triagens gratuitas e desbloqueie relatórios premium com Braincoins.</p>
+        <div class="cards" style="margin-top:.8rem">
+          <div class="card">
+            <div class="tag">🧠 Testes</div>
+            <h3>Teste de TDAH</h3>
+            <p class="muted">Triagem baseada em sintomas comportamentais. Relatório premium por <strong>10 Braincoins</strong>.</p>
+            <div class="cta">
+              <a class="btn secondary" href="teste-tdah.html">Triagem gratuita</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="tag">🧠 Testes</div>
+            <h3>Teste de Burnout</h3>
+            <p class="muted">Avalie sinais de esgotamento emocional. Relatório premium por <strong>10 Braincoins</strong>.</p>
+            <div class="cta">
+              <a class="btn secondary" href="teste-burnout.html">Triagem gratuita</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="tag">🧮 Lógico</div>
+            <h3>Teste de Q.I.</h3>
+            <p class="muted">Raciocínio lógico, numérico e padrões. Relatório premium por <strong>10 Braincoins</strong>.</p>
+            <div class="cta">
+              <a class="btn secondary" href="teste-qi.html">Triagem gratuita</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TESTES -->
+      <div class="section" data-view="testes" style="display:none">
+        <h2>Todos os Testes</h2>
+        <p class="muted">Escolha um teste para começar gratuitamente. Relatórios premium podem ser comprados com Braincoins.</p>
+        <div class="cards" style="margin-top:.8rem">
+          <div class="card">
+            <div class="tag">🧠</div>
+            <h3>TDAH</h3>
+            <p class="muted">Triagem e relatório premium.</p>
+            <div class="cta"><a class="btn secondary" href="teste-tdah.html">Abrir</a></div>
+          </div>
+          <div class="card">
+            <div class="tag">🔥</div>
+            <h3>Burnout</h3>
+            <p class="muted">Triagem e relatório premium.</p>
+            <div class="cta"><a class="btn secondary" href="teste-burnout.html">Abrir</a></div>
+          </div>
+          <div class="card">
+            <div class="tag">🧮</div>
+            <h3>Q.I.</h3>
+            <p class="muted">Triagem e relatório premium.</p>
+            <div class="cta"><a class="btn secondary" href="teste-qi.html">Abrir</a></div>
+          </div>
+          <div class="card soon">
+            <div class="tag">⚡</div>
+            <h3>Tempo de Reação</h3>
+            <p class="muted">Teste cognitivo de milissegundos. <strong>Em breve</strong>.</p>
+            <div class="cta"><button class="btn">Em breve</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Placeholders -->
+      <div class="section soon" data-view="assinaturas" style="display:none">
+        <h2>Assinaturas</h2>
+        <p class="muted">Planos mensais com Braincoins bônus e acesso premium. <strong>Em breve</strong>.</p>
+      </div>
+      <div class="section soon" data-view="jogos" style="display:none">
+        <h2>Jogos Cognitivos</h2>
+        <p class="muted">Raciocínio, memória e tempo de reação. <strong>Em breve</strong>.</p>
+      </div>
+      <div class="section soon" data-view="historico" style="display:none">
+        <h2>Histórico</h2>
+        <p class="muted">Relatórios adquiridos e progresso. <strong>Em breve</strong>.</p>
+      </div>
+      <div class="section soon" data-view="config" style="display:none">
+        <h2>Configurações</h2>
+        <p class="muted">Perfil, tema (claro/escuro), segurança. <strong>Em breve</strong>.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Modal Auth -->
+<div class="modal" id="authModal">
+  <div class="auth-box">
+    <h3>Entrar na Braintest</h3>
+    <div class="field">
+      <label>E-mail</label><input type="email" id="email" placeholder="seu@email.com">
+    </div>
+    <div class="field">
+      <label>Senha</label><input type="password" id="senha" placeholder="••••••••">
+    </div>
+    <div class="row">
+      <button class="btn" onclick="login()">Entrar</button>
+      <button class="btn secondary" onclick="signup()">Criar conta</button>
+    </div>
+    <div class="row">
+      <button class="gbtn" onclick="loginGoogle()">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google"> Entrar com Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // UI refs
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const burger = document.getElementById('burger');
+  const loginOpenBtn = document.getElementById('loginOpenBtn');
+  const authModal = document.getElementById('authModal');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  // Mobile sidebar
+  burger?.addEventListener('click', ()=>{ sidebar.classList.add('open'); overlay.classList.add('open'); });
+  overlay?.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+
+  // Modal auth
+  loginOpenBtn?.addEventListener('click', ()=> authModal.classList.add('open'));
+  authModal?.addEventListener('click', (e)=>{ if(e.target===authModal) authModal.classList.remove('open'); });
+
+  // Navegação de seções
+  const sideLinks = document.querySelectorAll('.side .item[data-section]');
+  const views = document.querySelectorAll('[data-view]');
+  sideLinks.forEach(link=>{
+    link.addEventListener('click', (e)=>{
+      e.preventDefault();
+      sideLinks.forEach(l=>l.classList.remove('active'));
+      link.classList.add('active');
+      const target = link.getAttribute('data-section');
+      views.forEach(v=> v.style.display = (v.getAttribute('data-view')===target? 'block': 'none'));
+      if(target==='home'){ document.querySelector('[data-view="home"]').style.display='block'; }
+      sidebar.classList.remove('open'); overlay.classList.remove('open');
+    });
+  });
+
+  // Sessão + saldo
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    const { data:{user} } = await sb.auth.getUser();
+    const uemail = document.getElementById('uemail');
+    const avatar = document.getElementById('avatar');
+
+    if(user){
+      uemail.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'block';
+      loginOpenBtn.style.display = 'none';
+      avatar.textContent = (user.email||'U').slice(0,2).toUpperCase();
+      carregarSaldo();
+    } else {
+      logoutBtn.style.display = 'none';
+      loginOpenBtn.style.display = 'inline-block';
+    }
+  });
+
+  async function carregarSaldo(){
+    const { data:{user} } = await sb.auth.getUser();
+    if(!user) return;
+    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const cents = data?.balance_cents || 0;
+    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+  }
+
+  // Auth
+  async function login(){
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+    const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+    if(error){ alert(error.message); return; }
+    authModal.classList.remove('open');
+    location.reload();
+  }
+  async function signup(){
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+    const { error } = await sb.auth.signUp({ email, password: senha });
+    if(error){ alert(error.message); return; }
+    alert('Conta criada! Verifique seu e-mail para confirmar.');
+  }
+  async function loginGoogle(){
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: "https://braintest.com.br" }
+    });
+    if(error) alert("Erro: "+error.message);
+  }
+  logoutBtn?.addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    location.reload();
+  });
+</script>
+</body>
+</html>

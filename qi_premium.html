@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatório Premium Q.I. — Braintest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --salmao:#ff8a73; --azul:#1d3557; --cinza:#f8f9fb;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+    body{background:var(--cinza);color:#333;line-height:1.7;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
+    .logo{display:flex;align-items:center;gap:0.5rem;}
+    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
+    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
+    nav a:hover{text-decoration:underline;}
+    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+    h2,h3{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
+    p{margin-bottom:1rem;}
+    ul{margin-left:1.2rem;margin-bottom:1rem;}
+    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
+    .highlight{background:#fff3f1;border-left:5px solid var(--salmao);padding:1rem;border-radius:6px;margin:1rem 0;}
+    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;margin-top:1.5rem;}
+    .btn:hover{background:#ff7458;}
+  </style>
+
+  <script>
+    const SUPABASE_URL="https://gqwgyresqsuciikmymkd.supabase.co";
+    const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="assets/logo.svg" alt="logo" width="32" height="32">
+      <h1>Braintest</h1>
+    </div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="user-info"></span>
+      <button id="logout-btn" class="btn" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Relatório Premium — Q.I.</h2>
+
+    <div class="highlight">
+      <p><strong>Importante:</strong> Este relatório é uma análise cognitiva de caráter informativo e não substitui testes clínicos conduzidos por psicólogos especializados.</p>
+    </div>
+
+    <h3>🧠 Interpretação geral</h3>
+    <p>Seu desempenho sugere um perfil cognitivo equilibrado, com boas habilidades de raciocínio lógico, atenção e resolução de problemas. 
+    A pontuação estimada no teste coloca você dentro ou acima da média da população, dependendo do número de acertos.</p>
+
+    <p>Testes de Q.I. medem, principalmente, a capacidade de aprender, adaptar-se e resolver problemas — e não apenas conhecimento acumulado. 
+    Portanto, o resultado deve ser visto como um reflexo do seu potencial cognitivo atual.</p>
+
+    <h3>📊 Faixas de interpretação</h3>
+    <ul>
+      <li><strong>Q.I. abaixo de 90:</strong> desempenho inferior à média populacional. Indica possíveis dificuldades em concentração, lógica ou memória de trabalho, mas também pode estar relacionado a fatores externos (como estresse ou fadiga).</li>
+      <li><strong>Q.I. entre 90 e 110:</strong> faixa média — a mais comum na população. Representa raciocínio sólido, boa capacidade analítica e aprendizado estável.</li>
+      <li><strong>Q.I. acima de 110:</strong> faixa superior à média, indicando excelente potencial lógico e facilidade em compreender padrões e relações complexas.</li>
+    </ul>
+
+    <h3>⚙️ Recomendações de desenvolvimento</h3>
+    <ul>
+      <li>Pratique exercícios mentais como Sudoku, palavras cruzadas, xadrez e jogos de lógica.</li>
+      <li>Desenvolva leitura crítica — livros de raciocínio, filosofia e ciências cognitivas estimulam novas conexões neurais.</li>
+      <li>Aprenda novas habilidades ou idiomas para fortalecer sua plasticidade cerebral.</li>
+      <li>Cuide da saúde física — sono, alimentação e atividade física impactam diretamente o desempenho cognitivo.</li>
+      <li>Evite comparações diretas: o Q.I. é um indicativo, não uma medida de valor pessoal ou sucesso.</li>
+    </ul>
+
+    <div class="highlight">
+      <p><strong>Reflexão final:</strong> Inteligência é um conjunto de habilidades que pode ser aprimorado ao longo da vida. 
+      O autoconhecimento é o primeiro passo para expandir o seu potencial.</p>
+    </div>
+
+    <div style="text-align:center;">
+      <h3>Explore outros testes da Braintest</h3>
+      <a href="teste-tdah.html" class="btn">Teste de TDAH</a>
+      <a href="teste-burnout.html" class="btn">Teste de Burnout</a>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Braintest — Todos os direitos reservados.
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded",async()=>{
+      const {data:{user}}=await sb.auth.getUser();
+      const ui=document.getElementById("user-info");
+      const logout=document.getElementById("logout-btn");
+      if(user){ui.textContent=`👤 ${user.email}`;logout.style.display="inline-block";}
+    });
+    async function logout(){await sb.auth.signOut();location.reload();}
+  </script>
+</body>
+</html>

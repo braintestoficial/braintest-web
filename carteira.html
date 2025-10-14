@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adicionar Créditos — Braintest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --salmao: #ff8a73;
+      --azul: #1d3557;
+      --cinza: #f8f9fb;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+    body{background:var(--cinza);color:#333;line-height:1.6;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
+    .logo{display:flex;align-items:center;gap:0.5rem;}
+    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
+    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
+    nav a:hover{text-decoration:underline;}
+    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+    h2{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
+    .pacotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:1.5rem;}
+    .box{background:#fff;border:2px solid var(--cinza);border-radius:12px;padding:1.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+    .valor{font-size:1.5rem;color:var(--azul);margin-top:0.5rem;}
+    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:inline-block;margin-top:1rem;text-decoration:none;}
+    .btn:hover{background:#ff7458;}
+    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
+  </style>
+
+  <script>
+    const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="assets/logo.svg" alt="logo" width="32" height="32">
+      <h1>Braintest</h1>
+    </div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="user-info"></span>
+      <button id="logout-btn" class="btn" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="auth-box" style="max-width:380px;margin:3rem auto;text-align:center;display:none;">
+      <h2>Entrar na Braintest</h2>
+      <input id="email" type="email" placeholder="Seu e-mail" style="width:90%;padding:0.7rem;margin-top:0.6rem;border:1px solid #ccc;border-radius:6px;"><br>
+      <input id="senha" type="password" placeholder="Senha" style="width:90%;padding:0.7rem;margin-top:0.6rem;border:1px solid #ccc;border-radius:6px;"><br>
+      <button class="btn" onclick="login()">Entrar</button>
+      <button class="btn" style="margin-top:0.5rem;background:var(--azul);" onclick="signup()">Criar conta</button>
+      <div style="margin-top:1rem;">
+        <button class="btn" style="background:#fff;color:#333;border:1px solid #ccc;" onclick="loginGoogle()">
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" width="18" style="vertical-align:middle;margin-right:8px;">
+          Entrar com Google
+        </button>
+      </div>
+    </section>
+
+    <section id="conteudo" style="display:none;">
+      <h2>Adicionar Créditos</h2>
+      <p>Selecione o valor de Braincoins que deseja adicionar à sua carteira.</p>
+      <div class="pacotes">
+        <div class="box">
+          <h3>Pacote 10 Braincoins</h3>
+          <p class="valor">R$10,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04">Comprar</a>
+        </div>
+        <div class="box">
+          <h3>Pacote 30 Braincoins</h3>
+          <p class="valor">R$30,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05">Comprar</a>
+        </div>
+        <div class="box">
+          <h3>Pacote 50 Braincoins</h3>
+          <p class="valor">R$50,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06">Comprar</a>
+        </div>
+        <div class="box">
+          <h3>Pacote 100 Braincoins</h3>
+          <p class="valor">R$100,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07">Comprar</a>
+        </div>
+        <div class="box">
+          <h3>Pacote 500 Braincoins</h3>
+          <p class="valor">R$500,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08">Comprar</a>
+        </div>
+        <div class="box">
+          <h3>Pacote 1000 Braincoins</h3>
+          <p class="valor">R$1000,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09">Comprar</a>
+        </div>
+        <div class="box">
+          <h3>Pacote 3000 Braincoins</h3>
+          <p class="valor">R$3000,00</p>
+          <a class="btn" href="https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a">Comprar</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 Braintest — Todos os direitos reservados.
+  </footer>
+
+  <script>
+    async function login(){
+      const email=document.getElementById("email").value;
+      const senha=document.getElementById("senha").value;
+      const { error } = await sb.auth.signInWithPassword({ email, password:senha });
+      if(error){ alert(error.message); return; }
+      location.reload();
+    }
+
+    async function signup(){
+      const email=document.getElementById("email").value;
+      const senha=document.getElementById("senha").value;
+      const { error } = await sb.auth.signUp({ email, password:senha });
+      if(error){ alert(error.message); return; }
+      alert("Conta criada! Verifique seu e-mail para confirmar.");
+    }
+
+    async function logout(){
+      await sb.auth.signOut();
+      location.reload();
+    }
+
+    async function loginGoogle(){
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: "https://braintest.com.br" }
+      });
+      if(error) alert("Erro ao conectar com Google: " + error.message);
+    }
+
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      const { data:{user} } = await sb.auth.getUser();
+      const authBox=document.getElementById("auth-box");
+      const conteudo=document.getElementById("conteudo");
+      const userInfo=document.getElementById("user-info");
+      const logoutBtn=document.getElementById("logout-btn");
+
+      if(user){
+        authBox.style.display="none";
+        conteudo.style.display="block";
+        userInfo.textContent = `👤 ${user.email}`;
+        logoutBtn.style.display="inline-block";
+      } else {
+        authBox.style.display="block";
+      }
+    });
+  </script>
+</body>
+</html>

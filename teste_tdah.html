@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste de TDAH — Braintest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --salmao:#ff8a73; --azul:#1d3557; --cinza:#f8f9fb; }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+    body{background:var(--cinza);color:#333;line-height:1.7;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
+    .logo{display:flex;align-items:center;gap:0.5rem;}
+    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
+    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
+    nav a:hover{text-decoration:underline;}
+    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+    h2{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
+    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:inline-block;margin-top:1rem;text-decoration:none;}
+    .btn.secondary{background:#fff;color:var(--azul);border:1px solid #dde3ee}
+    .btn:hover{background:#ff7458;}
+    .question{margin-bottom:1.2rem;}
+    .result-box{margin-top:2rem;padding:1.5rem;border-radius:8px;background:#fef5f4;}
+    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
+  </style>
+  <script>
+    const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const PRECO_BC = 10; // 10 Braincoins
+  </script>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="assets/logo.svg" alt="logo" width="32" height="32"><h1>Braintest</h1>
+    </div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="user-info"></span>
+      <button id="logout-btn" class="btn secondary" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Teste de TDAH</h2>
+    <p>Triagem inicial baseada em sintomas. Não substitui avaliação profissional.</p>
+
+    <form id="tdahForm" style="margin-top:1.5rem;">
+      <div id="questions"></div>
+      <button type="submit" class="btn">Enviar respostas</button>
+    </form>
+
+    <div id="resultado" class="result-box" style="display:none;"></div>
+  </main>
+
+  <footer>© 2025 Braintest — Todos os direitos reservados.</footer>
+
+  <script>
+    const perguntas=[
+      "Com que frequência você tem dificuldade em manter o foco em tarefas demoradas ou monótonas?",
+      "Com que frequência você se distrai facilmente com estímulos externos?",
+      "Com que frequência tem dificuldade em concluir tarefas que exigem atenção contínua?",
+      "Você frequentemente esquece compromissos, prazos ou obrigações?",
+      "Você tem dificuldade em organizar suas atividades diárias?",
+      "Com que frequência adia tarefas importantes até o último momento?",
+      "Você costuma perder objetos necessários (como chaves, celular ou documentos)?",
+      "Com que frequência se sente inquieto ou tem dificuldade em ficar parado?",
+      "Você fala excessivamente ou interrompe os outros durante conversas?",
+      "Com que frequência sente que seus pensamentos estão acelerados?",
+      "Você age impulsivamente sem pensar nas consequências?",
+      "Você se sente frequentemente sobrecarregado por pequenas tarefas?",
+      "Tem dificuldade em relaxar mesmo em momentos de descanso?",
+      "Sente-se facilmente entediado em atividades repetitivas?",
+      "Você tem histórico de dificuldades escolares ou de atenção desde a infância?",
+      "Com que frequência sente que procrastina mesmo quando sabe o que precisa ser feito?",
+      "Você se sente frequentemente desorganizado mentalmente ou emocionalmente?",
+      "Sente que tem dificuldade em manter relacionamentos por falta de atenção ou impulsividade?",
+      "Com que frequência sente que sua mente “desliga” durante conversas ou leituras?",
+      "Você se reconhece com sintomas típicos de TDAH descritos em artigos ou redes sociais?"
+    ];
+    const respostas=["Nunca","Raramente","Às vezes","Frequentemente","Sempre"];
+    const questionsDiv=document.getElementById("questions");
+    perguntas.forEach((q,i)=>{
+      const div=document.createElement("div"); div.classList.add("question");
+      div.innerHTML=`<label>${i+1}. ${q}</label><br>`+
+        respostas.map((r,idx)=>`<label><input type="radio" name="q${i}" value="${idx}"> ${r}</label>`).join("<br>");
+      questionsDiv.appendChild(div);
+    });
+
+    document.getElementById("tdahForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      let score=0;
+      perguntas.forEach((_,i)=>{
+        const val=document.querySelector(`input[name="q${i}"]:checked`);
+        if(val) score+=parseInt(val.value);
+      });
+      const media=score/perguntas.length;
+      let mensagem="";
+      if(media<1.5) mensagem="Baixo nível de sintomas de TDAH.";
+      else if(media<2.5) mensagem="Alguns indícios de sintomas relacionados a TDAH — observe seu comportamento ao longo do tempo.";
+      else mensagem="Sinais significativos compatíveis com TDAH. Avaliação profissional é recomendada.";
+
+      const r=document.getElementById("resultado");
+      r.innerHTML = `
+        <h3>Resultado da triagem:</h3>
+        <p>${mensagem}</p>
+        <p style="margin-top:1rem;">Relatório premium com análise personalizada: <strong>${PRECO_BC} Braincoins</strong>.</p>
+        <button class="btn" onclick="comprarRelatorio()">Comprar com Braincoins (${PRECO_BC} BC)</button>
+      `;
+      r.style.display="block"; window.scrollTo({top:r.offsetTop,behavior:'smooth'});
+    });
+
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      const { data:{user} } = await sb.auth.getUser();
+      const ui=document.getElementById("user-info");
+      const out=document.getElementById("logout-btn");
+      if(user){ ui.textContent=`👤 ${user.email}`; out.style.display="inline-block"; }
+    });
+    async function logout(){ await sb.auth.signOut(); location.reload(); }
+
+    async function comprarRelatorio(){
+      const { data:{user} } = await sb.auth.getUser();
+      if(!user){ alert("Faça login para continuar."); return; }
+
+      const preco=PRECO_BC*100;
+      const { data:wallet } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const saldo = wallet?.balance_cents ?? 0;
+      if(saldo < preco){
+        alert("Saldo insuficiente. Adicione Braincoins à sua carteira.");
+        location.href="carteira.html"; return;
+      }
+      const novo = saldo - preco;
+      const { data:upd, error:updErr } = await sb
+        .from('wallets')
+        .update({ balance_cents: novo })
+        .eq('user_id', user.id)
+        .eq('balance_cents', saldo)
+        .select();
+      if(updErr || !upd || !upd.length){
+        alert("Não foi possível concluir a compra. Tente novamente.");
+        return;
+      }
+      await sb.from('wallet_transactions').insert({
+        user_id: user.id, kind:'spend', amount_cents: preco, description:'Relatório Premium TDAH'
+      });
+      location.href="tdah-premium.html";
+    }
+  </script>
+</body>
+</html>

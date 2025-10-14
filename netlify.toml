@@ -1,0 +1,10 @@
+[build]
+  publish = "."       # sua pasta pública é a raiz (onde estão os .html)
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"  # padrão recomendado; empacota a função
+
+# (opcional) defina a versão do Node se quiser reforçar
+[build.environment]
+  NODE_VERSION = "18"

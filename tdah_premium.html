@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatório Premium TDAH — Braintest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --salmao: #ff8a73;
+      --azul: #1d3557;
+      --cinza: #f8f9fb;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+    body{background:var(--cinza);color:#333;line-height:1.7;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
+    .logo{display:flex;align-items:center;gap:0.5rem;}
+    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
+    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
+    nav a:hover{text-decoration:underline;}
+    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
+    h2,h3{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
+    p{margin-bottom:1rem;}
+    ul{margin-left:1.2rem;margin-bottom:1rem;}
+    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
+    .highlight{background:#fff3f1;border-left:5px solid var(--salmao);padding:1rem;border-radius:6px;margin:1rem 0;}
+    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;margin-top:1.5rem;}
+    .btn:hover{background:#ff7458;}
+  </style>
+
+  <script>
+    const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="assets/logo.svg" alt="logo" width="32" height="32">
+      <h1>Braintest</h1>
+    </div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="user-info"></span>
+      <button id="logout-btn" class="btn" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Relatório Premium — TDAH</h2>
+
+    <div class="highlight">
+      <p><strong>Importante:</strong> Este relatório tem caráter informativo e não substitui avaliação ou diagnóstico realizados por profissionais de saúde.</p>
+    </div>
+
+    <h3>🔍 Interpretação dos resultados</h3>
+    <p>O seu padrão de respostas indica a presença de sinais consistentes com o <strong>Transtorno de Déficit de Atenção e Hiperatividade (TDAH)</strong> em nível leve a moderado.  
+    Isso significa que há uma tendência a variações significativas de foco, dificuldade em manter atenção prolongada e impulsividade situacional.</p>
+
+    <p>Essas características, quando reconhecidas, podem ser administradas com boas estratégias comportamentais, organização pessoal e acompanhamento profissional quando necessário.</p>
+
+    <h3>🧠 Aspectos cognitivos e comportamentais observados</h3>
+    <ul>
+      <li>Dificuldade em manter atenção em atividades prolongadas ou pouco estimulantes.</li>
+      <li>Procrastinação frequente e dispersão de foco em ambientes com múltiplos estímulos.</li>
+      <li>Percepção de “pensamentos acelerados” e tendência à impulsividade.</li>
+      <li>Oscilações de produtividade e motivação, influenciadas por interesse ou pressão externa.</li>
+      <li>Dificuldade em manter rotinas estruturadas por longos períodos.</li>
+    </ul>
+
+    <h3>⚙️ Recomendações práticas</h3>
+    <ul>
+      <li>Adote uma rotina com horários fixos e pausas curtas a cada 25–30 minutos (técnica Pomodoro).</li>
+      <li>Utilize listas de tarefas visuais e lembretes automáticos (apps como Notion, Todoist ou Google Tasks ajudam muito).</li>
+      <li>Evite ambientes com múltiplas distrações durante atividades de foco.</li>
+      <li>Durma bem e mantenha alimentação equilibrada — sono e nutrição afetam diretamente o foco e o humor.</li>
+      <li>Procure um psicólogo ou psiquiatra se os sintomas afetarem sua rotina de forma significativa.</li>
+    </ul>
+
+    <div class="highlight">
+      <p><strong>Lembre-se:</strong> O TDAH não define quem você é — ele apenas descreve um padrão de funcionamento mental.  
+      Entender esse padrão é o primeiro passo para usar sua mente a seu favor.</p>
+    </div>
+
+    <div style="text-align:center;">
+      <h3>Explore outros testes da Braintest</h3>
+      <a href="teste-burnout.html" class="btn">Teste de Burnout</a>
+      <a href="teste-qi.html" class="btn">Teste de Q.I.</a>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Braintest — Todos os direitos reservados.
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      const { data:{user} } = await sb.auth.getUser();
+      const userInfo=document.getElementById("user-info");
+      const logoutBtn=document.getElementById("logout-btn");
+      if(user){
+        userInfo.textContent = `👤 ${user.email}`;
+        logoutBtn.style.display="inline-block";
+      }
+    });
+
+    async function logout(){
+      await sb.auth.signOut();
+      location.reload();
+    }
+  </script>
+</body>
+</html>
