@@ -37,12 +37,14 @@
       <img src="assets/logo.svg" alt="logo" width="32" height="32"><h1>Braintest</h1>
     </div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="carteira.html">Carteira</a>
-      <a href="sobre.html">Sobre</a>
-      <span id="user-info"></span>
-      <button id="logout-btn" class="btn secondary" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
-    </nav>
+  <a href="index.html">Início</a>
+  <a href="carteira.html">Carteira</a>
+  <a href="historico.html">Histórico</a>
+  <a href="sobre.html">Sobre</a>
+  <span id="user-info"></span>
+  <button id="logout-btn" class="btn secondary" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
+</nav>
+
   </header>
 
   <main>
@@ -126,13 +128,15 @@
       const { data:{user} } = await sb.auth.getUser();
       if(!user){ alert("Faça login para continuar."); return; }
 
-      const preco=PRECO_BC*100;
+      const preco=PRECO_BC*100; // centavos-BC
       const { data:wallet } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
       const saldo = wallet?.balance_cents ?? 0;
       if(saldo < preco){
         alert("Saldo insuficiente. Adicione Braincoins à sua carteira.");
         location.href="carteira.html"; return;
       }
+
+      // tentativa de débito atômico simples
       const novo = saldo - preco;
       const { data:upd, error:updErr } = await sb
         .from('wallets')
@@ -140,13 +144,18 @@
         .eq('user_id', user.id)
         .eq('balance_cents', saldo)
         .select();
+
       if(updErr || !upd || !upd.length){
         alert("Não foi possível concluir a compra. Tente novamente.");
         return;
       }
+
+      // extrato + purchase
       await sb.from('wallet_transactions').insert({
         user_id: user.id, kind:'spend', amount_cents: preco, description:'Relatório Premium TDAH'
       });
+      await sb.from('purchases').insert({ user_id: user.id, product: 'tdah' }).catch(()=>{});
+
       location.href="tdah-premium.html";
     }
   </script>

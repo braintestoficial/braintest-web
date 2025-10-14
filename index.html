@@ -28,10 +28,8 @@
   /* Mobile/off-canvas */
   .overlay{display:none;}
   @media(max-width:720px){
-    .sidebar{
-      position:fixed; inset:0 auto 0 0; height:100vh; transform:translateX(-100%);
-      transition:transform .25s ease; z-index:30;
-    }
+    .sidebar{ position:fixed; inset:0 auto 0 0; height:100vh; transform:translateX(-100%);
+      transition:transform .25s ease; z-index:30; }
     .sidebar.open{ transform:translateX(0) }
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:20;display:none}
     .overlay.open{display:block}
@@ -136,8 +134,11 @@
       <a href="carteira.html" class="item"><span class="icon">💰</span> <span class="label">Carteira</span></a>
       <a href="#" class="item" data-section="assinaturas"><span class="icon">⭐</span> <span class="label">Assinaturas</span></a>
       <a href="#" class="item" data-section="jogos"><span class="icon">🎮</span> <span class="label">Jogos</span></a>
-      <a href="#" class="item" data-section="historico"><span class="icon">📈</span> <span class="label">Histórico</span></a>
+      <!-- Atualizado: link direto para histórico -->
+      <a href="historico.html" class="item"><span class="icon">📈</span> <span class="label">Histórico</span></a>
       <a href="#" class="item" data-section="config"><span class="icon">⚙️</span> <span class="label">Configurações</span></a>
+      <a href="faq.html" class="item"><span class="icon">❓</span> <span class="label">FAQ</span></a>
+      <a href="termos.html" class="item"><span class="icon">📃</span> <span class="label">Termos</span></a>
     </nav>
 
     <div class="bottom">
@@ -228,7 +229,7 @@
         </div>
       </div>
 
-      <!-- Placeholders -->
+      <!-- Placeholders (assinaturas/config/jogos) -->
       <div class="section soon" data-view="assinaturas" style="display:none">
         <h2>Assinaturas</h2>
         <p class="muted">Planos mensais com Braincoins bônus e acesso premium. <strong>Em breve</strong>.</p>
@@ -237,14 +238,11 @@
         <h2>Jogos Cognitivos</h2>
         <p class="muted">Raciocínio, memória e tempo de reação. <strong>Em breve</strong>.</p>
       </div>
-      <div class="section soon" data-view="historico" style="display:none">
-        <h2>Histórico</h2>
-        <p class="muted">Relatórios adquiridos e progresso. <strong>Em breve</strong>.</p>
-      </div>
       <div class="section soon" data-view="config" style="display:none">
         <h2>Configurações</h2>
         <p class="muted">Perfil, tema (claro/escuro), segurança. <strong>Em breve</strong>.</p>
       </div>
+      <!-- Removido: placeholder antigo de histórico -->
     </div>
   </section>
 </div>
@@ -274,9 +272,11 @@
 <script>
   const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
 
-  // UI refs
+  // ---- Helpers de UI
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('overlay');
   const burger = document.getElementById('burger');
@@ -284,15 +284,12 @@
   const authModal = document.getElementById('authModal');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  // Mobile sidebar
   burger?.addEventListener('click', ()=>{ sidebar.classList.add('open'); overlay.classList.add('open'); });
   overlay?.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('open'); });
 
-  // Modal auth
   loginOpenBtn?.addEventListener('click', ()=> authModal.classList.add('open'));
   authModal?.addEventListener('click', (e)=>{ if(e.target===authModal) authModal.classList.remove('open'); });
 
-  // Navegação de seções
   const sideLinks = document.querySelectorAll('.side .item[data-section]');
   const views = document.querySelectorAll('[data-view]');
   sideLinks.forEach(link=>{
@@ -307,7 +304,23 @@
     });
   });
 
-  // Sessão + saldo
+  // ---- Sessão + saldo + profiles sync
+  async function carregarSaldo(){
+    const { data:{user} } = await sb.auth.getUser();
+    if(!user) return;
+    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const cents = data?.balance_cents || 0;
+    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+  }
+
+  async function syncProfile(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user?.id) return;
+    const email = user.email || null;
+    if(!email) return;
+    await sb.from('profiles').upsert({ user_id: user.id, email }, { onConflict: 'user_id' });
+  }
+
   document.addEventListener('DOMContentLoaded', async ()=>{
     const { data:{user} } = await sb.auth.getUser();
     const uemail = document.getElementById('uemail');
@@ -318,28 +331,43 @@
       logoutBtn.style.display = 'block';
       loginOpenBtn.style.display = 'none';
       avatar.textContent = (user.email||'U').slice(0,2).toUpperCase();
-      carregarSaldo();
+      await syncProfile();
+      await carregarSaldo();
     } else {
       logoutBtn.style.display = 'none';
       loginOpenBtn.style.display = 'inline-block';
     }
   });
 
-  async function carregarSaldo(){
+  sb.auth.onAuthStateChange(async (_event, _session)=>{
     const { data:{user} } = await sb.auth.getUser();
-    if(!user) return;
-    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const cents = data?.balance_cents || 0;
-    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
-  }
+    const uemail = document.getElementById('uemail');
+    const avatar = document.getElementById('avatar');
 
-  // Auth
+    if(user){
+      uemail.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'block';
+      loginOpenBtn.style.display = 'none';
+      avatar.textContent = (user.email||'U').slice(0,2).toUpperCase();
+      await syncProfile();
+      await carregarSaldo();
+    } else {
+      document.getElementById('saldoBC').textContent = '0.00';
+      uemail.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+      loginOpenBtn.style.display = 'inline-block';
+    }
+  });
+
+  // ---- Auth ações
   async function login(){
     const email = document.getElementById('email').value.trim();
     const senha = document.getElementById('senha').value.trim();
     const { error } = await sb.auth.signInWithPassword({ email, password: senha });
     if(error){ alert(error.message); return; }
     authModal.classList.remove('open');
+    await syncProfile();
+    await carregarSaldo();
     location.reload();
   }
   async function signup(){
@@ -347,7 +375,7 @@
     const senha = document.getElementById('senha').value.trim();
     const { error } = await sb.auth.signUp({ email, password: senha });
     if(error){ alert(error.message); return; }
-    alert('Conta criada! Verifique seu e-mail para confirmar.');
+    alert('Conta criada! Verifique seu e-mail para confirmar (se exigido).');
   }
   async function loginGoogle(){
     const { error } = await sb.auth.signInWithOAuth({
@@ -358,6 +386,7 @@
   }
   logoutBtn?.addEventListener('click', async ()=>{
     await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
     location.reload();
   });
 </script>

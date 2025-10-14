@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
+h3{color:#0e1d33;margin:.9rem 0 .4rem}
+.muted{color:#6b7380}
+.faq-item{border-top:1px solid var(--borda);padding:1rem 0}
+.faq-item:first-of-type{border-top:none}
+.faq-item h3{display:flex;align-items:center;gap:.4rem}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+.list{margin:.4rem 0 0 1rem} .list li{margin:.35rem 0}
+.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+  <a href="index.html">Início</a>
+  <a href="carteira.html">Carteira</a>
+  <a href="sobre.html">Sobre</a>
+  <a href="historico.html">Histórico</a>
+  <a href="faq.html" class="btn secondary">FAQ</a>
+  <a href="termos.html">Termos & Privacidade</a>
+</nav>
+
+  </header>
+
+  <section class="card">
+    <h2>Perguntas Frequentes</h2>
+    <p class="muted">Última atualização: 14/10/2025</p>
+
+    <div class="faq-item">
+      <h3>O que é a Braintest?</h3>
+      <p>A Braintest é uma plataforma de autoconhecimento com triagens gratuitas e relatórios premium em áreas como atenção (TDAH), esgotamento (Burnout) e raciocínio (Q.I.).</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Os testes são diagnósticos?</h3>
+      <p>Não. Os resultados têm caráter informativo/educacional e não substituem avaliação com profissionais de saúde. Se houver impacto no seu cotidiano, procure atendimento especializado.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>O que são Braincoins?</h3>
+      <p>São créditos internos da plataforma. A relação é 1 Braincoin = R$ 1. Você adiciona Braincoins à sua carteira e usa para desbloquear relatórios premium ou, no futuro, assinaturas e jogos.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Como adiciono Braincoins?</h3>
+      <p>Pela página <a href="carteira.html">Carteira</a>. Os pagamentos são processados com segurança via Stripe. Após a confirmação, seu saldo é atualizado automaticamente.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Existe reembolso de Braincoins?</h3>
+      <p>Como regra, Braincoins não são transferíveis nem reembolsáveis após o uso. Para compras recentes com erro técnico (ex.: crédito não lançado), fale com a gente pelo e-mail <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a>.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Posso acessar o relatório depois?</h3>
+      <p>Sim. Relatórios premium liberados ficam vinculados à sua conta e poderão ser consultados novamente (estamos evoluindo a página de histórico).</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Quais dados vocês armazenam?</h3>
+      <p>Dados de conta (e-mail), respostas dos testes e histórico de compras/acessos. Não armazenamos dados de cartão (processamento é do Stripe). Mais detalhes em <a href="termos.html">Termos & Privacidade</a>.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Meus dados ficam seguros?</h3>
+      <p>Utilizamos o Supabase para autenticação e banco de dados, com boas práticas de segurança e controle de acesso. Você pode solicitar a exclusão da conta e dos dados conforme a LGPD.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Sou empresa. Posso avaliar minha equipe?</h3>
+      <p>Estamos desenvolvendo recursos para organizações. Entre em contato para saber mais: <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a>.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Suporte</h3>
+      <p>Envie um e-mail para <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a>. Responderemos o quanto antes.</p>
+    </div>
+  </section>
+
+  <div class="footer">© 2025 Braintest — Todos os direitos reservados.</div>
+</div>
+</body>
+</html>

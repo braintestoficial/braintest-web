@@ -1,97 +1,90 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sobre — Braintest</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --salmao: #ff8a73;
-      --azul: #1d3557;
-      --cinza: #f8f9fb;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
-    body{background:var(--cinza);color:#333;line-height:1.7;}
-    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
-    .logo{display:flex;align-items:center;gap:0.5rem;}
-    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
-    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
-    nav a:hover{text-decoration:underline;}
-    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-    h2{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
-    p{margin-bottom:1rem;}
-    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;}
-    .btn:hover{background:#ff7458;}
-    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobre — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/toast.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
 
-  <script>
-    const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
+.hero{margin-top:1rem;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:2rem}
+.hero h2{font-family:'Poppins',sans-serif;color:var(--azul);font-size:1.6rem;margin-bottom:.6rem}
+.hero p{color:#51607a}
+
+.grid{display:grid;gap:1rem;margin-top:1rem;grid-template-columns:1fr 1fr}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem}
+.card h3{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
+.muted{color:#6b7380}
+.list{margin:.5rem 0 0 1rem} .list li{margin:.4rem 0}
+.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="logo">
-      <img src="assets/logo.svg" alt="logo" width="32" height="32">
-      <h1>Braintest</h1>
-    </div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="carteira.html">Carteira</a>
-      <a href="sobre.html">Sobre</a>
-      <span id="user-info"></span>
-      <button id="logout-btn" class="btn" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
-    </nav>
+  <a href="index.html">Início</a>
+  <a href="carteira.html">Carteira</a>
+  <a href="historico.html">Histórico</a>
+  <a href="sobre.html" class="btn secondary">Sobre</a>
+</nav>
+
   </header>
 
-  <main>
+  <section class="hero">
     <h2>Sobre a Braintest</h2>
-    <p>A <strong>Braintest</strong> nasceu com o propósito de democratizar o acesso ao autoconhecimento e à avaliação cognitiva. 
-    Acreditamos que entender a própria mente é o primeiro passo para viver melhor — no trabalho, nos relacionamentos e na vida pessoal.</p>
+    <p>A Braintest é uma plataforma de autoconhecimento que reúne triagens gratuitas e relatórios premium em áreas como atenção, estresse ocupacional e habilidades cognitivas. Nosso objetivo é oferecer clareza e ferramentas práticas para seu dia a dia — de um jeito simples, seguro e responsável.</p>
+  </section>
 
-    <p>Desenvolvemos testes e ferramentas com base em estudos científicos e psicologia comportamental, 
-    traduzidos em uma linguagem simples e acessível. Nosso objetivo é tornar o autoconhecimento 
-    algo prático e diário, através de diagnósticos rápidos e relatórios claros.</p>
+  <div class="grid">
+    <section class="card">
+      <h3>Como funciona</h3>
+      <ul class="list">
+        <li><strong>Triagens gratuitas:</strong> você responde questionários baseados em referenciais reconhecidos.</li>
+        <li><strong>Relatórios premium:</strong> por 10 Braincoins, você desbloqueia um relatório aprofundado com recomendações úteis.</li>
+        <li><strong>Carteira Braintest:</strong> adicione Braincoins (1 BC = R$ 1) e utilize em qualquer teste.</li>
+        <li><strong>Privacidade:</strong> seus dados são armazenados com segurança no Supabase. Você controla sua conta.</li>
+      </ul>
+    </section>
 
-    <p>Além de ajudar indivíduos a entenderem mais sobre si mesmos, 
-    oferecemos soluções para empresas e times de RH que desejam medir e desenvolver 
-    aspectos emocionais e cognitivos de suas equipes.</p>
+    <section class="card">
+      <h3>É importante saber</h3>
+      <p class="muted">Os relatórios da Braintest têm caráter informativo e educacional. Eles <strong>não substituem</strong> avaliação com profissionais de saúde (psicologia/psiquiatria). Se seus sintomas impactam o cotidiano, procure atendimento especializado.</p>
+      <p class="muted" style="margin-top:.6rem;">Em situações de urgência, busque serviços de emergência (SAMU 192) ou atendimento local.</p>
+    </section>
 
-    <p>Com o sistema de <strong>Braincoins</strong>, cada usuário tem autonomia para explorar 
-    nossos testes, adquirir relatórios premium e acompanhar sua evolução de forma simples, segura e 100% digital.</p>
+    <section class="card">
+      <h3>Para empresas</h3>
+      <p>Estamos preparando ferramentas para equipes de RH acompanharem indicadores (com consentimento) e oferecerem programas de saúde mental e cognitiva — respeitando a privacidade individual.</p>
+    </section>
 
-    <p><strong>Braintest</strong> é mais do que uma plataforma de testes — é um ecossistema de inteligência humana.</p>
+    <section class="card">
+      <h3>Contato</h3>
+      <p>Quer falar com a gente? Envie um e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+    </section>
+  </div>
 
-    <div style="text-align:center;margin-top:2rem;">
-      <a href="index.html" class="btn">Voltar à Página Inicial</a>
-    </div>
-  </main>
+  <div class="footer">© 2025 Braintest — Todos os direitos reservados.</div>
+</div>
 
-  <footer>
-    © 2025 Braintest — Todos os direitos reservados.
-  </footer>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      const { data:{user} } = await sb.auth.getUser();
-      const userInfo=document.getElementById("user-info");
-      const logoutBtn=document.getElementById("logout-btn");
-
-      if(user){
-        userInfo.textContent = `👤 ${user.email}`;
-        logoutBtn.style.display="inline-block";
-      }
-    });
-
-    async function logout(){
-      await sb.auth.signOut();
-      location.reload();
-    }
-  </script>
+<script src="assets/toast.js"></script>
+<script>
+  // Exemplo de uso do toast nesta página (pode remover se quiser)
+  // showToast('Bem-vindo(a) à Braintest!');
+</script>
 </body>
 </html>

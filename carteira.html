@@ -1,164 +1,277 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Adicionar Créditos — Braintest</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --salmao: #ff8a73;
-      --azul: #1d3557;
-      --cinza: #f8f9fb;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
-    body{background:var(--cinza);color:#333;line-height:1.6;}
-    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
-    .logo{display:flex;align-items:center;gap:0.5rem;}
-    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
-    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
-    nav a:hover{text-decoration:underline;}
-    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-    h2{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
-    .pacotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:1.5rem;}
-    .box{background:#fff;border:2px solid var(--cinza);border-radius:12px;padding:1.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-    .valor{font-size:1.5rem;color:var(--azul);margin-top:0.5rem;}
-    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:inline-block;margin-top:1rem;text-decoration:none;}
-    .btn:hover{background:#ff7458;}
-    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carteira — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --salmao:#ff8a73; --salmao-2:#ff7458;
+    --azul:#1d3557; --azul-2:#0f223c;
+    --bg:#f6f7fb; --card:#ffffff; --borda:#e9ecf2; --texto:#2b2b2b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto);}
+  a{text-decoration:none;color:inherit}
 
-  <script>
-    const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
+  .wrap{max-width:1100px;margin:0 auto;padding:1rem;}
+  header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+  .brand{display:flex;align-items:center;gap:.6rem}
+  .brand img{width:28px;height:28px}
+  .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+  nav a{margin-left:1rem;color:var(--azul)}
+  nav .btn{margin-left:1rem}
+  .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+  .btn:hover{background:var(--salmao-2)}
+  .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+  .btn.secondary:hover{background:#f7f9ff}
+
+  .grid{display:grid;gap:1rem;margin-top:1rem;grid-template-columns:1.1fr .9fr}
+  @media(max-width:960px){ .grid{grid-template-columns:1fr} }
+
+  .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem}
+  .card h2{font-family:'Poppins',sans-serif;color:var(--azul);margin-bottom:.5rem}
+  .muted{color:#6b7380}
+
+  .saldo-box{display:flex;align-items:center;justify-content:space-between;background:#fef7f6;border:1px dashed #ffd5cb;padding:1rem;border-radius:12px;margin:.6rem 0 1rem}
+  .saldo-box strong{font-size:1.2rem}
+
+  .packs{display:grid;gap:.8rem;grid-template-columns:repeat(3,1fr)}
+  @media(max-width:720px){ .packs{grid-template-columns:1fr 1fr} }
+  @media(max-width:480px){ .packs{grid-template-columns:1fr} }
+  .pack{border:1px solid var(--borda);border-radius:12px;padding:1rem;background:#fff;display:flex;flex-direction:column;gap:.4rem}
+  .pack h3{font-size:1.05rem;color:#0e1d33}
+  .price{font-weight:700}
+  .pack .btn{margin-top:.4rem}
+
+  table{width:100%;border-collapse:collapse;margin-top:.6rem}
+  th,td{padding:.7rem;border-bottom:1px solid var(--borda);text-align:left;font-size:.95rem}
+  th{color:#0e1d33}
+  .badge{display:inline-flex;align-items:center;gap:.35rem;background:#f7f9ff;border:1px solid var(--borda);padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
+  .right{display:flex;gap:.5rem;align-items:center}
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="logo">
-      <img src="assets/logo.svg" alt="logo" width="32" height="32">
-      <h1>Braintest</h1>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img src="assets/logo.svg" alt="logo"><h1>Braintest</h1>
     </div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="carteira.html">Carteira</a>
-      <a href="sobre.html">Sobre</a>
-      <span id="user-info"></span>
-      <button id="logout-btn" class="btn" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
-    </nav>
+  <a href="index.html">Início</a>
+  <a href="teste-tdah.html">TDAH</a>
+  <a href="teste-burnout.html">Burnout</a>
+  <a href="teste-qi.html">Q.I.</a>
+  <a href="historico.html">Histórico</a>
+  <span id="userInfo" class="badge" style="margin-left:.6rem;">Visitante</span>
+  <button id="logoutBtn" class="btn secondary" style="display:none;">Sair</button>
+</nav>
+
   </header>
 
-  <main>
-    <section id="auth-box" style="max-width:380px;margin:3rem auto;text-align:center;display:none;">
-      <h2>Entrar na Braintest</h2>
-      <input id="email" type="email" placeholder="Seu e-mail" style="width:90%;padding:0.7rem;margin-top:0.6rem;border:1px solid #ccc;border-radius:6px;"><br>
-      <input id="senha" type="password" placeholder="Senha" style="width:90%;padding:0.7rem;margin-top:0.6rem;border:1px solid #ccc;border-radius:6px;"><br>
-      <button class="btn" onclick="login()">Entrar</button>
-      <button class="btn" style="margin-top:0.5rem;background:var(--azul);" onclick="signup()">Criar conta</button>
-      <div style="margin-top:1rem;">
-        <button class="btn" style="background:#fff;color:#333;border:1px solid #ccc;" onclick="loginGoogle()">
-          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" width="18" style="vertical-align:middle;margin-right:8px;">
-          Entrar com Google
-        </button>
+  <div class="grid">
+    <!-- Coluna esquerda: saldo e pacotes -->
+    <section class="card">
+      <h2>Carteira</h2>
+      <p class="muted">Adicione Braincoins para desbloquear relatórios premium e futuras assinaturas.</p>
+
+      <div class="saldo-box">
+        <div>Saldo atual:</div>
+        <strong>💰 <span id="saldoBC">0.00</span> Braincoins</strong>
+        <div class="right">
+          <button id="refreshBtn" class="btn secondary">Atualizar</button>
+        </div>
+      </div>
+
+      <h3 style="margin:.4rem 0 .6rem">Adicionar Braincoins</h3>
+      <div class="packs">
+        <div class="pack">
+          <div class="badge">🔹 Pacote</div>
+          <h3>10 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 10,00</div>
+          <a id="link-10" class="btn" href="https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04" target="_blank" rel="noopener">Comprar</a>
+        </div>
+        <div class="pack">
+          <div class="badge">🔹 Pacote</div>
+          <h3>30 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 30,00</div>
+          <a id="link-30" class="btn" href="https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05" target="_blank" rel="noopener">Comprar</a>
+        </div>
+        <div class="pack">
+          <div class="badge">🔹 Pacote</div>
+          <h3>50 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 50,00</div>
+          <a id="link-50" class="btn" href="https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06" target="_blank" rel="noopener">Comprar</a>
+        </div>
+        <div class="pack">
+          <div class="badge">🔸 Mais popular</div>
+          <h3>100 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 100,00</div>
+          <a id="link-100" class="btn" href="https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07" target="_blank" rel="noopener">Comprar</a>
+        </div>
+        <div class="pack">
+          <div class="badge">💼 Profissional</div>
+          <h3>500 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 500,00</div>
+          <a id="link-500" class="btn" href="https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08" target="_blank" rel="noopener">Comprar</a>
+        </div>
+        <div class="pack">
+          <div class="badge">🏢 Empresas</div>
+          <h3>1000 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 1000,00</div>
+          <a id="link-1000" class="btn" href="https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09" target="_blank" rel="noopener">Comprar</a>
+        </div>
+        <div class="pack">
+          <div class="badge">🏢 Empresas</div>
+          <h3>3000 Braincoins</h3>
+          <div class="muted">Equivalente a R$ 3000,00</div>
+          <a id="link-3000" class="btn" href="https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a" target="_blank" rel="noopener">Comprar</a>
+        </div>
       </div>
     </section>
 
-    <section id="conteudo" style="display:none;">
-      <h2>Adicionar Créditos</h2>
-      <p>Selecione o valor de Braincoins que deseja adicionar à sua carteira.</p>
-      <div class="pacotes">
-        <div class="box">
-          <h3>Pacote 10 Braincoins</h3>
-          <p class="valor">R$10,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04">Comprar</a>
-        </div>
-        <div class="box">
-          <h3>Pacote 30 Braincoins</h3>
-          <p class="valor">R$30,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05">Comprar</a>
-        </div>
-        <div class="box">
-          <h3>Pacote 50 Braincoins</h3>
-          <p class="valor">R$50,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06">Comprar</a>
-        </div>
-        <div class="box">
-          <h3>Pacote 100 Braincoins</h3>
-          <p class="valor">R$100,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07">Comprar</a>
-        </div>
-        <div class="box">
-          <h3>Pacote 500 Braincoins</h3>
-          <p class="valor">R$500,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08">Comprar</a>
-        </div>
-        <div class="box">
-          <h3>Pacote 1000 Braincoins</h3>
-          <p class="valor">R$1000,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09">Comprar</a>
-        </div>
-        <div class="box">
-          <h3>Pacote 3000 Braincoins</h3>
-          <p class="valor">R$3000,00</p>
-          <a class="btn" href="https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a">Comprar</a>
-        </div>
-      </div>
+    <!-- Coluna direita: extrato -->
+    <section class="card">
+      <h2>Extrato</h2>
+      <p class="muted">Últimas movimentações da sua carteira.</p>
+      <table id="txTable">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="txBody">
+          <tr><td colspan="4" class="muted">Carregando…</td></tr>
+        </tbody>
+      </table>
     </section>
-  </main>
+  </div>
+</div>
 
-  <footer>
-    © 2025 Braintest — Todos os direitos reservados.
-  </footer>
+<script>
+  const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
 
-  <script>
-    async function login(){
-      const email=document.getElementById("email").value;
-      const senha=document.getElementById("senha").value;
-      const { error } = await sb.auth.signInWithPassword({ email, password:senha });
-      if(error){ alert(error.message); return; }
-      location.reload();
+  const saldoEl = document.getElementById('saldoBC');
+  const userInfo = document.getElementById('userInfo');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const txBody = document.getElementById('txBody');
+
+  // Mantém profiles sincronizado (webhook usa o e-mail para achar user_id)
+  async function syncProfile(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user?.id) return;
+    const email = user.email || null;
+    if(!email) return;
+    await sb.from('profiles').upsert({ user_id: user.id, email }, { onConflict: 'user_id' });
+  }
+
+  async function carregarSaldo(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user){ saldoEl.textContent = '0.00'; return; }
+    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const cents = data?.balance_cents || 0;
+    saldoEl.textContent = (cents/100).toFixed(2);
+  }
+
+  async function carregarExtrato(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user){ txBody.innerHTML = `<tr><td colspan="4" class="muted">Entre para ver seu extrato.</td></tr>`; return; }
+    const { data, error } = await sb
+      .from('wallet_transactions')
+      .select('created_at, kind, description, amount_cents')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(25);
+
+    if(error){
+      txBody.innerHTML = `<tr><td colspan="4" class="muted">Não foi possível carregar o extrato.</td></tr>`;
+      return;
     }
-
-    async function signup(){
-      const email=document.getElementById("email").value;
-      const senha=document.getElementById("senha").value;
-      const { error } = await sb.auth.signUp({ email, password:senha });
-      if(error){ alert(error.message); return; }
-      alert("Conta criada! Verifique seu e-mail para confirmar.");
+    if(!data || !data.length){
+      txBody.innerHTML = `<tr><td colspan="4" class="muted">Sem movimentações.</td></tr>`;
+      return;
     }
+    txBody.innerHTML = data.map(tx=>{
+      const dt = new Date(tx.created_at);
+      const tipo = tx.kind === 'topup' ? 'Crédito' : (tx.kind === 'spend' ? 'Débito' : tx.kind);
+      const val = (tx.amount_cents/100).toFixed(2) + ' BC';
+      return `<tr>
+        <td>${dt.toLocaleString('pt-BR')}</td>
+        <td>${tipo}</td>
+        <td>${tx.description || '-'}</td>
+        <td>${tx.kind === 'topup' ? '+' : '-'} ${val}</td>
+      </tr>`;
+    }).join('');
+  }
 
-    async function logout(){
-      await sb.auth.signOut();
-      location.reload();
-    }
-
-    async function loginGoogle(){
-      const { data, error } = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: "https://braintest.com.br" }
+  function prefillPaymentLinks(){
+    // adiciona ?prefilled_email= ao final de cada Payment Link
+    const ids = ['link-10','link-30','link-50','link-100','link-500','link-1000','link-3000'];
+    sb.auth.getUser().then(({ data:{ user } })=>{
+      if(!user?.email) return;
+      ids.forEach(id=>{
+        const a = document.getElementById(id);
+        if(a && !a.dataset.prefilled){
+          const url = new URL(a.href);
+          url.searchParams.set('prefilled_email', user.email);
+          a.href = url.toString();
+          a.dataset.prefilled = '1';
+        }
       });
-      if(error) alert("Erro ao conectar com Google: " + error.message);
-    }
-
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      const { data:{user} } = await sb.auth.getUser();
-      const authBox=document.getElementById("auth-box");
-      const conteudo=document.getElementById("conteudo");
-      const userInfo=document.getElementById("user-info");
-      const logoutBtn=document.getElementById("logout-btn");
-
-      if(user){
-        authBox.style.display="none";
-        conteudo.style.display="block";
-        userInfo.textContent = `👤 ${user.email}`;
-        logoutBtn.style.display="inline-block";
-      } else {
-        authBox.style.display="block";
-      }
     });
-  </script>
+  }
+
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    const { data:{ user } } = await sb.auth.getUser();
+    if(user){
+      userInfo.textContent = user.email;
+      logoutBtn.style.display = 'inline-block';
+      await syncProfile();
+      prefillPaymentLinks();
+    }else{
+      userInfo.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+    }
+    await carregarSaldo();
+    await carregarExtrato();
+  });
+
+  sb.auth.onAuthStateChange(async (_evt,_sess)=>{
+    const { data:{ user } } = await sb.auth.getUser();
+    if(user){
+      userInfo.textContent = user.email;
+      logoutBtn.style.display = 'inline-block';
+      await syncProfile();
+      prefillPaymentLinks();
+      await carregarSaldo();
+      await carregarExtrato();
+    }else{
+      userInfo.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+      saldoEl.textContent = '0.00';
+      txBody.innerHTML = `<tr><td colspan="4" class="muted">Entre para ver seu extrato.</td></tr>`;
+    }
+  });
+
+  refreshBtn.addEventListener('click', async ()=>{
+    await carregarSaldo();
+    await carregarExtrato();
+  });
+
+  logoutBtn.addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    location.reload();
+  });
+</script>
 </body>
 </html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Histórico — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+.muted{color:#6b7380}
+.header-row{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem}
+.saldo{margin-left:.5rem}
+
+table{width:100%;border-collapse:collapse;margin-top:.8rem}
+th,td{padding:.8rem;border-bottom:1px solid var(--borda);text-align:left}
+th{color:#0e1d33}
+.empty{padding:1rem;text-align:center;color:#6b7380}
+.row-actions{display:flex;gap:.5rem;align-items:center}
+.small{font-size:.9rem;color:#6b7380}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a id="userInfo" class="badge" href="javascript:void(0)">Carregando…</a>
+    </nav>
+  </header>
+
+  <section class="card">
+    <div class="header-row">
+      <h2>Histórico de Relatórios</h2>
+      <span class="small">Acesse novamente os relatórios premium que você já adquiriu.</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Produto</th>
+          <th>Detalhes</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="4" class="empty">Carregando…</td></tr>
+      </tbody>
+    </table>
+
+    <div id="footNote" class="small" style="margin-top:.6rem;color:#6b7380">
+      Dica: você pode adicionar Braincoins a qualquer momento na <a href="carteira.html">Carteira</a>.
+    </div>
+  </section>
+</div>
+
+<script>
+const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+const mapProduto = {
+  'tdah':  { nome:'Relatório Premium — TDAH',  premium:'tdah-premium.html',    teste:'teste-tdah.html' },
+  'burnout': { nome:'Relatório Premium — Burnout', premium:'burnout-premium.html', teste:'teste-burnout.html' },
+  'qi':    { nome:'Relatório Premium — Q.I.',   premium:'qi-premium.html',     teste:'teste-qi.html' }
+};
+
+async function requireLogin(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){
+    alert('Faça login para ver seu histórico.');
+    location.href = 'index.html';
+    return null;
+  }
+  return user;
+}
+
+async function carregarSaldo(){
+  const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+  const cents = data?.balance_cents || 0;
+  document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+}
+
+function fmtData(iso){
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+async function carregarHistorico(){
+  const user = await requireLogin(); if(!user) return;
+  document.getElementById('userInfo').textContent = user.email;
+  await carregarSaldo();
+
+  // Busca todas as compras do usuário
+  const { data, error } = await sb
+    .from('purchases')
+    .select('id, product, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending:false });
+
+  const tbody = document.getElementById('tbody');
+
+  if(error){
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">Não foi possível carregar seu histórico.</td></tr>`;
+    return;
+  }
+  if(!data || !data.length){
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">Você ainda não possui relatórios premium. Faça uma triagem e desbloqueie um relatório!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(row=>{
+    const meta = mapProduto[row.product] || { nome:'Relatório', premium:'#', teste:'index.html' };
+    return `
+      <tr>
+        <td>${fmtData(row.created_at)}</td>
+        <td>${meta.nome}</td>
+        <td class="small muted">${row.product.toUpperCase()} • ID: ${row.id.slice(0,8)}…</td>
+        <td class="row-actions">
+          <a class="btn" href="${meta.premium}">Abrir</a>
+          <a class="btn secondary" href="${meta.teste}">Refazer triagem</a>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', carregarHistorico);
+
+// Atualiza UI em mudanças de sessão
+sb.auth.onAuthStateChange(async (_evt,_sess)=>{
+  await carregarSaldo();
+  const { data:{ user } } = await sb.auth.getUser();
+  document.getElementById('userInfo').textContent = user ? user.email : 'Visitante';
+});
+</script>
+</body>
+</html>

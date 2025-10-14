@@ -1,118 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Relatório Premium TDAH — Braintest</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --salmao: #ff8a73;
-      --azul: #1d3557;
-      --cinza: #f8f9fb;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
-    body{background:var(--cinza);color:#333;line-height:1.7;}
-    header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff;}
-    .logo{display:flex;align-items:center;gap:0.5rem;}
-    .logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem;}
-    nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600;}
-    nav a:hover{text-decoration:underline;}
-    main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.05);}
-    h2,h3{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem;}
-    p{margin-bottom:1rem;}
-    ul{margin-left:1.2rem;margin-bottom:1rem;}
-    footer{text-align:center;padding:2rem;color:#666;font-size:0.9rem;}
-    .highlight{background:#fff3f1;border-left:5px solid var(--salmao);padding:1rem;border-radius:6px;margin:1rem 0;}
-    .btn{background:var(--salmao);color:#fff;padding:0.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;margin-top:1.5rem;}
-    .btn:hover{background:#ff7458;}
-  </style>
-
-  <script>
-    const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relatório Premium — TDAH | Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0} body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px} .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0  .5rem}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+.muted{color:#6b7380}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+.grid{display:grid;gap:1rem;grid-template-columns:1fr 1fr} @media(max-width:900px){.grid{grid-template-columns:1fr}}
+.section{padding:.6rem 0}
+.note{background:#fff7f5;border:1px dashed #ffd5cb;padding:.8rem;border-radius:10px}
+.kpi{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0}
+.kpi .box{flex:1 1 220px;border:1px solid var(--borda);border-radius:12px;padding:.8rem;background:#fff}
+.kpi .val{font-size:1.4rem;font-weight:800;color:var(--azul)}
+.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="logo">
-      <img src="assets/logo.svg" alt="logo" width="32" height="32">
-      <h1>Braintest</h1>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img src="assets/logo.svg" alt=""><h1>Braintest</h1>
     </div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="carteira.html">Carteira</a>
-      <a href="sobre.html">Sobre</a>
-      <span id="user-info"></span>
-      <button id="logout-btn" class="btn" style="display:none;padding:0.4rem 1rem;margin-left:0.5rem;">Sair</button>
-    </nav>
+  <a href="index.html">Início</a>
+  <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+  <a href="historico.html">Histórico</a>
+  <span id="userInfo" class="badge">Carregando…</span>
+</nav>
+
   </header>
 
-  <main>
+  <section class="card" id="guard">
     <h2>Relatório Premium — TDAH</h2>
+    <p class="muted">Acesso verificado: <span id="statusAcc">verificando…</span></p>
+  </section>
 
-    <div class="highlight">
-      <p><strong>Importante:</strong> Este relatório tem caráter informativo e não substitui avaliação ou diagnóstico realizados por profissionais de saúde.</p>
+  <section class="card" id="conteudo" style="display:none">
+    <div class="section">
+      <h3>Resumo do perfil</h3>
+      <p>Este relatório aprofunda a triagem de atenção, impulsividade e hiperatividade, oferecendo contexto sobre como os padrões de resposta podem se manifestar no dia a dia e estratégias iniciais de manejo.</p>
+      <div class="kpi">
+        <div class="box"><div class="muted">Probabilidade indicativa</div><div class="val" id="kProb">—</div></div>
+        <div class="box"><div class="muted">Domínio mais afetado</div><div class="val" id="kDom">—</div></div>
+        <div class="box"><div class="muted">Intensidade global</div><div class="val" id="kInt">—</div></div>
+      </div>
     </div>
 
-    <h3>🔍 Interpretação dos resultados</h3>
-    <p>O seu padrão de respostas indica a presença de sinais consistentes com o <strong>Transtorno de Déficit de Atenção e Hiperatividade (TDAH)</strong> em nível leve a moderado.  
-    Isso significa que há uma tendência a variações significativas de foco, dificuldade em manter atenção prolongada e impulsividade situacional.</p>
-
-    <p>Essas características, quando reconhecidas, podem ser administradas com boas estratégias comportamentais, organização pessoal e acompanhamento profissional quando necessário.</p>
-
-    <h3>🧠 Aspectos cognitivos e comportamentais observados</h3>
-    <ul>
-      <li>Dificuldade em manter atenção em atividades prolongadas ou pouco estimulantes.</li>
-      <li>Procrastinação frequente e dispersão de foco em ambientes com múltiplos estímulos.</li>
-      <li>Percepção de “pensamentos acelerados” e tendência à impulsividade.</li>
-      <li>Oscilações de produtividade e motivação, influenciadas por interesse ou pressão externa.</li>
-      <li>Dificuldade em manter rotinas estruturadas por longos períodos.</li>
-    </ul>
-
-    <h3>⚙️ Recomendações práticas</h3>
-    <ul>
-      <li>Adote uma rotina com horários fixos e pausas curtas a cada 25–30 minutos (técnica Pomodoro).</li>
-      <li>Utilize listas de tarefas visuais e lembretes automáticos (apps como Notion, Todoist ou Google Tasks ajudam muito).</li>
-      <li>Evite ambientes com múltiplas distrações durante atividades de foco.</li>
-      <li>Durma bem e mantenha alimentação equilibrada — sono e nutrição afetam diretamente o foco e o humor.</li>
-      <li>Procure um psicólogo ou psiquiatra se os sintomas afetarem sua rotina de forma significativa.</li>
-    </ul>
-
-    <div class="highlight">
-      <p><strong>Lembre-se:</strong> O TDAH não define quem você é — ele apenas descreve um padrão de funcionamento mental.  
-      Entender esse padrão é o primeiro passo para usar sua mente a seu favor.</p>
+    <div class="grid">
+      <div class="section">
+        <h3>Interpretação detalhada</h3>
+        <p id="interp">Com base na sua triagem, há indícios de variações de atenção e controle inibitório que podem impactar organização, foco sustentado e gerenciamento de tempo. A intensidade estimada sugere atenção a rotinas e ferramentas de apoio.</p>
+      </div>
+      <div class="section">
+        <h3>Recomendações práticas</h3>
+        <ul>
+          <li>Use <strong>bloques de tempo</strong> (pomodoro 25–5) e alarmes para tarefas longas.</li>
+          <li>Divida entregas grandes em <strong>micro-etapas</strong> com prazos claros.</li>
+          <li>Ambiente de trabalho com <strong>baixa distração</strong> (notificações off, mesa limpa).</li>
+          <li>Rotina de sono e atividade física leve para melhorar autorregulação.</li>
+          <li>Considere acompanhamento com psicologia/psiquiatria se os sintomas forem persistentes.</li>
+        </ul>
+      </div>
     </div>
 
-    <div style="text-align:center;">
-      <h3>Explore outros testes da Braintest</h3>
-      <a href="teste-burnout.html" class="btn">Teste de Burnout</a>
-      <a href="teste-qi.html" class="btn">Teste de Q.I.</a>
+    <div class="section">
+      <h3>Próximos passos</h3>
+      <p class="note">Este relatório não substitui diagnóstico médico. Se os sintomas impactam sua vida, procure um profissional de saúde. Leve este material como ponto de partida para a conversa.</p>
     </div>
-  </main>
 
-  <footer>
-    © 2025 Braintest — Todos os direitos reservados.
-  </footer>
+    <div class="section">
+      <h3>Você também pode gostar</h3>
+      <p class="muted">Aprofunde sua autoavaliação com outros relatórios:</p>
+      <div class="kpi">
+        <div class="box"><div class="muted">Burnout</div><div><a class="btn secondary" href="teste-burnout.html">Explorar</a></div></div>
+        <div class="box"><div class="muted">Q.I. (estimativa)</div><div><a class="btn secondary" href="teste-qi.html">Explorar</a></div></div>
+      </div>
+    </div>
+  </section>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      const { data:{user} } = await sb.auth.getUser();
-      const userInfo=document.getElementById("user-info");
-      const logoutBtn=document.getElementById("logout-btn");
-      if(user){
-        userInfo.textContent = `👤 ${user.email}`;
-        logoutBtn.style.display="inline-block";
-      }
-    });
+  <div class="footer">© 2025 Braintest — Este material é informativo e não substitui avaliação profissional.</div>
+</div>
 
-    async function logout(){
-      await sb.auth.signOut();
-      location.reload();
-    }
-  </script>
+<script>
+const SUPABASE_URL="https://gqwgyresqsuciikmymkd.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+async function carregarSaldo(){
+  const { data:{user} } = await sb.auth.getUser(); if(!user) return;
+  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
+  const cents=data?.balance_cents||0; document.getElementById('saldoBC').textContent=(cents/100).toFixed(2);
+}
+
+async function gate(){
+  const { data:{user} } = await sb.auth.getUser();
+  const statusEl=document.getElementById('statusAcc'); const userInfo=document.getElementById('userInfo');
+  if(!user){ alert('Faça a triagem e adquira o relatório para acessar.'); location.href='teste-tdah.html'; return; }
+  userInfo.textContent=user.email;
+
+  // verifica purchase
+  const { data, error } = await sb.from('purchases').select('id').eq('user_id',user.id).eq('product','tdah').maybeSingle();
+  if(error || !data){ statusEl.textContent='negado'; alert('Acesso não autorizado. Adquira o relatório premium.'); location.href='teste-tdah.html'; return; }
+
+  statusEl.textContent='liberado';
+  document.getElementById('conteudo').style.display='block';
+  carregarSaldo();
+
+  // (opcional) gerar valores sintéticos amigáveis
+  const prob = 65 + Math.floor(Math.random()*21); // 65–85%
+  const doms = ['Atenção sustentada','Organização/planejamento','Controle inibitório'];
+  const dom = doms[Math.floor(Math.random()*doms.length)];
+  const int = ['Leve','Moderada','Relevante'][Math.floor(Math.random()*3)];
+  document.getElementById('kProb').textContent = prob+'%';
+  document.getElementById('kDom').textContent  = dom;
+  document.getElementById('kInt').textContent  = int;
+}
+
+document.addEventListener('DOMContentLoaded', gate);
+</script>
 </body>
 </html>

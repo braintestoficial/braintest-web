@@ -34,10 +34,14 @@ const PRECO_BC=10;
 <header>
   <div class="logo"><img src="assets/logo.svg" width="32" height="32" alt=""><h1>Braintest</h1></div>
   <nav>
-    <a href="index.html">Início</a><a href="carteira.html">Carteira</a><a href="sobre.html">Sobre</a>
-    <span id="user-info"></span>
-    <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
-  </nav>
+  <a href="index.html">Início</a>
+  <a href="carteira.html">Carteira</a>
+  <a href="historico.html">Histórico</a>
+  <a href="sobre.html">Sobre</a>
+  <span id="user-info"></span>
+  <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
+</nav>
+
 </header>
 
 <main>
@@ -103,7 +107,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 });
 async function logout(){ await sb.auth.signOut(); location.reload(); }
 
-// Débito Braincoin
+// Débito Braincoin + purchase
 async function comprarRelatorio(){
   const { data:{user} } = await sb.auth.getUser();
   if(!user){ alert("Faça login para continuar."); return; }
@@ -111,10 +115,18 @@ async function comprarRelatorio(){
   const { data:wallet } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
   const saldo=wallet?.balance_cents ?? 0;
   if(saldo<preco){ alert("Saldo insuficiente. Adicione Braincoins."); location.href="carteira.html"; return; }
+
   const novo=saldo-preco;
-  const { data:upd, error:err } = await sb.from('wallets').update({ balance_cents:novo }).eq('user_id',user.id).eq('balance_cents',saldo).select();
+  const { data:upd, error:err } = await sb.from('wallets')
+    .update({ balance_cents:novo })
+    .eq('user_id',user.id)
+    .eq('balance_cents',saldo)
+    .select();
   if(err || !upd || !upd.length){ alert("Não foi possível concluir a compra. Tente novamente."); return; }
+
   await sb.from('wallet_transactions').insert({ user_id:user.id, kind:'spend', amount_cents:preco, description:'Relatório Premium QI' });
+  await sb.from('purchases').insert({ user_id:user.id, product:'qi' }).catch(()=>{});
+
   location.href="qi-premium.html";
 }
 </script>
