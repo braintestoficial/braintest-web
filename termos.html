@@ -2,26 +2,36 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Termos de Uso & Privacidade — Braintest</title>
+<title>Termos de Uso — Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
 .brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
-h3{color:#0e1d33;margin:.9rem 0 .4rem}
-.muted{color:#6b7380}
-.list{margin:.4rem 0 0 1rem} .list li{margin:.35rem 0}
-.toc{background:#fff;border:1px dashed var(--borda);border-radius:12px;padding:.8rem;margin-top:.6rem}
-.toc a{color:var(--azul);text-decoration:none}
-.small{font-size:.9rem;color:#6b7380}
-.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+h1,h2{font-family:'Poppins',sans-serif;color:var(--azul)}
+h2{margin:.6rem 0}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+p, li{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
+ul{margin-left:1.2rem}
+.callout{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:1rem}
 </style>
 </head>
 <body>
@@ -29,82 +39,102 @@ h3{color:#0e1d33;margin:.9rem 0 .4rem}
   <header class="top">
     <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-  <a href="index.html">Início</a>
-  <a href="faq.html">FAQ</a>
-  <a href="historico.html">Histórico</a>
-  <a href="termos.html">Termos & Privacidade</a>
-</nav>
-
+      <a href="index.html">Início</a>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="historico.html">Histórico</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
+    </nav>
   </header>
 
   <section class="card">
-    <h2>Termos de Uso & Política de Privacidade</h2>
-    <p class="muted">Última atualização: 14/10/2025</p>
+    <h2>Termos de Uso</h2>
+    <p>Bem-vindo(a) à Braintest. Ao acessar e utilizar a plataforma, você concorda com estes Termos de Uso. Leia com atenção.</p>
 
-    <div class="toc">
-      <strong>Sumário</strong>
-      <ul class="list">
-        <li><a href="#escopo">1. Escopo do serviço</a></li>
-        <li><a href="#cadastro">2. Cadastro e conta</a></li>
-        <li><a href="#braincoin">3. Braincoins e pagamentos</a></li>
-        <li><a href="#acesso">4. Acesso a relatórios premium</a></li>
-        <li><a href="#conduta">5. Conduta e uso permitido</a></li>
-        <li><a href="#dados">6. Tratamento de dados pessoais (Privacidade)</a></li>
-        <li><a href="#seguranca">7. Segurança</a></li>
-        <li><a href="#direitos">8. Seus direitos (LGPD)</a></li>
-        <li><a href="#retencao">9. Retenção e exclusão</a></li>
-        <li><a href="#responsabilidade">10. Limitação de responsabilidade</a></li>
-        <li><a href="#alteracoes">11. Alterações nos termos</a></li>
-        <li><a href="#contato">12. Contato</a></li>
-      </ul>
+    <div class="hr"></div>
+
+    <h3>1. Objetivo da plataforma</h3>
+    <p>A Braintest oferece triagens de autoconhecimento e relatórios premium de caráter <strong>informativo e educacional</strong>. O conteúdo não substitui avaliação ou diagnóstico médico/psicológico.</p>
+
+    <h3>2. Cadastro e conta</h3>
+    <ul>
+      <li>Para usar recursos premium, é necessário criar uma conta e manter suas credenciais em sigilo.</li>
+      <li>Você é responsável por todas as atividades realizadas em sua conta.</li>
+      <li>Podemos suspender ou encerrar contas que violem estes termos ou a legislação aplicável.</li>
+    </ul>
+
+    <h3>3. Braincoins (moeda interna)</h3>
+    <ul>
+      <li>Braincoin (BC) é a moeda interna usada para desbloquear relatórios premium e, futuramente, assinaturas e jogos.</li>
+      <li>Relação padrão: <strong>1 BC = R$1</strong>. Os pacotes são adquiridos por meio do Stripe.</li>
+      <li>As Braincoins são <strong>intransferíveis</strong> entre contas e não possuem mercado paralelo.</li>
+      <li>O saldo e o extrato ficam disponíveis na <a href="carteira.html">Carteira</a>.</li>
+    </ul>
+
+    <h3>4. Compras e reembolsos</h3>
+    <ul>
+      <li>Ao concluir a compra de um relatório premium, o acesso é liberado para a sua conta.</li>
+      <li>Pedidos de reembolso serão analisados em casos de falha técnica comprovada ou duplicidade de cobrança.</li>
+      <li>Relatórios já consumidos (abertos) geralmente <strong>não</strong> são reembolsáveis.</li>
+    </ul>
+
+    <h3>5. Uso adequado</h3>
+    <ul>
+      <li>Não é permitido utilizar a plataforma para atividades ilegais, ofensivas ou que violem direitos de terceiros.</li>
+      <li>É vedada a engenharia reversa, scraping automatizado e qualquer tentativa de acesso não autorizado.</li>
+    </ul>
+
+    <h3>6. Propriedade intelectual</h3>
+    <p>Todos os conteúdos, marcas, layout e código da Braintest pertencem à plataforma ou a seus licenciantes e são protegidos por lei.</p>
+
+    <h3>7. Privacidade e proteção de dados</h3>
+    <p>Tratamos seus dados conforme boas práticas de segurança. Utilizamos autenticação segura e armazenamos dados no Supabase com regras de acesso por usuário. Para mais detalhes, entre em contato em <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+
+    <h3>8. Isenções e limitações</h3>
+    <ul>
+      <li>Os resultados de triagens e relatórios são estimativas e <strong>não</strong> equivalem a diagnóstico profissional.</li>
+      <li>A Braintest não se responsabiliza por decisões tomadas exclusivamente com base nos relatórios.</li>
+      <li>Em situações de risco, procure serviços de urgência (ex.: SAMU 192) ou atendimento especializado.</li>
+    </ul>
+
+    <h3>9. Alterações nos termos</h3>
+    <p>Podemos atualizar estes Termos de Uso a qualquer momento. A versão vigente será publicada nesta página, com efeitos a partir da data de publicação.</p>
+
+    <h3>10. Contato</h3>
+    <p>Dúvidas sobre estes termos? Fale com a gente: <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+
+    <div class="callout">
+      <strong>Última atualização:</strong> 15/10/2025
     </div>
-
-    <h3 id="escopo">1. Escopo do serviço</h3>
-    <p>A Braintest oferece triagens gratuitas e relatórios premium com caráter informativo e educacional, relacionados a atenção, estresse ocupacional e habilidades cognitivas. Os conteúdos não constituem diagnóstico, prescrição ou aconselhamento médico/psicológico.</p>
-
-    <h3 id="cadastro">2. Cadastro e conta</h3>
-    <p>Para utilizar funcionalidades premium, você deve criar uma conta com e-mail e senha ou autenticar-se via provedores (ex.: Google). Você é responsável por manter a confidencialidade das credenciais e pela atividade realizada na sua conta.</p>
-
-    <h3 id="braincoin">3. Braincoins e pagamentos</h3>
-    <ul class="list">
-      <li>Braincoins são créditos internos (1 Braincoin = R$ 1) utilizados para adquirir relatórios premium e, futuramente, assinaturas e jogos.</li>
-      <li>Pagamentos são processados por terceiros (ex.: Stripe). Não armazenamos dados de cartão.</li>
-      <li>Após a confirmação, os créditos são adicionados automaticamente à sua carteira.</li>
-      <li>Como regra, Braincoins não são transferíveis nem reembolsáveis após o uso. Em casos de erro técnico, entre em contato.</li>
-    </ul>
-
-    <h3 id="acesso">4. Acesso a relatórios premium</h3>
-    <p>Ao adquirir um relatório premium, o acesso fica vinculado à sua conta. Podemos, a nosso critério, limitar o compartilhamento, download ou impressão para proteger propriedade intelectual e privacidade.</p>
-
-    <h3 id="conduta">5. Conduta e uso permitido</h3>
-    <ul class="list">
-      <li>É proibido tentar burlar o sistema de pagamento, explorar vulnerabilidades ou compartilhar acessos de forma indevida.</li>
-      <li>É proibido uso comercial dos conteúdos sem autorização por escrito.</li>
-    </ul>
-
-    <h3 id="dados">6. Tratamento de dados pessoais (Privacidade)</h3>
-    <p>Coletamos dados de conta (e-mail), respostas de triagens/testes, compras e logs técnicos. Utilizamos o Supabase para autenticação e armazenamento. Dados de pagamento são processados por provedores (ex.: Stripe). Usamos dados para operar, melhorar serviços e garantir segurança, conforme a legislação aplicável (LGPD).</p>
-
-    <h3 id="seguranca">7. Segurança</h3>
-    <p>Adotamos medidas técnicas e administrativas para proteger seus dados, incluindo controle de acesso e monitoramento. Nenhum sistema é 100% imune a incidentes; caso ocorra, seguiremos os procedimentos legais cabíveis.</p>
-
-    <h3 id="direitos">8. Seus direitos (LGPD)</h3>
-    <p>Você pode solicitar: confirmação de tratamento, acesso, correção, portabilidade, anonimização, bloqueio, exclusão e informação sobre compartilhamento. Contate-nos pelo e-mail indicado abaixo.</p>
-
-    <h3 id="retencao">9. Retenção e exclusão</h3>
-    <p>Guardamos dados enquanto sua conta estiver ativa ou quando necessário para cumprir obrigações legais/contratuais. Você pode solicitar exclusão; note que alguns registros podem ser mantidos conforme exigências legais.</p>
-
-    <h3 id="responsabilidade">10. Limitação de responsabilidade</h3>
-    <p>A Braintest não é responsável por decisões tomadas exclusivamente com base nos relatórios. Em qualquer hipótese, a responsabilidade total, quando aplicável, será limitada ao valor total efetivamente pago pelo usuário nos últimos 12 meses.</p>
-
-    <h3 id="alteracoes">11. Alterações nos termos</h3>
-    <p>Podemos atualizar estes termos e a política de privacidade. Se houver mudanças relevantes, notificaremos pelos canais disponíveis. O uso contínuo após as alterações implica concordância.</p>
-
-    <h3 id="contato">12. Contato</h3>
-    <p class="small">DPO/Encarregado e suporte: <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a></p>
   </section>
-
-  <div class="footer">© 2025 Braintest — Todos os direitos reservados.</div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
+
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+    }else{
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'inline-block';
+
+      const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const cents = data?.balance_cents || 0;
+      document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
+    location.href = 'index.html';
+  });
+</script>
 </body>
 </html>

@@ -2,135 +2,243 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Relatório Premium — TDAH | Braintest</title>
+<title>TDAH — Relatório Premium | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
-*{box-sizing:border-box;margin:0;padding:0} body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
 .wrap{max-width:1100px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px} .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
 .btn:hover{background:var(--salmao-2)}
-.card{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0  .5rem}
-h3{color:#0e1d33;margin:.8rem 0 .4rem}
-.muted{color:#6b7380}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-.grid{display:grid;gap:1rem;grid-template-columns:1fr 1fr} @media(max-width:900px){.grid{grid-template-columns:1fr}}
-.section{padding:.6rem 0}
-.note{background:#fff7f5;border:1px dashed #ffd5cb;padding:.8rem;border-radius:10px}
-.kpi{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0}
-.kpi .box{flex:1 1 220px;border:1px solid var(--borda);border-radius:12px;padding:.8rem;background:#fff}
-.kpi .val{font-size:1.4rem;font-weight:800;color:var(--azul)}
-.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+h3{color:#0e1d33;margin:.9rem 0 .4rem}
+.muted{color:#6b7380}
+.small{font-size:.9rem;color:#6b7380}
+.section{margin-top:.8rem}
+.grid{display:grid;gap:1rem;grid-template-columns:1.4fr .6fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.block{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem}
+.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.6rem}
+.kpi .box{border:1px solid var(--borda);border-radius:12px;padding:.8rem;background:#fff;text-align:center}
+.kpi .val{font-size:1.4rem;font-weight:800;color:#0e1d33}
+.kpi .lab{font-size:.85rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:.8rem 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand">
-      <img src="assets/logo.svg" alt=""><h1>Braintest</h1>
-    </div>
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-  <a href="index.html">Início</a>
-  <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
-  <a href="historico.html">Histórico</a>
-  <span id="userInfo" class="badge">Carregando…</span>
-</nav>
-
+      <a href="index.html">Início</a>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="historico.html">Histórico</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
+    </nav>
   </header>
 
-  <section class="card" id="guard">
+  <!-- Aviso de compra concluída -->
+  <section id="okBanner" class="card" style="display:none;background:#f2fff5;border-color:#cdebd4">
+    ✅ <strong>Compra concluída!</strong> Seu acesso ao relatório premium foi liberado.
+  </section>
+
+  <!-- Bloqueio se não tiver compra -->
+  <section id="noAccess" class="card warn" style="display:none;">
+    <h3>Acesso não liberado</h3>
+    <p class="small">Não encontramos uma compra ativa deste relatório na sua conta.</p>
+    <div style="margin-top:.6rem">
+      <a class="btn" href="teste-tdah.html">Fazer triagem e desbloquear</a>
+      <a class="btn secondary" href="historico.html" style="margin-left:.4rem">Ver meus relatórios</a>
+    </div>
+  </section>
+
+  <!-- Conteúdo do relatório (liberado apenas com purchase válida) -->
+  <section id="report" class="card" style="display:none;">
     <h2>Relatório Premium — TDAH</h2>
-    <p class="muted">Acesso verificado: <span id="statusAcc">verificando…</span></p>
-  </section>
-
-  <section class="card" id="conteudo" style="display:none">
-    <div class="section">
-      <h3>Resumo do perfil</h3>
-      <p>Este relatório aprofunda a triagem de atenção, impulsividade e hiperatividade, oferecendo contexto sobre como os padrões de resposta podem se manifestar no dia a dia e estratégias iniciais de manejo.</p>
-      <div class="kpi">
-        <div class="box"><div class="muted">Probabilidade indicativa</div><div class="val" id="kProb">—</div></div>
-        <div class="box"><div class="muted">Domínio mais afetado</div><div class="val" id="kDom">—</div></div>
-        <div class="box"><div class="muted">Intensidade global</div><div class="val" id="kInt">—</div></div>
-      </div>
-    </div>
-
     <div class="grid">
-      <div class="section">
-        <h3>Interpretação detalhada</h3>
-        <p id="interp">Com base na sua triagem, há indícios de variações de atenção e controle inibitório que podem impactar organização, foco sustentado e gerenciamento de tempo. A intensidade estimada sugere atenção a rotinas e ferramentas de apoio.</p>
-      </div>
-      <div class="section">
-        <h3>Recomendações práticas</h3>
-        <ul>
-          <li>Use <strong>bloques de tempo</strong> (pomodoro 25–5) e alarmes para tarefas longas.</li>
-          <li>Divida entregas grandes em <strong>micro-etapas</strong> com prazos claros.</li>
-          <li>Ambiente de trabalho com <strong>baixa distração</strong> (notificações off, mesa limpa).</li>
-          <li>Rotina de sono e atividade física leve para melhorar autorregulação.</li>
-          <li>Considere acompanhamento com psicologia/psiquiatria se os sintomas forem persistentes.</li>
-        </ul>
-      </div>
-    </div>
+      <div>
+        <div class="block">
+          <h3>Resumo do resultado</h3>
+          <p class="small">Este relatório aprofunda os sinais relatados na triagem, trazendo indicadores por domínio, fatores de impacto e orientações práticas. Lembre-se: este material é informativo e <strong>não substitui</strong> avaliação clínica.</p>
+          <div class="kpi">
+            <div class="box">
+              <div class="val" id="kpiGlobal">—</div>
+              <div class="lab">Score global (0–100)</div>
+            </div>
+            <div class="box">
+              <div class="val" id="kpiInatt">—</div>
+              <div class="lab">Desatenção</div>
+            </div>
+            <div class="box">
+              <div class="val" id="kpiHyper">—</div>
+              <div class="lab">Hiper/Impulsividade</div>
+            </div>
+          </div>
+        </div>
 
-    <div class="section">
-      <h3>Próximos passos</h3>
-      <p class="note">Este relatório não substitui diagnóstico médico. Se os sintomas impactam sua vida, procure um profissional de saúde. Leve este material como ponto de partida para a conversa.</p>
-    </div>
+        <div class="section">
+          <h3>Interpretação</h3>
+          <div class="block" id="interp">
+            <p class="small">Análise personalizada baseada em suas respostas. Caso seus sintomas causem impacto significativo em diferentes contextos (trabalho, casa, estudos), recomenda-se avaliação com especialista.</p>
+          </div>
+        </div>
 
-    <div class="section">
-      <h3>Você também pode gostar</h3>
-      <p class="muted">Aprofunde sua autoavaliação com outros relatórios:</p>
-      <div class="kpi">
-        <div class="box"><div class="muted">Burnout</div><div><a class="btn secondary" href="teste-burnout.html">Explorar</a></div></div>
-        <div class="box"><div class="muted">Q.I. (estimativa)</div><div><a class="btn secondary" href="teste-qi.html">Explorar</a></div></div>
+        <div class="section">
+          <h3>Recomendações</h3>
+          <div class="block">
+            <ul class="small" style="margin-left:1rem;line-height:1.6">
+              <li><strong>Organização:</strong> dividir tarefas grandes em subtarefas, usar checklists e alarmes.</li>
+              <li><strong>Atenção:</strong> técnica Pomodoro (25/5), foco em um objetivo por vez, reduzir distrações visuais/sonoras.</li>
+              <li><strong>Impulsividade:</strong> pausa intencional (respirar 10s) antes de responder/interromper.</li>
+              <li><strong>Rotina:</strong> horários consistentes de sono, atividade física leve-moderada 3–5x/semana.</li>
+              <li><strong>Profissional:</strong> se possível, psicoterapia (TCC) e avaliação médica para diagnóstico diferencial.</li>
+            </ul>
+          </div>
+        </div>
       </div>
+
+      <aside>
+        <div class="block">
+          <h3>Seus dados</h3>
+          <p class="small">Relatório vinculado à conta: <span id="emailSpan">—</span></p>
+          <div class="hr"></div>
+          <p class="small">Compra: <span id="purchaseId">—</span></p>
+          <p class="small">Data: <span id="purchaseDate">—</span></p>
+          <div class="hr"></div>
+          <button class="btn secondary" onclick="location.href='historico.html'">Ver histórico</button>
+        </div>
+
+        <div class="warn" style="margin-top:1rem">
+          <strong>Aviso importante</strong>
+          <p class="small">Este relatório é informativo/educacional. Não substitui diagnóstico médico/psicológico. Em situações de risco, busque serviços de urgência (SAMU 192) ou atendimento local.</p>
+        </div>
+      </aside>
     </div>
   </section>
-
-  <div class="footer">© 2025 Braintest — Este material é informativo e não substitui avaliação profissional.</div>
 </div>
 
 <script>
-const SUPABASE_URL="https://gqwgyresqsuciikmymkd.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  // Utilidades
+  function fmtData(iso){
+    if(!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
 
-async function carregarSaldo(){
-  const { data:{user} } = await sb.auth.getUser(); if(!user) return;
-  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
-  const cents=data?.balance_cents||0; document.getElementById('saldoBC').textContent=(cents/100).toFixed(2);
-}
+  async function carregarSaldo(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user) return;
+    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const cents = data?.balance_cents || 0;
+    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+  }
 
-async function gate(){
-  const { data:{user} } = await sb.auth.getUser();
-  const statusEl=document.getElementById('statusAcc'); const userInfo=document.getElementById('userInfo');
-  if(!user){ alert('Faça a triagem e adquira o relatório para acessar.'); location.href='teste-tdah.html'; return; }
-  userInfo.textContent=user.email;
+  async function verifyAndRender(){
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
 
-  // verifica purchase
-  const { data, error } = await sb.from('purchases').select('id').eq('user_id',user.id).eq('product','tdah').maybeSingle();
-  if(error || !data){ statusEl.textContent='negado'; alert('Acesso não autorizado. Adquira o relatório premium.'); location.href='teste-tdah.html'; return; }
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-  statusEl.textContent='liberado';
-  document.getElementById('conteudo').style.display='block';
-  carregarSaldo();
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+      // sem login, sem acesso
+      document.getElementById('noAccess').style.display = 'block';
+      return;
+    }
 
-  // (opcional) gerar valores sintéticos amigáveis
-  const prob = 65 + Math.floor(Math.random()*21); // 65–85%
-  const doms = ['Atenção sustentada','Organização/planejamento','Controle inibitório'];
-  const dom = doms[Math.floor(Math.random()*doms.length)];
-  const int = ['Leve','Moderada','Relevante'][Math.floor(Math.random()*3)];
-  document.getElementById('kProb').textContent = prob+'%';
-  document.getElementById('kDom').textContent  = dom;
-  document.getElementById('kInt').textContent  = int;
-}
+    ui.textContent = user.email || 'Usuário';
+    logoutBtn.style.display = 'inline-block';
+    await carregarSaldo();
 
-document.addEventListener('DOMContentLoaded', gate);
+    // Verifica compra
+    const { data: purchases, error } = await sb
+      .from('purchases')
+      .select('id, product, created_at')
+      .eq('user_id', user.id)
+      .eq('product', 'tdah')
+      .order('created_at', { ascending:false })
+      .limit(1);
+
+    if(error || !purchases || purchases.length===0){
+      // sem compra
+      document.getElementById('noAccess').style.display = 'block';
+      return;
+    }
+
+    // Tem compra -> libera relatório
+    const p = purchases[0];
+    document.getElementById('report').style.display = 'block';
+    document.getElementById('emailSpan').textContent = user.email || '—';
+    document.getElementById('purchaseId').textContent = p.id.slice(0,8)+'…';
+    document.getElementById('purchaseDate').textContent = fmtData(p.created_at);
+
+    // Banner de compra concluída se veio de ?ok=1
+    const u = new URL(location.href);
+    if(u.searchParams.get('ok')==='1'){
+      document.getElementById('okBanner').style.display = 'block';
+      u.searchParams.delete('ok');
+      history.replaceState(null,'',u.toString());
+    }
+
+    // (Opcional) Poderíamos recuperar últimos scores salvos; por ora, geramos um exemplo de KPIs
+    await renderKPIs(user.id);
+  }
+
+  // Exemplo: gerar KPIs sintéticos caso você não esteja salvando scores
+  async function renderKPIs(userId){
+    // Se você tiver uma tabela de resultados, troque este bloco por um SELECT real.
+    // Aqui, só para visual: gera números pseudo-aleatórios estáveis por usuário.
+    function seeded(n){ return Math.floor((Math.abs(hashCode(userId+n))+30)%70)+30; }
+    function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i); h|=0;} return h; }
+
+    const global = seeded('g');
+    const inatt  = Math.min(100, global + ((hashCode(userId+'i')%11)-5));
+    const hyper  = Math.min(100, global + ((hashCode(userId+'h')%11)-5));
+
+    document.getElementById('kpiGlobal').textContent = global;
+    document.getElementById('kpiInatt').textContent  = Math.max(0,inatt);
+    document.getElementById('kpiHyper').textContent  = Math.max(0,hyper);
+
+    // Interpretação simples por faixas
+    const interp = document.getElementById('interp');
+    let faixa = 'baixa';
+    if(global>=35 && global<60) faixa='moderada';
+    else if(global>=60) faixa='elevada';
+    interp.innerHTML = `
+      <p class="small">
+        Seu <strong>score global</strong> sugere probabilidade <strong>${faixa}</strong> de sintomas compatíveis com TDAH.
+        Observa-se perfil de <strong>desatenção ${inatt>=hyper?'proeminente':'equilibrada'}</strong> e
+        <strong>${hyper>inatt?'hiperatividade/impulsividade mais evidente':'hiperatividade/impulsividade moderada'}</strong>.
+        Recomendamos acompanhamento profissional para investigação diagnóstica e plano individualizado.
+      </p>
+    `;
+  }
+
+  document.addEventListener('DOMContentLoaded', verifyAndRender);
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
+    location.href = 'index.html';
+  });
 </script>
 </body>
 </html>

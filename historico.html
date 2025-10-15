@@ -4,7 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Histórico — Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -16,21 +20,28 @@ header.top{display:flex;align-items:center;justify-content:space-between;backgro
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn.small{padding:.4rem .7rem}
 .btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
 h3{color:#0e1d33;margin:.8rem 0 .4rem}
-.muted{color:#6b7380}
-.header-row{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
-.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem}
-.saldo{margin-left:.5rem}
+p{line-height:1.6;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
+.grid{display:grid;gap:1rem;grid-template-columns:1.2fr .8fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
 
-table{width:100%;border-collapse:collapse;margin-top:.8rem}
-th,td{padding:.8rem;border-bottom:1px solid var(--borda);text-align:left}
-th{color:#0e1d33}
-.empty{padding:1rem;text-align:center;color:#6b7380}
-.row-actions{display:flex;gap:.5rem;align-items:center}
-.small{font-size:.9rem;color:#6b7380}
+.toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.input{border:1px solid var(--borda);border-radius:10px;padding:.5rem .6rem;background:#f9fbff;min-width:220px}
+.select{border:1px solid var(--borda);border-radius:10px;padding:.5rem;background:#fff}
+
+.table{width:100%;border-collapse:collapse;margin-top:.6rem}
+.table th,.table td{border-bottom:1px solid var(--borda);padding:.6rem .2rem;text-align:left;font-size:.94rem}
+.table th{color:#6b7380;font-weight:600}
+.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
+.success{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem}
+.center{text-align:center}
 </style>
 </head>
 <body>
@@ -40,118 +51,200 @@ th{color:#0e1d33}
     <nav>
       <a href="index.html">Início</a>
       <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
-      <a id="userInfo" class="badge" href="javascript:void(0)">Carregando…</a>
+      <a href="faq.html">FAQ</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
 
-  <section class="card">
-    <div class="header-row">
-      <h2>Histórico de Relatórios</h2>
-      <span class="small">Acesse novamente os relatórios premium que você já adquiriu.</span>
-    </div>
+  <div class="grid">
+    <!-- Compras / Relatórios -->
+    <section class="card">
+      <h2>Meus relatórios</h2>
+      <div class="toolbar">
+        <input id="q" class="input" placeholder="Buscar por produto (ex.: tdah, burnout, qi)">
+        <select id="filterProd" class="select">
+          <option value="">Todos</option>
+          <option value="tdah">TDAH</option>
+          <option value="burnout">Burnout</option>
+          <option value="qi">QI</option>
+        </select>
+        <button id="btnFiltrar" class="btn small">Filtrar</button>
+        <button id="btnLimpar" class="btn secondary small">Limpar</button>
+      </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Produto</th>
-          <th>Detalhes</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="4" class="empty">Carregando…</td></tr>
-      </tbody>
-    </table>
+      <div class="hr"></div>
 
-    <div id="footNote" class="small" style="margin-top:.6rem;color:#6b7380">
-      Dica: você pode adicionar Braincoins a qualquer momento na <a href="carteira.html">Carteira</a>.
-    </div>
-  </section>
+      <div id="purchEmpty" class="warn" style="display:none">
+        <strong>Nenhuma compra encontrada.</strong>
+        <p class="small">Quando você desbloquear relatórios premium, eles aparecerão aqui.</p>
+      </div>
+
+      <table class="table" id="purchTable" style="display:none">
+        <thead><tr><th>Data</th><th>Produto</th><th>Abrir</th></tr></thead>
+        <tbody id="purchBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Extrato curto -->
+    <aside class="card">
+      <h3>Extrato recente</h3>
+      <p class="small">Últimas movimentações da carteira (até 10).</p>
+      <div class="hr"></div>
+
+      <div id="txEmpty" class="warn" style="display:none">
+        <strong>Sem movimentações.</strong>
+        <p class="small">Faça compras de Braincoins ou desbloqueie relatórios para ver aqui.</p>
+      </div>
+
+      <table class="table" id="txTable" style="display:none">
+        <thead><tr><th>Data</th><th>Tipo</th><th>Valor</th></tr></thead>
+        <tbody id="txBody"></tbody>
+      </table>
+
+      <div class="hr"></div>
+      <button class="btn secondary small" onclick="location.href='carteira.html'">Ver carteira completa</button>
+    </aside>
+  </div>
 </div>
 
 <script>
-const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-});
+  // --------- Sessão / Header ----------
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-const mapProduto = {
-  'tdah':  { nome:'Relatório Premium — TDAH',  premium:'tdah-premium.html',    teste:'teste-tdah.html' },
-  'burnout': { nome:'Relatório Premium — Burnout', premium:'burnout-premium.html', teste:'teste-burnout.html' },
-  'qi':    { nome:'Relatório Premium — Q.I.',   premium:'qi-premium.html',     teste:'teste-qi.html' }
-};
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+      alert('Faça login para ver seu histórico.');
+      location.href = 'index.html';
+      return;
+    }
 
-async function requireLogin(){
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){
-    alert('Faça login para ver seu histórico.');
+    ui.textContent = user.email || 'Usuário';
+    logoutBtn.style.display = 'inline-block';
+
+    await carregarSaldo();
+    await carregarCompras();
+    await carregarExtrato();
+
+    document.getElementById('btnFiltrar').addEventListener('click', carregarCompras);
+    document.getElementById('btnLimpar').addEventListener('click', ()=>{
+      document.getElementById('q').value = '';
+      document.getElementById('filterProd').value = '';
+      carregarCompras();
+    });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
     location.href = 'index.html';
-    return null;
-  }
-  return user;
-}
+  });
 
-async function carregarSaldo(){
-  const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-  const cents = data?.balance_cents || 0;
-  document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
-}
-
-function fmtData(iso){
-  const d = new Date(iso);
-  return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-}
-
-async function carregarHistorico(){
-  const user = await requireLogin(); if(!user) return;
-  document.getElementById('userInfo').textContent = user.email;
-  await carregarSaldo();
-
-  // Busca todas as compras do usuário
-  const { data, error } = await sb
-    .from('purchases')
-    .select('id, product, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending:false });
-
-  const tbody = document.getElementById('tbody');
-
-  if(error){
-    tbody.innerHTML = `<tr><td colspan="4" class="empty">Não foi possível carregar seu histórico.</td></tr>`;
-    return;
-  }
-  if(!data || !data.length){
-    tbody.innerHTML = `<tr><td colspan="4" class="empty">Você ainda não possui relatórios premium. Faça uma triagem e desbloqueie um relatório!</td></tr>`;
-    return;
+  async function carregarSaldo(){
+    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const cents = data?.balance_cents || 0;
+    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
   }
 
-  tbody.innerHTML = data.map(row=>{
-    const meta = mapProduto[row.product] || { nome:'Relatório', premium:'#', teste:'index.html' };
-    return `
-      <tr>
-        <td>${fmtData(row.created_at)}</td>
-        <td>${meta.nome}</td>
-        <td class="small muted">${row.product.toUpperCase()} • ID: ${row.id.slice(0,8)}…</td>
-        <td class="row-actions">
-          <a class="btn" href="${meta.premium}">Abrir</a>
-          <a class="btn secondary" href="${meta.teste}">Refazer triagem</a>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
+  // --------- Compras / Relatórios ----------
+  function mapUrl(prod){
+    if(prod==='tdah') return 'tdah-premium.html';
+    if(prod==='burnout') return 'burnout-premium.html';
+    if(prod==='qi') return 'qi-premium.html';
+    return '#';
+  }
 
-document.addEventListener('DOMContentLoaded', carregarHistorico);
+  async function carregarCompras(){
+    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
 
-// Atualiza UI em mudanças de sessão
-sb.auth.onAuthStateChange(async (_evt,_sess)=>{
-  await carregarSaldo();
-  const { data:{ user } } = await sb.auth.getUser();
-  document.getElementById('userInfo').textContent = user ? user.email : 'Visitante';
-});
+    const q = (document.getElementById('q').value || '').trim().toLowerCase();
+    const filter = document.getElementById('filterProd').value;
+
+    let req = sb.from('purchases')
+      .select('id, product, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending:false })
+      .limit(200);
+
+    // Filtro no client (mais simples sem extensões de busca)
+    const { data, error } = await req;
+    const tbody = document.getElementById('purchBody');
+    const table = document.getElementById('purchTable');
+    const empty = document.getElementById('purchEmpty');
+
+    if(error || !data || data.length===0){
+      tbody.innerHTML = '';
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    let rows = data;
+    if(filter) rows = rows.filter(r => r.product === filter);
+    if(q) rows = rows.filter(r => r.product.toLowerCase().includes(q));
+
+    if(rows.length===0){
+      tbody.innerHTML = '';
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(p=>{
+      const dt = new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<tr>
+        <td>${dt}</td>
+        <td>${p.product.toUpperCase()}</td>
+        <td><a class="btn small" href="${mapUrl(p.product)}">Abrir</a></td>
+      </tr>`;
+    }).join('');
+
+    empty.style.display = 'none';
+    table.style.display = 'table';
+  }
+
+  // --------- Extrato curto ----------
+  async function carregarExtrato(){
+    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+
+    const { data, error } = await sb
+      .from('wallet_transactions')
+      .select('created_at, kind, amount_cents')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending:false })
+      .limit(10);
+
+    const tbody = document.getElementById('txBody');
+    const table = document.getElementById('txTable');
+    const empty = document.getElementById('txEmpty');
+
+    if(error || !data || data.length===0){
+      tbody.innerHTML = '';
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    tbody.innerHTML = data.map(tx=>{
+      const dt = new Date(tx.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const tipo = tx.kind==='credit' ? 'Crédito' : 'Débito';
+      const val = (tx.amount_cents/100).toFixed(2);
+      return `<tr>
+        <td>${dt}</td>
+        <td>${tipo}</td>
+        <td>${tipo==='Crédito' ? '+' : '-'} ${val} BC</td>
+      </tr>`;
+    }).join('');
+
+    empty.style.display = 'none';
+    table.style.display = 'table';
+  }
 </script>
 </body>
 </html>

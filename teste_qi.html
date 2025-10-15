@@ -1,134 +1,244 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Teste de Q.I. — Braintest</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q.I. — Triagem | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
-:root{--salmao:#ff8a73;--azul:#1d3557;--cinza:#f8f9fb}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
-body{background:var(--cinza);color:#333;line-height:1.7}
-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--azul);color:#fff}
-.logo{display:flex;align-items:center;gap:.5rem}
-.logo h1{font-family:'Poppins',sans-serif;font-size:1.5rem}
-nav a{color:#fff;text-decoration:none;margin-left:1rem;font-weight:600}
-nav a:hover{text-decoration:underline}
-main{max-width:900px;margin:2rem auto;padding:2rem;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.05)}
-h2{color:var(--azul);font-family:'Poppins',sans-serif;margin-bottom:1rem}
-.btn{background:var(--salmao);color:#fff;padding:.7rem 1.4rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:inline-block;margin-top:1rem;text-decoration:none}
-.btn.secondary{background:#fff;color:var(--azul);border:1px solid #dde3ee}
-.btn:hover{background:#ff7458}
-.question{margin-bottom:1.2rem}
-.result-box{margin-top:2rem;padding:1.5rem;border-radius:8px;background:#fef5f4}
-footer{text-align:center;padding:2rem;color:#666;font-size:.9rem}
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+
+.grid{display:grid;gap:1rem;margin-top:1rem;grid-template-columns:1.1fr .9fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
+h3{color:#0e1d33;margin:.9rem 0 .4rem}
+.muted{color:#6b7380}
+.q{border-bottom:1px solid var(--borda);padding:.8rem 0}
+.q:last-child{border-bottom:none}
+.opts{display:grid;gap:.45rem;margin-top:.5rem}
+.opts label{border:1px solid var(--borda);border-radius:10px;padding:.55rem .6rem;background:#f9fbff;cursor:pointer;display:flex;gap:.5rem;align-items:flex-start}
+.opts input{margin-top:.2rem}
+.result{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem;margin-top:.6rem}
+.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:.6rem}
+.small{font-size:.9rem;color:#6b7380}
+.center{text-align:center}
 </style>
-<script>
-const SUPABASE_URL="https://gqwgyresqsuciikmymkd.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-const PRECO_BC=10;
-</script>
 </head>
 <body>
-<header>
-  <div class="logo"><img src="assets/logo.svg" width="32" height="32" alt=""><h1>Braintest</h1></div>
-  <nav>
-  <a href="index.html">Início</a>
-  <a href="carteira.html">Carteira</a>
-  <a href="historico.html">Histórico</a>
-  <a href="sobre.html">Sobre</a>
-  <span id="user-info"></span>
-  <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
-</nav>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="historico.html">Histórico</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="user-info" class="badge">Carregando…</span>
+      <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
+    </nav>
+  </header>
 
-</header>
+  <div class="grid">
+    <!-- Triagem -->
+    <section class="card">
+      <h2>Triagem de Q.I. (15 itens)</h2>
+      <p class="muted">Responda sem calculadora e sem ajuda externa. O relatório premium estima seu <strong>QI numérico</strong> e percentil.</p>
 
-<main>
-  <h2>Teste de Q.I.</h2>
-  <p>Versão simplificada de raciocínio lógico, numérico e padrões. Resultado estimado — não substitui avaliação profissional.</p>
+      <form id="formQi">
+        <div id="qs"></div>
 
-  <form id="qiForm" style="margin-top:1.5rem;">
-    <div id="questions"></div>
-    <button type="submit" class="btn">Enviar respostas</button>
-  </form>
+        <div style="display:flex;gap:.6rem;margin-top:1rem">
+          <button class="btn" type="submit">Ver resultado gratuito</button>
+          <button class="btn secondary" type="button" onclick="resetForm()">Limpar</button>
+        </div>
+      </form>
 
-  <div id="resultado" class="result-box" style="display:none;"></div>
-</main>
+      <div id="freeResult" class="result" style="display:none"></div>
 
-<footer>© 2025 Braintest — Todos os direitos reservados.</footer>
+      <div id="ctaPremium" style="display:none;margin-top:.8rem">
+        <button class="btn" id="buyPremiumBtn">Desbloquear relatório premium (10 Braincoins)</button>
+        <p class="small" style="margin-top:.4rem">
+          O relatório premium converte sua pontuação para uma <strong>estimativa de QI</strong> com base em distribuição padronizada e mostra percentil, áreas de força e recomendações.
+        </p>
+      </div>
+
+      <div id="loginWarn" class="warn" style="display:none;">
+        <strong>Você não está logado.</strong>
+        <p class="small">Faça login para salvar o resultado e desbloquear o relatório premium.</p>
+        <button class="btn" onclick="location.href='index.html'">Entrar na conta</button>
+      </div>
+    </section>
+
+    <!-- Lateral -->
+    <aside class="card">
+      <h3>Sobre esta triagem</h3>
+      <p class="small">Itens mistos: lógica, padrões, raciocínio numérico e verbal curto. O objetivo é ter uma <strong>estimativa</strong> inicial. Testes clínicos formais exigem aplicação padronizada.</p>
+
+      <div class="result" style="margin-top:.8rem">
+        <strong>Seu saldo:</strong> <span id="saldoBC">0.00</span> BC
+      </div>
+    </aside>
+  </div>
+</div>
 
 <script>
-const perguntas=[
-  {q:"Se 2 gatos caçam 2 ratos em 2 minutos, quantos gatos seriam necessários para caçar 20 ratos em 20 minutos?",a:["2","4","6","10"],c:0},
-  {q:"Complete a sequência: 3, 6, 12, 24, ?",a:["36","48","46","50"],c:1},
-  {q:"Maria é irmã de João. João é pai de Pedro. O que Maria é de Pedro?",a:["Mãe","Tia","Avó","Prima"],c:1},
-  {q:"Qual número completa a série: 2, 4, 8, 16, 32, ?",a:["48","60","64","72"],c:2},
-  {q:"Se todos os A são B e alguns B são C, então:",a:["Todos os A são C","Nenhum C é A","Alguns A podem ser C","Todos os C são A"],c:2},
-  {q:"Qual é o próximo número da sequência: 1, 1, 2, 3, 5, 8, ?",a:["11","12","13","13"],c:3},
-  {q:"Se hoje é quarta-feira, que dia será daqui a 10 dias?",a:["Sábado","Domingo","Segunda-feira","Sexta-feira"],c:1},
-  {q:"Quantos lados tem 4 triângulos juntos formando um quadrado?",a:["8","10","12","14"],c:2},
-  {q:"Um trem leva 1h para percorrer 60 km. Qual é sua velocidade média?",a:["60 km/h","120 km/h","30 km/h","90 km/h"],c:0},
-  {q:"Se 5x = 20, então x =",a:["2","3","4","5"],c:2},
-  {q:"Complete a sequência: A, C, F, J, O, ?",a:["Q","S","U","V"],c:2},
-  {q:"Qual figura não pertence ao grupo: círculo, triângulo, quadrado, esfera?",a:["Círculo","Triângulo","Esfera","Quadrado"],c:2},
-  {q:"Se o relógio marca 3:15, qual o ângulo entre o ponteiro das horas e o dos minutos?",a:["0°","7,5°","30°","60°"],c:3},
-  {q:"Qual número é logicamente diferente dos demais: 2, 3, 5, 9, 11?",a:["2","9","11","3"],c:1},
-  {q:"Se 1=3, 2=3, 3=5, 4=4, 5=4, então 6=?",a:["3","4","5","6"],c:1}
+/** ------------------ Banco de questões (15 itens) ------------------ **/
+const Q = [
+  // Lógica/Sequências Numéricas (5)
+  {e:"Complete a sequência: 2, 6, 12, 20, 30, ?", a:["36","40","42","44"], c:2},
+  {e:"Qual é o próximo termo? 1, 1, 2, 3, 5, 8, ?", a:["11","12","13","14"], c:2},
+  {e:"Qual número falta? 9, 7, 8, 6, 7, 5, 6, ?", a:["3","4","5","6"], c:1},
+  {e:"Se 3▲=12 e 5▲=20, então 7▲ = ?", a:["21","24","28","35"], c:2},
+  {e:"Qual é o próximo par? (2,4), (3,9), (4,16), (5,25), (6, ?)", a:["30","32","34","36"], c:3},
+
+  // Padrões/Analogias (5)
+  {e:"A é para Z assim como B é para ?", a:["X","Y","W","V"], c:1},
+  {e:"Se LIVRO : PÁGINA :: ÁRVORE : ?", a:["FLORESTA","FOLHA","GALHO","FRUTO"], c:1},
+  {e:"Qual completa o padrão de figuras mentais? ▢, △, ▢, △, ▢, ?", a:["○","△","◇","▩"], c:1},
+  {e:"Relação: CANETA : ESCREVER :: TESOURA : ?", a:["CORTAR","MEDIR","APAGAR","PRENDER"], c:0},
+  {e:"Se SEG a TER como QUA é para ?", a:["QUI","SEX","TER","DOM"], c:0},
+
+  // Verbal/Curto e Lógica (5)
+  {e:"Sinônimo mais próximo de 'conciso':", a:["prolixo","sucinto","ambíguo","longo"], c:1},
+  {e:"Qual a palavra que completa? 'Ele ____ chegar cedo.'", a:["há de","a de","ah de","há-de"], c:0},
+  {e:"Se todos os Zons são Deks e alguns Deks são Pors, então:", a:["alguns Zons são Pors","nenhum Zon é Por","talvez alguns Zons sejam Pors","todos os Pors são Zons"], c:2},
+  {e:"Em uma sala há 5 pessoas. Cada uma aperta a mão de todas as outras uma vez. Quantos apertos no total?", a:["5","8","10","12"], c:2},
+  {e:"Qual número torna a frase verdadeira? 3x + 5 = 20", a:["5","15","20","25"], c:0}
 ];
 
-const qDiv=document.getElementById("questions");
-perguntas.forEach((p,i)=>{
-  const d=document.createElement("div"); d.classList.add("question");
-  d.innerHTML=`<label>${i+1}. ${p.q}</label><br>`+p.a.map((r,idx)=>`<label><input type="radio" name="q${i}" value="${idx}"> ${r}</label>`).join("<br>");
-  qDiv.appendChild(d);
-});
+/** ------------------ Sessão / UI header ------------------ **/
+async function boot(){
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  const info = document.getElementById('user-info');
+  const logout = document.getElementById('logout-btn');
+  const warn = document.getElementById('loginWarn');
 
-document.getElementById("qiForm").addEventListener("submit",(e)=>{
-  e.preventDefault();
-  let score=0; perguntas.forEach((p,i)=>{ const v=document.querySelector(`input[name="q${i}"]:checked`); if(v && parseInt(v.value)===p.c) score++; });
-  const qi=80+(score*4);
-  let msg=""; if(qi<90) msg=`Seu Q.I. estimado é ${qi}. Desempenho abaixo da média, com espaço para desenvolvimento.`;
-  else if(qi<110) msg=`Seu Q.I. estimado é ${qi}. Você está dentro da média da população.`;
-  else msg=`Seu Q.I. estimado é ${qi}. Desempenho acima da média, excelente raciocínio.`;
-
-  const box=document.getElementById("resultado");
-  box.innerHTML=`<h3>Resultado da triagem:</h3><p>${msg}</p>
-  <p style="margin-top:1rem;">Relatório premium detalhado: <strong>${PRECO_BC} Braincoins</strong>.</p>
-  <button class="btn" onclick="comprarRelatorio()">Comprar com Braincoins (${PRECO_BC} BC)</button>`;
-  box.style.display="block"; window.scrollTo({top:box.offsetTop,behavior:'smooth'});
-});
-
-// Sessão
-document.addEventListener("DOMContentLoaded",async()=>{
-  const {data:{user}}=await sb.auth.getUser();
-  const ui=document.getElementById("user-info"); const out=document.getElementById("logout-btn");
-  if(user){ ui.textContent=`👤 ${user.email}`; out.style.display="inline-block"; }
-});
-async function logout(){ await sb.auth.signOut(); location.reload(); }
-
-// Débito Braincoin + purchase
-async function comprarRelatorio(){
-  const { data:{user} } = await sb.auth.getUser();
-  if(!user){ alert("Faça login para continuar."); return; }
-  const preco=PRECO_BC*100;
-  const { data:wallet } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
-  const saldo=wallet?.balance_cents ?? 0;
-  if(saldo<preco){ alert("Saldo insuficiente. Adicione Braincoins."); location.href="carteira.html"; return; }
-
-  const novo=saldo-preco;
-  const { data:upd, error:err } = await sb.from('wallets')
-    .update({ balance_cents:novo })
-    .eq('user_id',user.id)
-    .eq('balance_cents',saldo)
-    .select();
-  if(err || !upd || !upd.length){ alert("Não foi possível concluir a compra. Tente novamente."); return; }
-
-  await sb.from('wallet_transactions').insert({ user_id:user.id, kind:'spend', amount_cents:preco, description:'Relatório Premium QI' });
-  await sb.from('purchases').insert({ user_id:user.id, product:'qi' }).catch(()=>{});
-
-  location.href="qi-premium.html";
+  if(user){
+    info.textContent = user.email || 'Usuário';
+    logout.style.display = 'inline-block';
+    warn.style.display = 'none';
+    await carregarSaldo();
+  }else{
+    info.textContent = 'Visitante';
+    logout.style.display = 'none';
+    warn.style.display = 'block';
+  }
 }
+
+async function carregarSaldo(){
+  const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
+  const cents = data?.balance_cents || 0;
+  document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+}
+
+document.getElementById('logout-btn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  location.href = 'index.html';
+});
+
+/** ------------------ Render das questões ------------------ **/
+function renderQuestoes(){
+  const qs = document.getElementById('qs');
+  qs.innerHTML = Q.map((q,idx)=>{
+    const opts = q.a.map((alt,i)=>`
+      <label>
+        <input type="radio" name="q${idx}" value="${i}">
+        <span><strong>${String.fromCharCode(65+i)})</strong> ${alt}</span>
+      </label>
+    `).join('');
+    return `<div class="q"><div><strong>${idx+1}.</strong> ${q.e}</div><div class="opts">${opts}</div></div>`;
+  }).join('');
+}
+
+function resetForm(){
+  document.getElementById('formQi').reset();
+  document.getElementById('freeResult').style.display='none';
+  document.getElementById('ctaPremium').style.display='none';
+}
+
+/** ------------------ Correção ------------------ **/
+function corrigir(fd){
+  let acertos = 0;
+  for(let i=0;i<Q.length;i++){
+    const v = fd.get(`q${i}`);
+    if(v===null){ return {ok:false, msg:`Responda a questão ${i+1}.`}; }
+    if(Number(v)===Q[i].c) acertos++;
+  }
+  const pct = Math.round((acertos/Q.length)*100);
+  let faixa = 'Básico';
+  if(pct>=40 && pct<60) faixa='Intermediário';
+  else if(pct>=60 && pct<80) faixa='Avançado';
+  else if(pct>=80) faixa='Muito avançado';
+  return {ok:true, acertos, pct, faixa};
+}
+
+/** ------------------ Submit da triagem ------------------ **/
+document.getElementById('formQi').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const r = corrigir(fd);
+  if(!r.ok){ alert(r.msg); return; }
+
+  const free = document.getElementById('freeResult');
+  free.innerHTML = `
+    <strong>Resultado gratuito:</strong><br>
+    Você acertou <strong>${r.acertos} de ${Q.length}</strong> (${r.pct}%). Nível estimado: <strong>${r.faixa}</strong>.
+    <br><span class="small">O relatório premium converte esta pontuação em um <strong>QI estimado</strong> com percentil.</span>
+  `;
+  free.style.display='block';
+  document.getElementById('ctaPremium').style.display='block';
+});
+
+/** ------------------ Compra atômica via RPC (10 BC) ------------------ **/
+async function comprarPremiumQi(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ alert('Entre na sua conta para comprar.'); return; }
+
+  const preco = 10*100; // 10 Braincoins
+  const { data, error } = await sb.rpc('wallet_spend_and_purchase', {
+    p_product: 'qi',
+    p_price_cents: preco,
+    p_description: 'Relatório Premium — QI'
+  });
+
+  if(error){
+    if(error.message && /insufficient_funds/i.test(error.message)){
+      if(confirm('Saldo insuficiente. Ir para Carteira e adicionar Braincoins?')){
+        location.href = 'carteira.html';
+      }
+      return;
+    }
+    alert('Não foi possível concluir a compra. Tente novamente.');
+    return;
+  }
+  // data = purchase_id (uuid) — compra registrada
+  location.href = 'qi-premium.html?ok=1';
+}
+document.getElementById('buyPremiumBtn').addEventListener('click', comprarPremiumQi);
+
+/** ------------------ Init ------------------ **/
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await boot();
+  renderQuestoes();
+});
 </script>
 </body>
 </html>

@@ -4,13 +4,16 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sobre — Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/toast.css">
+
+<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
 .brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
@@ -18,18 +21,20 @@ nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
 .btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
 
-.hero{margin-top:1rem;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:2rem}
-.hero h2{font-family:'Poppins',sans-serif;color:var(--azul);font-size:1.6rem;margin-bottom:.6rem}
-.hero p{color:#51607a}
-
-.grid{display:grid;gap:1rem;margin-top:1rem;grid-template-columns:1fr 1fr}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem}
-.card h3{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
-.muted{color:#6b7380}
-.list{margin:.5rem 0 0 1rem} .list li{margin:.4rem 0}
-.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+p{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
+.grid{display:grid;gap:1rem;grid-template-columns:1fr}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.kpi .box{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem;text-align:center}
+.kpi .val{font-size:1.3rem;font-weight:800;color:#0e1d33}
+.kpi .lab{font-size:.85rem;color:#6b7380}
+.callout{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
 </style>
 </head>
 <body>
@@ -37,54 +42,86 @@ nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
   <header class="top">
     <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-  <a href="index.html">Início</a>
-  <a href="carteira.html">Carteira</a>
-  <a href="historico.html">Histórico</a>
-  <a href="sobre.html" class="btn secondary">Sobre</a>
-</nav>
-
+      <a href="index.html">Início</a>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="historico.html">Histórico</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
+    </nav>
   </header>
 
-  <section class="hero">
+  <section class="card">
     <h2>Sobre a Braintest</h2>
-    <p>A Braintest é uma plataforma de autoconhecimento que reúne triagens gratuitas e relatórios premium em áreas como atenção, estresse ocupacional e habilidades cognitivas. Nosso objetivo é oferecer clareza e ferramentas práticas para seu dia a dia — de um jeito simples, seguro e responsável.</p>
+    <p>A Braintest é uma plataforma brasileira focada em <strong>inteligência lógica e emocional</strong>. Nossa missão é tornar acessíveis ferramentas de <strong>autoconhecimento</strong> e <strong>desempenho cognitivo</strong> para pessoas e empresas — de triagens rápidas (TDAH, Burnout) a testes de raciocínio (QI, tempo de reação) e jogos mentais.</p>
+
+    <div class="hr"></div>
+
+    <h3>Como funciona</h3>
+    <p>Você realiza <strong>triagens gratuitas</strong> e, se quiser aprofundar, desbloqueia um <strong>relatório premium</strong> usando <strong>Braincoins</strong>, nossa moeda interna (1 BC = R$1). O saldo fica salvo na sua <a href="carteira.html">Carteira</a> e pode ser usado em relatórios, assinaturas e — em breve — jogos cognitivos.</p>
+
+    <div class="kpi" style="margin-top:.6rem">
+      <div class="box">
+        <div class="val">Triagens grátis</div>
+        <div class="lab">Relatórios premium com 10 BC</div>
+      </div>
+      <div class="box">
+        <div class="val">Conta unificada</div>
+        <div class="lab">Histórico e reabertura de relatórios</div>
+      </div>
+      <div class="box">
+        <div class="val">Para pessoas e empresas</div>
+        <div class="lab">Planos corporativos (em breve)</div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h3>Transparência e limites</h3>
+    <p>Os materiais da Braintest têm caráter <strong>educacional e informativo</strong>. Eles <strong>não substituem</strong> avaliação médica ou psicológica. Sempre encorajamos que pessoas com sintomas persistentes ou impacto funcional busquem avaliação com profissionais de saúde.</p>
+
+    <div class="callout" style="margin-top:.8rem">
+      <strong>Em situações de risco:</strong>
+      <p class="small">procure serviços locais de urgência (ex.: SAMU 192) ou suporte especializado imediatamente.</p>
+    </div>
+
+    <div class="hr"></div>
+
+    <h3>Privacidade</h3>
+    <p>Valorizamos sua privacidade. Usamos autenticação segura e armazenamos dados no Supabase com <strong>regras de acesso por usuário</strong>. Você pode solicitar a exclusão da conta a qualquer momento.</p>
+
+    <div class="hr"></div>
+
+    <h3>Contato</h3>
+    <p>Dúvidas, parcerias ou imprensa: <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a></p>
   </section>
-
-  <div class="grid">
-    <section class="card">
-      <h3>Como funciona</h3>
-      <ul class="list">
-        <li><strong>Triagens gratuitas:</strong> você responde questionários baseados em referenciais reconhecidos.</li>
-        <li><strong>Relatórios premium:</strong> por 10 Braincoins, você desbloqueia um relatório aprofundado com recomendações úteis.</li>
-        <li><strong>Carteira Braintest:</strong> adicione Braincoins (1 BC = R$ 1) e utilize em qualquer teste.</li>
-        <li><strong>Privacidade:</strong> seus dados são armazenados com segurança no Supabase. Você controla sua conta.</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h3>É importante saber</h3>
-      <p class="muted">Os relatórios da Braintest têm caráter informativo e educacional. Eles <strong>não substituem</strong> avaliação com profissionais de saúde (psicologia/psiquiatria). Se seus sintomas impactam o cotidiano, procure atendimento especializado.</p>
-      <p class="muted" style="margin-top:.6rem;">Em situações de urgência, busque serviços de emergência (SAMU 192) ou atendimento local.</p>
-    </section>
-
-    <section class="card">
-      <h3>Para empresas</h3>
-      <p>Estamos preparando ferramentas para equipes de RH acompanharem indicadores (com consentimento) e oferecerem programas de saúde mental e cognitiva — respeitando a privacidade individual.</p>
-    </section>
-
-    <section class="card">
-      <h3>Contato</h3>
-      <p>Quer falar com a gente? Envie um e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
-    </section>
-  </div>
-
-  <div class="footer">© 2025 Braintest — Todos os direitos reservados.</div>
 </div>
 
-<script src="assets/toast.js"></script>
 <script>
-  // Exemplo de uso do toast nesta página (pode remover se quiser)
-  // showToast('Bem-vindo(a) à Braintest!');
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
+
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+    }else{
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'inline-block';
+
+      const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const cents = data?.balance_cents || 0;
+      document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
+    location.href = 'index.html';
+  });
 </script>
 </body>
 </html>

@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /netlify/
+Disallow: /assets/
+Disallow: /404.html
+Allow: /
+
+Sitemap: https://braintest.com.br/sitemap.xml

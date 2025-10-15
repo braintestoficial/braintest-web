@@ -1,0 +1,5 @@
+https://www.braintest.com.br/*   https://braintest.com.br/:splat   301!
+http://braintest.com.br/*        https://braintest.com.br/:splat   301!
+http://www.braintest.com.br/*    https://braintest.com.br/:splat   301!
+
+/*   /404.html   404

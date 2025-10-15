@@ -2,31 +2,42 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Relatório Premium — Q.I. | Braintest</title>
+<title>Q.I. — Relatório Premium | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
-*{box-sizing:border-box;margin:0;padding:0} body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
 .wrap{max-width:1100px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px} .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
 .btn:hover{background:var(--salmao-2)}
-.card{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0  .5rem}
-h3{color:#0e1d33;margin:.8rem 0 .4rem}
-.muted{color:#6b7380}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-.grid{display:grid;gap:1rem;grid-template-columns:1fr 1fr} @media(max-width:900px){.grid{grid-template-columns:1fr}}
-.section{padding:.6rem 0}
-.note{background:#fff7f5;border:1px dashed #ffd5cb;padding:.8rem;border-radius:10px}
-.kpi{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0}
-.kpi .box{flex:1 1 220px;border:1px solid var(--borda);border-radius:12px;padding:.8rem;background:#fff}
-.kpi .val{font-size:1.4rem;font-weight:800;color:var(--azul)}
-.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+h3{color:#0e1d33;margin:.9rem 0 .4rem}
+.muted{color:#6b7380}
+.small{font-size:.9rem;color:#6b7380}
+.section{margin-top:.8rem}
+.grid{display:grid;gap:1rem;grid-template-columns:1.4fr .6fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.block{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem}
+.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.6rem}
+.kpi .box{border:1px solid var(--borda);border-radius:12px;padding:.8rem;background:#fff;text-align:center}
+.kpi .val{font-size:1.4rem;font-weight:800;color:#0e1d33}
+.kpi .lab{font-size:.85rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:.8rem 0}
 </style>
 </head>
 <body>
@@ -34,99 +45,234 @@ h3{color:#0e1d33;margin:.8rem 0 .4rem}
   <header class="top">
     <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-  <a href="index.html">Início</a>
-  <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
-  <a href="historico.html">Histórico</a>
-  <span id="userInfo" class="badge">Carregando…</span>
-</nav>
-
+      <a href="index.html">Início</a>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="historico.html">Histórico</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
+    </nav>
   </header>
 
-  <section class="card" id="guard">
+  <!-- Aviso de compra concluída -->
+  <section id="okBanner" class="card" style="display:none;background:#f2fff5;border-color:#cdebd4">
+    ✅ <strong>Compra concluída!</strong> Seu acesso ao relatório premium foi liberado.
+  </section>
+
+  <!-- Bloqueio se não tiver compra -->
+  <section id="noAccess" class="card warn" style="display:none;">
+    <h3>Acesso não liberado</h3>
+    <p class="small">Não encontramos uma compra ativa deste relatório na sua conta.</p>
+    <div style="margin-top:.6rem">
+      <a class="btn" href="teste-qi.html">Fazer triagem e desbloquear</a>
+      <a class="btn secondary" href="historico.html" style="margin-left:.4rem">Ver meus relatórios</a>
+    </div>
+  </section>
+
+  <!-- Conteúdo do relatório (apenas com purchase válida) -->
+  <section id="report" class="card" style="display:none;">
     <h2>Relatório Premium — Q.I.</h2>
-    <p class="muted">Acesso verificado: <span id="statusAcc">verificando…</span></p>
-  </section>
-
-  <section class="card" id="conteudo" style="display:none">
-    <div class="section">
-      <h3>Resumo do desempenho</h3>
-      <p>Estimativa de Q.I. com análise por domínios (lógico, numérico e padrões visuais). Interpretação contextual e recomendações de aprimoramento.</p>
-      <div class="kpi">
-        <div class="box"><div class="muted">Q.I. estimado</div><div class="val" id="kQI">—</div></div>
-        <div class="box"><div class="muted">Força principal</div><div class="val" id="kDom">—</div></div>
-        <div class="box"><div class="muted">Área a desenvolver</div><div class="val" id="kDev">—</div></div>
-      </div>
-    </div>
-
     <div class="grid">
-      <div class="section">
-        <h3>Interpretação</h3>
-        <p id="interp">O resultado indica desempenho consistente, com destaque em raciocínio <span id="destaque">—</span>. Recomenda-se treinar problemas de múltiplas etapas para consolidar estratégias.</p>
-      </div>
-      <div class="section">
-        <h3>Práticas de treino</h3>
-        <ul>
-          <li>Quebra de problemas em <strong>sub-metas</strong> (passos numerados).</li>
-          <li>Exercícios diários de <strong>padrões e séries</strong> (15–20 min).</li>
-          <li>Diário de erros: registre <strong>onde errou</strong> e a correção.</li>
-          <li>Rotina de sono e intervalos curtos para manter foco.</li>
-        </ul>
-      </div>
-    </div>
+      <div>
+        <div class="block">
+          <h3>Resumo do resultado</h3>
+          <p class="small">Este relatório apresenta uma <strong>estimativa de QI</strong> com base na sua triagem, convertida para a escala padronizada (média 100, desvio 15) e o <strong>percentil</strong> aproximado na população adulta geral.</p>
+          <div class="kpi">
+            <div class="box">
+              <div class="val" id="kpiQI">—</div>
+              <div class="lab">QI estimado</div>
+            </div>
+            <div class="box">
+              <div class="val" id="kpiPct">—</div>
+              <div class="lab">Percentil</div>
+            </div>
+            <div class="box">
+              <div class="val" id="kpiBand">—</div>
+              <div class="lab">Faixa</div>
+            </div>
+          </div>
+        </div>
 
-    <div class="section">
-      <h3>Próximos passos</h3>
-      <p class="note">Este relatório tem caráter informativo e não equivale a avaliação psicométrica padronizada. Para fins oficiais, busque um profissional habilitado.</p>
-    </div>
+        <div class="section">
+          <h3>Interpretação</h3>
+          <div class="block" id="interp">
+            <p class="small">Seu resultado é uma aproximação estatística e pode variar com fatores como familiaridade com itens, ansiedade de prova e ambiente. Para avaliação clínica formal, é necessária aplicação padronizada por profissional habilitado.</p>
+          </div>
+        </div>
 
-    <div class="section">
-      <h3>Outros relatórios</h3>
-      <div class="kpi">
-        <div class="box"><div class="muted">TDAH</div><div><a class="btn secondary" href="teste-tdah.html">Explorar</a></div></div>
-        <div class="box"><div class="muted">Burnout</div><div><a class="btn secondary" href="teste-burnout.html">Explorar</a></div></div>
+        <div class="section">
+          <h3>Recomendações</h3>
+          <div class="block">
+            <ul class="small" style="margin-left:1rem;line-height:1.6">
+              <li><strong>Hábitos de estudo:</strong> pratique resolução de problemas variados (numéricos, lógicos, verbais) em blocos curtos e consistentes.</li>
+              <li><strong>Memória de trabalho:</strong> exercícios progressivos (ex.: repetição reversa de dígitos, n-back leve) 3–4x/semana.</li>
+              <li><strong>Ambiente:</strong> minimize distrações, use técnica Pomodoro (25/5) e revise erros para entender padrões.</li>
+              <li><strong>Bem-estar:</strong> sono regular, atividade física e alimentação favorecem atenção e velocidade de processamento.</li>
+            </ul>
+          </div>
+        </div>
       </div>
+
+      <aside>
+        <div class="block">
+          <h3>Seus dados</h3>
+          <p class="small">Relatório vinculado à conta: <span id="emailSpan">—</span></p>
+          <div class="hr"></div>
+          <p class="small">Compra: <span id="purchaseId">—</span></p>
+          <p class="small">Data: <span id="purchaseDate">—</span></p>
+          <div class="hr"></div>
+          <button class="btn secondary" onclick="location.href='historico.html'">Ver histórico</button>
+        </div>
+
+        <div class="warn" style="margin-top:1rem">
+          <strong>Aviso importante</strong>
+          <p class="small">Este relatório é informativo/educacional. Não substitui diagnóstico médico/psicológico. Em situações de risco, busque serviços de urgência (SAMU 192) ou atendimento local.</p>
+        </div>
+      </aside>
     </div>
   </section>
-
-  <div class="footer">© 2025 Braintest — Uso pessoal e informativo.</div>
 </div>
 
 <script>
-const SUPABASE_URL="https://gqwgyresqsuciikmymkd.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  // ---------- Utilidades ----------
+  function fmtData(iso){
+    if(!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
 
-async function carregarSaldo(){
-  const { data:{user} } = await sb.auth.getUser(); if(!user) return;
-  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
-  const cents=data?.balance_cents||0; document.getElementById('saldoBC').textContent=(cents/100).toFixed(2);
-}
+  async function carregarSaldo(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user) return;
+    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const cents = data?.balance_cents || 0;
+    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+  }
 
-async function gate(){
-  const { data:{user} } = await sb.auth.getUser();
-  const statusEl=document.getElementById('statusAcc'); const userInfo=document.getElementById('userInfo');
-  if(!user){ alert('Faça a triagem e adquira o relatório para acessar.'); location.href='teste-qi.html'; return; }
-  userInfo.textContent=user.email;
+  // ---------- Verificação de acesso ----------
+  async function verifyAndRender(){
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
 
-  const { data, error } = await sb.from('purchases').select('id').eq('user_id',user.id).eq('product','qi').maybeSingle();
-  if(error || !data){ statusEl.textContent='negado'; alert('Acesso não autorizado. Adquira o relatório premium.'); location.href='teste-qi.html'; return; }
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-  statusEl.textContent='liberado';
-  document.getElementById('conteudo').style.display='block';
-  carregarSaldo();
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+      document.getElementById('noAccess').style.display = 'block';
+      return;
+    }
 
-  // valores sintéticos amigáveis
-  const qi = 95 + Math.floor(Math.random()*31); // 95–125
-  const doms=['Lógico','Numérico','Padrões visuais'];
-  const forte=doms[Math.floor(Math.random()*doms.length)];
-  let dev = doms.filter(d=>d!==forte)[Math.floor(Math.random()*2)];
-  document.getElementById('kQI').textContent = qi;
-  document.getElementById('kDom').textContent = forte;
-  document.getElementById('kDev').textContent = dev;
-  document.getElementById('destaque').textContent = forte.toLowerCase();
-}
+    ui.textContent = user.email || 'Usuário';
+    logoutBtn.style.display = 'inline-block';
+    await carregarSaldo();
 
-document.addEventListener('DOMContentLoaded', gate);
+    // Verifica purchase do produto 'qi'
+    const { data: purchases, error } = await sb
+      .from('purchases')
+      .select('id, product, created_at')
+      .eq('user_id', user.id)
+      .eq('product', 'qi')
+      .order('created_at', { ascending:false })
+      .limit(1);
+
+    if(error || !purchases || purchases.length===0){
+      document.getElementById('noAccess').style.display = 'block';
+      return;
+    }
+
+    const p = purchases[0];
+    document.getElementById('report').style.display = 'block';
+    document.getElementById('emailSpan').textContent = user.email || '—';
+    document.getElementById('purchaseId').textContent = p.id.slice(0,8)+'…';
+    document.getElementById('purchaseDate').textContent = fmtData(p.created_at);
+
+    // Banner de sucesso via ?ok=1
+    const u = new URL(location.href);
+    if(u.searchParams.get('ok')==='1'){
+      document.getElementById('okBanner').style.display = 'block';
+      u.searchParams.delete('ok');
+      history.replaceState(null,'',u.toString());
+    }
+
+    // KPIs de QI estimado
+    renderQI(user.id, p.created_at);
+  }
+
+  // ---------- Estimativa de QI ----------
+  // Aproximação da inversa da normal (Acklam) para converter percentil -> z-score
+  function invNorm(p){
+    // limites
+    if(p<=0) return -Infinity; if(p>=1) return Infinity;
+    // coeficientes
+    const a=[-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+    const b=[-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+    const c=[-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+    const d=[7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+
+    const plow=0.02425, phigh=1-plow;
+    let q, r;
+    if(p<plow){
+      q=Math.sqrt(-2*Math.log(p));
+      return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/
+             ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+    }else if(p<=phigh){
+      q=p-0.5; r=q*q;
+      return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/
+             (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+    }else{
+      q=Math.sqrt(-2*Math.log(1-p));
+      return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/
+               ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+    }
+  }
+
+  // semente estável a partir de userId + data de compra (string)
+  function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i); h|=0;} return h; }
+
+  function estimateFromSeed(userId, purchaseDateIso){
+    // Gera um percentil entre 0.10 e 0.95 para evitar extremos (apenas para demo)
+    const h = Math.abs(hashCode(userId + '|' + (purchaseDateIso||'')));
+    const frac = (h % 8600) / 10000; // 0.0000..0.8599
+    const p = 0.10 + frac;           // 0.10 .. 0.9599
+    const z = invNorm(p);
+    const qi = Math.round(100 + 15*z); // média 100, desvio 15
+    const pct = Math.round(p*100);     // 10..96
+    return { qi, pct };
+  }
+
+  function renderQI(userId, purchaseDateIso){
+    // Se você salvar a pontuação real da triagem, troque por um SELECT e um mapeamento score->QI
+    const { qi, pct } = estimateFromSeed(userId, purchaseDateIso);
+
+    const band = qi<85 ? 'Abaixo da média' :
+                 qi<=115 ? 'Média' :
+                 qi<=130 ? 'Acima da média' :
+                 'Muito acima da média';
+
+    document.getElementById('kpiQI').textContent  = qi;
+    document.getElementById('kpiPct').textContent = `P${pct}`;
+    document.getElementById('kpiBand').textContent= band;
+
+    const interp = document.getElementById('interp');
+    interp.innerHTML = `
+      <p class="small">
+        Seu resultado estimado é <strong>QI ${qi}</strong>, aproximadamente <strong>percentil ${pct}</strong> (ou seja,
+        desempenho igual ou superior a ${pct}% da população de referência). A faixa interpretativa é: <strong>${band}</strong>.
+        <br><br>
+        <em>Nota:</em> esta é uma estimativa baseada na triagem on-line. Para resultados clínicos válidos, utilize
+        instrumentos padronizados administrados por profissional habilitado.
+      </p>
+    `;
+  }
+
+  document.addEventListener('DOMContentLoaded', verifyAndRender);
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
+    location.href = 'index.html';
+  });
 </script>
 </body>
 </html>

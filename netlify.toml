@@ -1,10 +1,28 @@
 [build]
-  publish = "."       # sua pasta pública é a raiz (onde estão os .html)
+  publish = "."             # sua pasta pública é a raiz (onde estão os .html)
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"  # padrão recomendado; empacota a função
 
-# (opcional) defina a versão do Node se quiser reforçar
 [build.environment]
   NODE_VERSION = "18"
+
+# Redirects para unificar o domínio (impede perder sessão)
+[[redirects]]
+  from = "https://www.braintest.com.br/*"
+  to = "https://braintest.com.br/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://braintest.com.br/*"
+  to = "https://braintest.com.br/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.braintest.com.br/*"
+  to = "https://braintest.com.br/:splat"
+  status = 301
+  force = true

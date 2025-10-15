@@ -1,392 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Braintest — Plataforma</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Braintest — Autoconhecimento e desempenho cognitivo</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
-  :root{
-    --salmao:#ff8a73; --salmao-2:#ff7458;
-    --azul:#1d3557; --azul-2:#0f223c;
-    --bg:#f6f7fb; --card:#ffffff; --borda:#e9ecf2; --texto:#2b2b2b;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto);}
-  a{text-decoration:none;color:inherit}
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem;backdrop-filter:saturate(180%) blur(8px)}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn.small{padding:.4rem .7rem}
+.btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
 
-  /* LAYOUT BASE */
-  .app{display:flex;min-height:100vh;min-width:0;}
-  .sidebar{
-    flex:0 0 260px; width:260px; background:var(--azul); color:#fff;
-    display:flex; flex-direction:column; border-right:1px solid #0c1a2d;
-    position:sticky; top:0; height:100vh; overflow:auto;
-  }
-  .main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;}
+.hero{display:grid;gap:1rem;grid-template-columns:1.2fr .8fr;margin-top:1rem}
+@media(max-width:980px){.hero{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+h3{color:#0e1d33;margin:.6rem 0 .3rem}
+p{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
 
-  /* Mobile/off-canvas */
-  .overlay{display:none;}
-  @media(max-width:720px){
-    .sidebar{ position:fixed; inset:0 auto 0 0; height:100vh; transform:translateX(-100%);
-      transition:transform .25s ease; z-index:30; }
-    .sidebar.open{ transform:translateX(0) }
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:20;display:none}
-    .overlay.open{display:block}
-  }
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(3,1fr)}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.tile{border:1px solid var(--borda);border-radius:12px;background:#f9fbff;padding:1rem;display:flex;flex-direction:column;gap:.4rem}
+.tile h4{margin:0;color:#0e1d33}
+.tile p{font-size:.95rem}
+.tile .actions{margin-top:.4rem;display:flex;gap:.5rem;flex-wrap:wrap}
 
-  /* Sidebar conteúdo */
-  .brand{display:flex;align-items:center;gap:.6rem;padding:1rem;border-bottom:1px solid #0c1a2d;}
-  .brand img{width:28px;height:28px}
-  .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;letter-spacing:.2px}
-
-  .user-box{padding:1rem;border-bottom:1px solid #0c1a2d;}
-  .user-row{display:flex;align-items:center;gap:.75rem;}
-  .avatar{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--azul);display:flex;align-items:center;justify-content:center;font-weight:700}
-  .user-meta{display:flex;flex-direction:column;}
-  .user-meta small{opacity:.8}
-  .saldo{margin-top:.8rem;padding:.6rem .8rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;display:flex;justify-content:space-between;font-weight:600}
-  .saldo .add{color:#fff;background:var(--salmao);border:none;border-radius:6px;padding:.2rem .5rem;cursor:pointer}
-  .saldo .add:hover{background:var(--salmao-2)}
-
-  nav.side{padding:.6rem 0;flex:1;overflow:auto}
-  .item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;color:#cfe2ff;opacity:.95;}
-  .item:hover{background:rgba(255,255,255,.06)}
-  .item.active{background:rgba(255,255,255,.12);color:#fff;}
-  .item .icon{width:22px;text-align:center;font-weight:700}
-
-  .bottom{padding:1rem;border-top:1px solid #0c1a2d;}
-  .logout-btn{width:100%;background:#fff;color:var(--azul);border:none;border-radius:8px;padding:.6rem 1rem;font-weight:700;cursor:pointer}
-  .logout-btn:hover{background:#f0f4ff}
-
-  /* Topbar + conteúdo */
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-bottom:1px solid var(--borda);background:#fff;position:sticky;top:0;z-index:10}
-  .left{display:flex;align-items:center;gap:.8rem}
-  .burger{display:none}
-  @media(max-width:720px){
-    .burger{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--borda);border-radius:8px;background:#fff}
-  }
-  .search{display:flex;align-items:center;background:#fff;border:1px solid var(--borda);border-radius:10px;padding:.5rem .8rem;min-width:260px}
-  .search input{border:none;outline:none;width:100%;font-size:.95rem}
-  .right{display:flex;align-items:center;gap:1rem}
-  .pill{background:#fff;border:1px solid var(--borda);padding:.45rem .75rem;border-radius:999px;font-weight:600}
-  .login-btn{background:var(--salmao);color:#fff;border:none;border-radius:8px;padding:.55rem 1rem;font-weight:700;cursor:pointer}
-  .login-btn:hover{background:var(--salmao-2)}
-
-  .content{padding:1.5rem;display:grid;gap:1rem;grid-template-columns:1fr;max-width:1100px;margin:0 auto; width:100%}
-  .section{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:1.2rem 1.2rem 1.3rem;box-shadow:0 2px 10px rgba(0,0,0,.04)}
-  .section h2{font-family:'Poppins',sans-serif;color:var(--azul);margin-bottom:.5rem}
-  .muted{color:#6b7380}
-
-  .cards{display:grid;gap:1rem;grid-template-columns:repeat(3,1fr)}
-  @media(max-width:960px){ .cards{grid-template-columns:repeat(2,1fr)} }
-  @media(max-width:560px){ .cards{grid-template-columns:1fr} }
-  .card{border:1px solid var(--borda);border-radius:12px;background:#fff;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
-  .card h3{font-size:1rem;color:#0e1d33}
-  .tag{display:inline-flex;align-items:center;gap:.35rem;background:#f7f9ff;border:1px solid var(--borda);padding:.25rem .55rem;border-radius:999px;font-size:.8rem}
-  .cta{margin-top:auto;display:flex;gap:.5rem}
-  .btn{background:var(--salmao);color:#fff;border:none;border-radius:8px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-  .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-  .btn:hover{background:var(--salmao-2)}
-  .btn.secondary:hover{background:#f7f9ff}
-  .soon{opacity:.75}
-  .soon .btn{pointer-events:none;opacity:.6}
-
-  /* Modal Auth */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);z-index:40}
-  .modal.open{display:flex}
-  .auth-box{width:100%;max-width:420px;background:#fff;border-radius:14px;border:1px solid var(--borda);padding:1.2rem}
-  .auth-box h3{font-family:'Poppins',sans-serif;color:var(--azul);margin-bottom:.75rem}
-  .field{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
-  .field input{border:1px solid var(--borda);border-radius:10px;padding:.65rem .8rem;font-size:.95rem}
-  .row{display:flex;gap:.6rem;margin-top:.7rem}
-  .gbtn{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:.6rem .8rem;display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:600}
-  .gbtn img{width:18px;height:18px}
+.kpi{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.kpi .balance{display:flex;align-items:center;gap:.5rem}
+.kpi .val{font-size:1.5rem;font-weight:800;color:#0e1d33}
+.callout{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
+.success{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem}
+.center{text-align:center}
 </style>
 </head>
 <body>
-
-<div class="app" id="app">
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <img src="assets/logo.svg" alt="logo">
-      <h1>Braintest</h1>
-    </div>
-
-    <div class="user-box" id="userBox">
-      <div class="user-row">
-        <div class="avatar" id="avatar">BT</div>
-        <div class="user-meta">
-          <strong id="uemail">Visitante</strong>
-          <small>Bem-vindo(a)!</small>
-        </div>
-      </div>
-      <div class="saldo">
-        <span>💰 <span id="saldoBC">0.00</span> Braincoins</span>
-        <button class="add" onclick="location.href='carteira.html'">+ Comprar</button>
-      </div>
-    </div>
-
-    <nav class="side" id="sidenav">
-      <a href="#" class="item active" data-section="home"><span class="icon">🏠</span> <span class="label">Início</span></a>
-      <a href="#" class="item" data-section="testes"><span class="icon">🧠</span> <span class="label">Testes</span></a>
-      <a href="carteira.html" class="item"><span class="icon">💰</span> <span class="label">Carteira</span></a>
-      <a href="#" class="item" data-section="assinaturas"><span class="icon">⭐</span> <span class="label">Assinaturas</span></a>
-      <a href="#" class="item" data-section="jogos"><span class="icon">🎮</span> <span class="label">Jogos</span></a>
-      <!-- Atualizado: link direto para histórico -->
-      <a href="historico.html" class="item"><span class="icon">📈</span> <span class="label">Histórico</span></a>
-      <a href="#" class="item" data-section="config"><span class="icon">⚙️</span> <span class="label">Configurações</span></a>
-      <a href="faq.html" class="item"><span class="icon">❓</span> <span class="label">FAQ</span></a>
-      <a href="termos.html" class="item"><span class="icon">📃</span> <span class="label">Termos</span></a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="historico.html">Histórico</a>
+      <a href="faq.html">FAQ</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
+  </header>
 
-    <div class="bottom">
-      <button class="logout-btn" id="logoutBtn" style="display:none;">Sair</button>
+  <!-- HERO -->
+  <section class="hero">
+    <!-- Esquerda: mensagem principal -->
+    <div class="card">
+      <h2>Autoconhecimento e desempenho cognitivo, no seu tempo</h2>
+      <p>Faça triagens gratuitas (TDAH, Burnout, QI) e desbloqueie relatórios premium com <strong>Braincoins</strong> (1 BC = R$1). Tudo salvo na sua conta.</p>
+
+      <div class="kpi" style="margin-top:.6rem">
+        <div class="balance">
+          <span class="small">Seu saldo</span>
+          <span class="val"><span id="saldoHero">0.00</span> BC</span>
+        </div>
+        <button class="btn small" onclick="location.href='carteira.html'">Adicionar Braincoins</button>
+        <button class="btn secondary small" onclick="location.href='historico.html'">Abrir meus relatórios</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <h3>Comece por aqui</h3>
+      <div class="grid" style="margin-top:.4rem">
+        <div class="tile">
+          <h4>TDAH</h4>
+          <p class="small">Triagem rápida para sinais de desatenção e hiperatividade/impulsividade.</p>
+          <div class="actions">
+            <a class="btn small" href="teste-tdah.html">Fazer triagem</a>
+            <a class="btn secondary small" href="tdah-premium.html">Abrir relatório (se comprado)</a>
+          </div>
+        </div>
+        <div class="tile">
+          <h4>Burnout</h4>
+          <p class="small">Avalie exaustão, cinismo/distanciamento e eficácia no trabalho.</p>
+          <div class="actions">
+            <a class="btn small" href="teste-burnout.html">Fazer triagem</a>
+            <a class="btn secondary small" href="burnout-premium.html">Abrir relatório (se comprado)</a>
+          </div>
+        </div>
+        <div class="tile">
+          <h4>QI</h4>
+          <p class="small">Raciocínio lógico, numérico e padrões. Estimativa de QI e percentil.</p>
+          <div class="actions">
+            <a class="btn small" href="teste-qi.html">Fazer triagem</a>
+            <a class="btn secondary small" href="qi-premium.html">Abrir relatório (se comprado)</a>
+          </div>
+        </div>
+      </div>
     </div>
-  </aside>
 
-  <!-- Overlay mobile -->
-  <div class="overlay" id="overlay"></div>
+    <!-- Direita: login/conta -->
+    <aside class="card" id="authPanel">
+      <div id="loggedBox" style="display:none">
+        <h3>Bem-vindo(a)</h3>
+        <p class="small">Conectado como <strong id="emailSpan">—</strong>.</p>
+        <div class="success" style="margin-top:.6rem">
+          <strong>Pronto para começar!</strong>
+          <p class="small">Escolha uma triagem ao lado ou adicione Braincoins para desbloquear relatórios premium.</p>
+        </div>
+        <div class="hr"></div>
+        <button class="btn" onclick="location.href='carteira.html'">Minha carteira</button>
+        <button class="btn secondary" style="margin-left:.4rem" onclick="location.href='historico.html'">Meu histórico</button>
+      </div>
 
-  <!-- Main -->
-  <section class="main">
-    <div class="topbar">
-      <div class="left">
-        <button class="burger" id="burger">☰</button>
-        <div class="search">
-          <input type="text" placeholder="Buscar testes, jogos, relatórios..." />
+      <div id="loginBox" style="display:none">
+        <h3>Entrar na Braintest</h3>
+        <p class="small">Use sua conta Google para começar.</p>
+        <button id="googleBtn" class="btn" style="margin-top:.6rem">Continuar com Google</button>
+        <div class="callout" style="margin-top:1rem">
+          <strong>Privacidade</strong>
+          <p class="small">Usamos autenticação segura. Você pode encerrar a sessão a qualquer momento.</p>
         </div>
       </div>
-      <div class="right">
-        <div class="pill">Moeda: Braincoin</div>
-        <button class="login-btn" id="loginOpenBtn">Entrar / Criar conta</button>
-      </div>
-    </div>
+    </aside>
+  </section>
 
-    <div class="content" id="content">
-      <!-- HOME -->
-      <div class="section" data-view="home">
-        <h2>Bem-vindo(a) à Braintest</h2>
-        <p class="muted">Plataforma de inteligência lógica e emocional. Faça triagens gratuitas e desbloqueie relatórios premium com Braincoins.</p>
-        <div class="cards" style="margin-top:.8rem">
-          <div class="card">
-            <div class="tag">🧠 Testes</div>
-            <h3>Teste de TDAH</h3>
-            <p class="muted">Triagem baseada em sintomas comportamentais. Relatório premium por <strong>10 Braincoins</strong>.</p>
-            <div class="cta">
-              <a class="btn secondary" href="teste-tdah.html">Triagem gratuita</a>
-            </div>
-          </div>
-          <div class="card">
-            <div class="tag">🧠 Testes</div>
-            <h3>Teste de Burnout</h3>
-            <p class="muted">Avalie sinais de esgotamento emocional. Relatório premium por <strong>10 Braincoins</strong>.</p>
-            <div class="cta">
-              <a class="btn secondary" href="teste-burnout.html">Triagem gratuita</a>
-            </div>
-          </div>
-          <div class="card">
-            <div class="tag">🧮 Lógico</div>
-            <h3>Teste de Q.I.</h3>
-            <p class="muted">Raciocínio lógico, numérico e padrões. Relatório premium por <strong>10 Braincoins</strong>.</p>
-            <div class="cta">
-              <a class="btn secondary" href="teste-qi.html">Triagem gratuita</a>
-            </div>
-          </div>
-        </div>
+  <!-- Rodapé leve -->
+  <section class="card" style="margin-top:1rem">
+    <div class="grid">
+      <div>
+        <h3>Como funciona</h3>
+        <p class="small">Triagens gratuitas → se quiser aprofundar, desbloqueie o <strong>relatório premium</strong> com 10 Braincoins. Seu acesso fica salvo em <em>Histórico</em>, podendo reabrir quando quiser.</p>
       </div>
-
-      <!-- TESTES -->
-      <div class="section" data-view="testes" style="display:none">
-        <h2>Todos os Testes</h2>
-        <p class="muted">Escolha um teste para começar gratuitamente. Relatórios premium podem ser comprados com Braincoins.</p>
-        <div class="cards" style="margin-top:.8rem">
-          <div class="card">
-            <div class="tag">🧠</div>
-            <h3>TDAH</h3>
-            <p class="muted">Triagem e relatório premium.</p>
-            <div class="cta"><a class="btn secondary" href="teste-tdah.html">Abrir</a></div>
-          </div>
-          <div class="card">
-            <div class="tag">🔥</div>
-            <h3>Burnout</h3>
-            <p class="muted">Triagem e relatório premium.</p>
-            <div class="cta"><a class="btn secondary" href="teste-burnout.html">Abrir</a></div>
-          </div>
-          <div class="card">
-            <div class="tag">🧮</div>
-            <h3>Q.I.</h3>
-            <p class="muted">Triagem e relatório premium.</p>
-            <div class="cta"><a class="btn secondary" href="teste-qi.html">Abrir</a></div>
-          </div>
-          <div class="card soon">
-            <div class="tag">⚡</div>
-            <h3>Tempo de Reação</h3>
-            <p class="muted">Teste cognitivo de milissegundos. <strong>Em breve</strong>.</p>
-            <div class="cta"><button class="btn">Em breve</button></div>
-          </div>
-        </div>
+      <div>
+        <h3>Em breve</h3>
+        <p class="small">Assinaturas para pessoas e empresas, testes de tempo de reação e memória de trabalho, além de jogos cognitivos.</p>
       </div>
-
-      <!-- Placeholders (assinaturas/config/jogos) -->
-      <div class="section soon" data-view="assinaturas" style="display:none">
-        <h2>Assinaturas</h2>
-        <p class="muted">Planos mensais com Braincoins bônus e acesso premium. <strong>Em breve</strong>.</p>
+      <div>
+        <h3>Suporte</h3>
+        <p class="small">Dúvidas? Consulte o <a href="faq.html">FAQ</a> ou envie e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
       </div>
-      <div class="section soon" data-view="jogos" style="display:none">
-        <h2>Jogos Cognitivos</h2>
-        <p class="muted">Raciocínio, memória e tempo de reação. <strong>Em breve</strong>.</p>
-      </div>
-      <div class="section soon" data-view="config" style="display:none">
-        <h2>Configurações</h2>
-        <p class="muted">Perfil, tema (claro/escuro), segurança. <strong>Em breve</strong>.</p>
-      </div>
-      <!-- Removido: placeholder antigo de histórico -->
     </div>
   </section>
 </div>
 
-<!-- Modal Auth -->
-<div class="modal" id="authModal">
-  <div class="auth-box">
-    <h3>Entrar na Braintest</h3>
-    <div class="field">
-      <label>E-mail</label><input type="email" id="email" placeholder="seu@email.com">
-    </div>
-    <div class="field">
-      <label>Senha</label><input type="password" id="senha" placeholder="••••••••">
-    </div>
-    <div class="row">
-      <button class="btn" onclick="login()">Entrar</button>
-      <button class="btn secondary" onclick="signup()">Criar conta</button>
-    </div>
-    <div class="row">
-      <button class="gbtn" onclick="loginGoogle()">
-        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google"> Entrar com Google
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>
-  const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  });
-
-  // ---- Helpers de UI
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
-  const burger = document.getElementById('burger');
-  const loginOpenBtn = document.getElementById('loginOpenBtn');
-  const authModal = document.getElementById('authModal');
-  const logoutBtn = document.getElementById('logoutBtn');
-
-  burger?.addEventListener('click', ()=>{ sidebar.classList.add('open'); overlay.classList.add('open'); });
-  overlay?.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('open'); });
-
-  loginOpenBtn?.addEventListener('click', ()=> authModal.classList.add('open'));
-  authModal?.addEventListener('click', (e)=>{ if(e.target===authModal) authModal.classList.remove('open'); });
-
-  const sideLinks = document.querySelectorAll('.side .item[data-section]');
-  const views = document.querySelectorAll('[data-view]');
-  sideLinks.forEach(link=>{
-    link.addEventListener('click', (e)=>{
-      e.preventDefault();
-      sideLinks.forEach(l=>l.classList.remove('active'));
-      link.classList.add('active');
-      const target = link.getAttribute('data-section');
-      views.forEach(v=> v.style.display = (v.getAttribute('data-view')===target? 'block': 'none'));
-      if(target==='home'){ document.querySelector('[data-view="home"]').style.display='block'; }
-      sidebar.classList.remove('open'); overlay.classList.remove('open');
-    });
-  });
-
-  // ---- Sessão + saldo + profiles sync
-  async function carregarSaldo(){
-    const { data:{user} } = await sb.auth.getUser();
-    if(!user) return;
-    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const cents = data?.balance_cents || 0;
-    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
-  }
-
-  async function syncProfile(){
-    const { data:{ user } } = await sb.auth.getUser();
-    if(!user?.id) return;
-    const email = user.email || null;
-    if(!email) return;
-    await sb.from('profiles').upsert({ user_id: user.id, email }, { onConflict: 'user_id' });
-  }
-
+  // Aguarda sessão, carrega UI e saldo
   document.addEventListener('DOMContentLoaded', async ()=>{
-    const { data:{user} } = await sb.auth.getUser();
-    const uemail = document.getElementById('uemail');
-    const avatar = document.getElementById('avatar');
+    await waitForSupabaseSession();
 
-    if(user){
-      uemail.textContent = user.email || 'Usuário';
-      logoutBtn.style.display = 'block';
-      loginOpenBtn.style.display = 'none';
-      avatar.textContent = (user.email||'U').slice(0,2).toUpperCase();
-      await syncProfile();
-      await carregarSaldo();
-    } else {
+    const { data:{ user } } = await sb.auth.getUser();
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginBox = document.getElementById('loginBox');
+    const loggedBox = document.getElementById('loggedBox');
+
+    if(!user){
+      ui.textContent = 'Visitante';
       logoutBtn.style.display = 'none';
-      loginOpenBtn.style.display = 'inline-block';
-    }
-  });
-
-  sb.auth.onAuthStateChange(async (_event, _session)=>{
-    const { data:{user} } = await sb.auth.getUser();
-    const uemail = document.getElementById('uemail');
-    const avatar = document.getElementById('avatar');
-
-    if(user){
-      uemail.textContent = user.email || 'Usuário';
-      logoutBtn.style.display = 'block';
-      loginOpenBtn.style.display = 'none';
-      avatar.textContent = (user.email||'U').slice(0,2).toUpperCase();
-      await syncProfile();
-      await carregarSaldo();
-    } else {
+      loginBox.style.display = 'block';
+      loggedBox.style.display = 'none';
       document.getElementById('saldoBC').textContent = '0.00';
-      uemail.textContent = 'Visitante';
-      logoutBtn.style.display = 'none';
-      loginOpenBtn.style.display = 'inline-block';
+      document.getElementById('saldoHero').textContent = '0.00';
+    }else{
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'inline-block';
+      document.getElementById('emailSpan').textContent = user.email || '—';
+      loginBox.style.display = 'none';
+      loggedBox.style.display = 'block';
+
+      // saldo
+      const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const cents = data?.balance_cents || 0;
+      const val = (cents/100).toFixed(2);
+      document.getElementById('saldoBC').textContent = val;
+      document.getElementById('saldoHero').textContent = val;
     }
   });
 
-  // ---- Auth ações
-  async function login(){
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value.trim();
-    const { error } = await sb.auth.signInWithPassword({ email, password: senha });
-    if(error){ alert(error.message); return; }
-    authModal.classList.remove('open');
-    await syncProfile();
-    await carregarSaldo();
-    location.reload();
-  }
-  async function signup(){
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value.trim();
-    const { error } = await sb.auth.signUp({ email, password: senha });
-    if(error){ alert(error.message); return; }
-    alert('Conta criada! Verifique seu e-mail para confirmar (se exigido).');
-  }
-  async function loginGoogle(){
-    const { error } = await sb.auth.signInWithOAuth({
+  // Login com Google
+  document.getElementById('googleBtn')?.addEventListener('click', async ()=>{
+    const redirectTo = window.location.origin; // ex.: https://braintest.com.br
+    await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: "https://braintest.com.br" }
+      options: { redirectTo }
     });
-    if(error) alert("Erro: "+error.message);
-  }
-  logoutBtn?.addEventListener('click', async ()=>{
+  });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
     await sb.auth.signOut();
+    // zera mostradores de saldo no topo
     document.getElementById('saldoBC').textContent = '0.00';
+    document.getElementById('saldoHero').textContent = '0.00';
     location.reload();
   });
 </script>

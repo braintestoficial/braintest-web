@@ -4,11 +4,16 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FAQ — Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
 .brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
@@ -16,16 +21,24 @@ nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
 .btn:hover{background:var(--salmao-2)}
-.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
-h3{color:#0e1d33;margin:.9rem 0 .4rem}
-.muted{color:#6b7380}
-.faq-item{border-top:1px solid var(--borda);padding:1rem 0}
-.faq-item:first-of-type{border-top:none}
-.faq-item h3{display:flex;align-items:center;gap:.4rem}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-.list{margin:.4rem 0 0 1rem} .list li{margin:.35rem 0}
-.footer{text-align:center;color:#6b7380;font-size:.9rem;padding:1.5rem}
+
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+p{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
+
+.faq{display:grid;gap:.6rem;margin-top:.6rem}
+.item{border:1px solid var(--borda);border-radius:12px;background:#fff;overflow:hidden}
+.q{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.9rem 1rem;cursor:pointer}
+.q strong{color:#0e1d33}
+.q:hover{background:#f7f9ff}
+.a{display:none;padding:0 1rem 1rem 1rem;color:#303540}
+.a.open{display:block}
+.chev{font-weight:700;color:#6b7380}
+.callout{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:1rem}
 </style>
 </head>
 <body>
@@ -33,72 +46,115 @@ h3{color:#0e1d33;margin:.9rem 0 .4rem}
   <header class="top">
     <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-  <a href="index.html">Início</a>
-  <a href="carteira.html">Carteira</a>
-  <a href="sobre.html">Sobre</a>
-  <a href="historico.html">Histórico</a>
-  <a href="faq.html" class="btn secondary">FAQ</a>
-  <a href="termos.html">Termos & Privacidade</a>
-</nav>
-
+      <a href="index.html">Início</a>
+      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="historico.html">Histórico</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
+    </nav>
   </header>
 
   <section class="card">
-    <h2>Perguntas Frequentes</h2>
-    <p class="muted">Última atualização: 14/10/2025</p>
+    <h2>FAQ — Perguntas frequentes</h2>
+    <div class="faq" id="faqList">
+      <div class="item">
+        <div class="q"><strong>O que são Braincoins?</strong><span class="chev">▸</span></div>
+        <div class="a">Braincoin (BC) é a moeda interna da Braintest. Você adiciona saldo na <a href="carteira.html">Carteira</a> (1 BC = R$1) e usa para desbloquear relatórios premium e, em breve, assinaturas e jogos.</div>
+      </div>
 
-    <div class="faq-item">
-      <h3>O que é a Braintest?</h3>
-      <p>A Braintest é uma plataforma de autoconhecimento com triagens gratuitas e relatórios premium em áreas como atenção (TDAH), esgotamento (Burnout) e raciocínio (Q.I.).</p>
+      <div class="item">
+        <div class="q"><strong>As triagens são gratuitas?</strong><span class="chev">▸</span></div>
+        <div class="a">Sim. TDAH, Burnout e QI têm triagem gratuita. O relatório premium (análise detalhada e reabertura via histórico) custa <strong>10 Braincoins</strong> cada.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Como adiciono Braincoins?</strong><span class="chev">▸</span></div>
+        <div class="a">Na <a href="carteira.html">Carteira</a>, escolha um pacote e finalize pelo Stripe. Assim que o pagamento é confirmado, seu saldo é atualizado. Se acabou de pagar, use “Sincronizar saldo”.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Meu saldo não atualizou. E agora?</strong><span class="chev">▸</span></div>
+        <div class="a">Clique em “Sincronizar saldo” na Carteira. Caso permaneça diferente do comprovante, entre em contato enviando o e-mail da conta, horário do pagamento e pacote comprado.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Relatório premium não abriu mesmo após a compra.</strong><span class="chev">▸</span></div>
+        <div class="a">Abra o seu <a href="historico.html">Histórico</a> e clique em “Abrir”. Se não aparecer, confirme se está logado com o mesmo e-mail da compra. Persistindo, fale com o suporte.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Os resultados valem como diagnóstico?</strong><span class="chev">▸</span></div>
+        <div class="a">Não. O conteúdo é <strong>informativo/educacional</strong>. Para diagnóstico clínico, procure profissional habilitado. Em situações de risco, busque serviços de urgência (SAMU 192).</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Posso pedir reembolso?</strong><span class="chev">▸</span></div>
+        <div class="a">Analisamos casos de erro técnico/duplicidade. Envie seu e-mail de cadastro, transação e motivo. Compras consumidas (relatório aberto) costumam não ser reembolsadas.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>É seguro? Como tratam meus dados?</strong><span class="chev">▸</span></div>
+        <div class="a">Usamos autenticação segura e armazenamento no Supabase, com regras que restringem o acesso aos dados de cada usuário. Não vendemos seus dados. Você pode excluir sua conta.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Tenho uma empresa. Vocês atendem RH?</strong><span class="chev">▸</span></div>
+        <div class="a">Sim — estamos preparando planos corporativos (gestão de times, convites e dashboards). Fale com a gente no e-mail de contato para prioridade no piloto.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Quais são os próximos lançamentos?</strong><span class="chev">▸</span></div>
+        <div class="a">Jogos cognitivos (memória, tempo de reação), novos testes e planos de assinatura. O roadmap será divulgado no site.</div>
+      </div>
+
+      <div class="item">
+        <div class="q"><strong>Como falo com o suporte?</strong><span class="chev">▸</span></div>
+        <div class="a">Envie um e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a> com seu e-mail de login, descrição do problema e, se possível, prints.</div>
+      </div>
     </div>
 
-    <div class="faq-item">
-      <h3>Os testes são diagnósticos?</h3>
-      <p>Não. Os resultados têm caráter informativo/educacional e não substituem avaliação com profissionais de saúde. Se houver impacto no seu cotidiano, procure atendimento especializado.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>O que são Braincoins?</h3>
-      <p>São créditos internos da plataforma. A relação é 1 Braincoin = R$ 1. Você adiciona Braincoins à sua carteira e usa para desbloquear relatórios premium ou, no futuro, assinaturas e jogos.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Como adiciono Braincoins?</h3>
-      <p>Pela página <a href="carteira.html">Carteira</a>. Os pagamentos são processados com segurança via Stripe. Após a confirmação, seu saldo é atualizado automaticamente.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Existe reembolso de Braincoins?</h3>
-      <p>Como regra, Braincoins não são transferíveis nem reembolsáveis após o uso. Para compras recentes com erro técnico (ex.: crédito não lançado), fale com a gente pelo e-mail <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a>.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Posso acessar o relatório depois?</h3>
-      <p>Sim. Relatórios premium liberados ficam vinculados à sua conta e poderão ser consultados novamente (estamos evoluindo a página de histórico).</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Quais dados vocês armazenam?</h3>
-      <p>Dados de conta (e-mail), respostas dos testes e histórico de compras/acessos. Não armazenamos dados de cartão (processamento é do Stripe). Mais detalhes em <a href="termos.html">Termos & Privacidade</a>.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Meus dados ficam seguros?</h3>
-      <p>Utilizamos o Supabase para autenticação e banco de dados, com boas práticas de segurança e controle de acesso. Você pode solicitar a exclusão da conta e dos dados conforme a LGPD.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Sou empresa. Posso avaliar minha equipe?</h3>
-      <p>Estamos desenvolvendo recursos para organizações. Entre em contato para saber mais: <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a>.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Suporte</h3>
-      <p>Envie um e-mail para <a href="mailto:braintestoficial@gmail.com">braintestoficial@gmail.com</a>. Responderemos o quanto antes.</p>
+    <div class="callout">
+      <strong>Não achou sua resposta?</strong>
+      <p class="small">Escreva para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>. Vamos responder o quanto antes.</p>
     </div>
   </section>
-
-  <div class="footer">© 2025 Braintest — Todos os direitos reservados.</div>
 </div>
+
+<script>
+  // Sessão e saldo
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+    }else{
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'inline-block';
+      const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const cents = data?.balance_cents || 0;
+      document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+    }
+
+    // Acordeão simples
+    document.querySelectorAll('.faq .item .q').forEach(q=>{
+      q.addEventListener('click', ()=>{
+        const ans = q.nextElementSibling;
+        const chev = q.querySelector('.chev');
+        const open = ans.classList.toggle('open');
+        chev.textContent = open ? '▾' : '▸';
+      });
+    });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    document.getElementById('saldoBC').textContent = '0.00';
+    location.href = 'index.html';
+  });
+</script>
 </body>
 </html>
