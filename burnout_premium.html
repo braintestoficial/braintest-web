@@ -4,40 +4,28 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Burnout — Relatório Premium | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/supabase-init.js"></script>
-
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-.btn:hover{background:var(--salmao-2)}
-.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
-h3{color:#0e1d33;margin:.9rem 0 .4rem}
-.muted{color:#6b7380}
-.small{font-size:.9rem;color:#6b7380}
-.section{margin-top:.8rem}
-.grid{display:grid;gap:1rem;grid-template-columns:1.4fr .6fr}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
-.block{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem}
-.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
-.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.6rem}
-.kpi .box{border:1px solid var(--borda);border-radius:12px;padding:.8rem;background:#fff;text-align:center}
-.kpi .val{font-size:1.4rem;font-weight:800;color:#0e1d33}
-.kpi .lab{font-size:.85rem;color:#6b7380}
-.hr{height:1px;background:var(--borda);margin:.8rem 0}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+p{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+.notice{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem;margin-top:1rem}
+.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:1rem}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
 </style>
 </head>
 <body>
@@ -46,196 +34,77 @@ h3{color:#0e1d33;margin:.9rem 0 .4rem}
     <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
       <a href="index.html">Início</a>
-      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="carteira.html">Carteira</a>
       <a href="historico.html">Histórico</a>
       <span id="userInfo" class="badge">Carregando…</span>
-      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
 
-  <!-- Aviso de compra concluída -->
-  <section id="okBanner" class="card" style="display:none;background:#f2fff5;border-color:#cdebd4">
-    ✅ <strong>Compra concluída!</strong> Seu acesso ao relatório premium foi liberado.
+  <section id="bannerOk" class="notice" style="display:none">
+    <strong>Compra concluída!</strong>
+    <p class="small">Seu acesso a este relatório premium foi liberado.</p>
   </section>
 
-  <!-- Bloqueio se não tiver compra -->
-  <section id="noAccess" class="card warn" style="display:none;">
-    <h3>Acesso não liberado</h3>
-    <p class="small">Não encontramos uma compra ativa deste relatório na sua conta.</p>
+  <section id="guard" class="warn" style="display:none">
+    <strong>Sem acesso ao relatório.</strong>
+    <p class="small">Você ainda não desbloqueou o relatório premium de Burnout. Faça a triagem e compre pelo botão de desbloqueio (10 Braincoins).</p>
     <div style="margin-top:.6rem">
-      <a class="btn" href="teste-burnout.html">Fazer triagem e desbloquear</a>
-      <a class="btn secondary" href="historico.html" style="margin-left:.4rem">Ver meus relatórios</a>
+      <button class="btn" onclick="location.href='teste-burnout.html'">Fazer triagem</button>
+      <button class="btn secondary" onclick="location.href='carteira.html'">Adicionar Braincoins</button>
     </div>
   </section>
 
-  <!-- Conteúdo do relatório (apenas se houver purchase válida) -->
-  <section id="report" class="card" style="display:none;">
-    <h2>Relatório Premium — Burnout</h2>
-    <div class="grid">
-      <div>
-        <div class="block">
-          <h3>Resumo do resultado</h3>
-          <p class="small">Este relatório aprofunda os sinais relatados na triagem (inspirado em dimensões usuais como <strong>exaustão</strong>, <strong>cinismo/distanciamento</strong> e <strong>eficácia</strong>), com indicadores e recomendações práticas. Material informativo — não substitui avaliação clínica.</p>
-          <div class="kpi">
-            <div class="box">
-              <div class="val" id="kpiGlobal">—</div>
-              <div class="lab">Risco global (0–100)</div>
-            </div>
-            <div class="box">
-              <div class="val" id="kpiExa">—</div>
-              <div class="lab">Exaustão</div>
-            </div>
-            <div class="box">
-              <div class="val" id="kpiCin">—</div>
-              <div class="lab">Cinismo/Distanciamento</div>
-            </div>
-          </div>
-        </div>
+  <section id="report" class="card" style="display:none">
+    <h2>Burnout — Relatório Premium</h2>
+    <p class="small">Material informativo/educacional. Não substitui avaliação clínica.</p>
+    <div class="hr"></div>
 
-        <div class="section">
-          <h3>Interpretação</h3>
-          <div class="block" id="interp">
-            <p class="small">Análise personalizada baseada nas suas respostas. Se houver prejuízo relevante em trabalho/vida pessoal, procure avaliação com profissional de saúde.</p>
-          </div>
-        </div>
+    <h3>Resumo</h3>
+    <p>Análise dos domínios: <strong>Exaustão</strong>, <strong>Cinismo/Distanciamento</strong> e <strong>Eficácia</strong>. Sugestões práticas de recuperação, higiene do sono e negociação de demandas.</p>
 
-        <div class="section">
-          <h3>Recomendações</h3>
-          <div class="block">
-            <ul class="small" style="margin-left:1rem;line-height:1.6">
-              <li><strong>Energia:</strong> pausas programadas, higiene do sono, hidratação/alimentação regular.</li>
-              <li><strong>Carga de trabalho:</strong> renegociação de prazos/escopo, priorização por impacto, alternância de tarefas.</li>
-              <li><strong>Limites:</strong> micro-rituais de início/fim do expediente; reduzir horas extras contínuas.</li>
-              <li><strong>Suporte:</strong> conversar com liderança/HR; se possível, acompanhamento psicológico (TCC).</li>
-              <li><strong>Autocompaixão:</strong> observar autocrítica excessiva; registrar vitórias semanais (pequenas e grandes).</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <h3>Sugestões</h3>
+    <ul class="small">
+      <li>Mapeie gatilhos semanais e negocie carga/escopo com foco em prioridades.</li>
+      <li>Pausas curtas (5–10min) a cada 60–90min de trabalho. Limites claros de horário.</li>
+      <li>Sono consistente: reduzir telas 60min antes, rotina de relaxamento, luz baixa.</li>
+    </ul>
 
-      <aside>
-        <div class="block">
-          <h3>Seus dados</h3>
-          <p class="small">Relatório vinculado à conta: <span id="emailSpan">—</span></p>
-          <div class="hr"></div>
-          <p class="small">Compra: <span id="purchaseId">—</span></p>
-          <p class="small">Data: <span id="purchaseDate">—</span></p>
-          <div class="hr"></div>
-          <button class="btn secondary" onclick="location.href='historico.html'">Ver histórico</button>
-        </div>
-
-        <div class="warn" style="margin-top:1rem">
-          <strong>Aviso importante</strong>
-          <p class="small">Este relatório é informativo/educacional. Não substitui diagnóstico profissional. Em situações de risco, busque serviços de urgência (SAMU 192) ou atendimento local.</p>
-        </div>
-      </aside>
-    </div>
+    <div class="hr"></div>
+    <h3>Quando procurar apoio</h3>
+    <p class="small">Se houver sintomas persistentes e impacto funcional relevante, procure avaliação psicológica/psiquiátrica. Em urgências, acione serviços locais (SAMU 192).</p>
   </section>
 </div>
 
 <script>
-  // Utilidades
-  function fmtData(iso){
-    if(!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  }
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  const ui = document.getElementById('userInfo');
 
-  async function carregarSaldo(){
-    const { data:{ user } } = await sb.auth.getUser();
-    if(!user) return;
-    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const cents = data?.balance_cents || 0;
-    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
-  }
-
-  // Verifica compra e renderiza conteúdo
-  async function verifyAndRender(){
-    await waitForSupabaseSession();
-    const { data:{ user } } = await sb.auth.getUser();
-
-    const ui = document.getElementById('userInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    if(!user){
-      ui.textContent = 'Visitante';
-      logoutBtn.style.display = 'none';
-      document.getElementById('noAccess').style.display = 'block';
-      return;
-    }
-
-    ui.textContent = user.email || 'Usuário';
-    logoutBtn.style.display = 'inline-block';
-    await carregarSaldo();
-
-    // Verifica purchase do produto 'burnout'
-    const { data: purchases, error } = await sb
-      .from('purchases')
-      .select('id, product, created_at')
-      .eq('user_id', user.id)
-      .eq('product', 'burnout')
-      .order('created_at', { ascending:false })
-      .limit(1);
-
-    if(error || !purchases || purchases.length===0){
-      document.getElementById('noAccess').style.display = 'block';
-      return;
-    }
-
-    const p = purchases[0];
-    document.getElementById('report').style.display = 'block';
-    document.getElementById('emailSpan').textContent = user.email || '—';
-    document.getElementById('purchaseId').textContent = p.id.slice(0,8)+'…';
-    document.getElementById('purchaseDate').textContent = fmtData(p.created_at);
-
-    // Banner de sucesso via ?ok=1
-    const u = new URL(location.href);
-    if(u.searchParams.get('ok')==='1'){
-      document.getElementById('okBanner').style.display = 'block';
-      u.searchParams.delete('ok');
-      history.replaceState(null,'',u.toString());
-    }
-
-    // KPIs (exemplo sintético; troque por SELECT real se salvar scores)
-    await renderKPIs(user.id);
-  }
-
-  // KPIs sintéticos: risco global, exaustão, cinismo (0–100)
-  async function renderKPIs(userId){
-    function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i); h|=0;} return h; }
-    function seed(n){ return Math.floor((Math.abs(hashCode(userId+n))+30)%70)+30; }
-
-    const global = seed('g');
-    const exa    = Math.min(100, global + ((hashCode(userId+'e')%11)-5));
-    const cin    = Math.min(100, global + ((hashCode(userId+'c')%11)-5));
-
-    document.getElementById('kpiGlobal').textContent = global;
-    document.getElementById('kpiExa').textContent    = Math.max(0, exa);
-    document.getElementById('kpiCin').textContent    = Math.max(0, cin);
-
-    // Eficácia é inversa de exaustão/cinismo (aproximação para visual)
-    const interp = document.getElementById('interp');
-    let faixa = 'baixo';
-    if(global>=35 && global<60) faixa='moderado';
-    else if(global>=60) faixa='elevado';
-
-    interp.innerHTML = `
-      <p class="small">
-        Seu <strong>risco global</strong> de burnout sugere nível <strong>${faixa}</strong>.
-        Observa-se <strong>exaustão ${exa>=cin?'proeminente':'equilibrada'}</strong> e
-        <strong>${cin>exa?'cinismo/distanciamento mais evidente':'cinismo moderado'}</strong>.
-        Considere intervenções de carga de trabalho, suporte social e estratégias de recuperação de energia.
-      </p>
-    `;
-  }
-
-  document.addEventListener('DOMContentLoaded', verifyAndRender);
-
-  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-    await sb.auth.signOut();
-    document.getElementById('saldoBC').textContent = '0.00';
+  if(!user){
+    ui.textContent = 'Visitante';
+    alert('Faça login para abrir seu relatório.');
     location.href = 'index.html';
-  });
+    return;
+  }
+  ui.textContent = user.email || 'Usuário';
+
+  const ok = new URLSearchParams(location.search).get('ok');
+  if(ok) document.getElementById('bannerOk').style.display = 'block';
+
+  const { data, error } = await sb
+    .from('purchases')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('product', 'burnout')
+    .limit(1);
+
+  if(error || !data || data.length===0){
+    document.getElementById('guard').style.display = 'block';
+  }else{
+    document.getElementById('report').style.display = 'block';
+  }
+});
 </script>
 </body>
 </html>
