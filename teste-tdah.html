@@ -2,11 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TDAH — Triagem Gratuita | Braintest</title>
+<title>TDAH — Triagem Aleatória | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
+<script src="/assets/test-runtime.js"></script>
 <style>
+/* (Mesmo CSS que você vem usando) */
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
@@ -21,15 +23,15 @@ nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
 .badge.ok{background:#f2fff5;border-color:#cdebd4;color:#184d2b}
-
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
 h3{color:#0e1d33;margin:.8rem 0 .4rem}
-p{line-height:1.7;color:#303540}
 .small{font-size:.92rem;color:#6b7380}
 .hr{height:1px;background:var(--borda);margin:1rem 0}
 .resultBox{padding:.9rem;border:1px solid var(--borda);border-radius:12px;background:#f9fbff}
 .hide{display:none}
+.q label{font-weight:600;display:block;margin-bottom:.3rem}
+.q .opt{margin:.25rem 0}
 </style>
 </head>
 <body>
@@ -46,47 +48,22 @@ p{line-height:1.7;color:#303540}
     </nav>
   </header>
 
-  <!-- Triagem -->
   <section class="card">
-    <h2>TDAH — Triagem Gratuita</h2>
-    <p class="small">Esta triagem é indicativa e não substitui avaliação clínica.</p>
+    <h2>TDAH — Triagem Aleatória (15 itens)</h2>
+    <p class="small">Indicativa e não substitui avaliação médica.</p>
     <div class="hr"></div>
 
-    <form id="formTdah">
-      <div class="q">
-        <label>Com que frequência você se distrai em tarefas longas?</label>
-        <div class="opt"><label><input type="radio" name="q1" value="0" required> Raramente</label></div>
-        <div class="opt"><label><input type="radio" name="q1" value="1"> Às vezes</label></div>
-        <div class="opt"><label><input type="radio" name="q1" value="2"> Frequentemente</label></div>
-      </div>
-      <div class="q" style="margin-top:.6rem">
-        <label>Costuma interromper os outros ou responder antes de terminar a pergunta?</label>
-        <div class="opt"><label><input type="radio" name="q2" value="0" required> Raramente</label></div>
-        <div class="opt"><label><input type="radio" name="q2" value="1"> Às vezes</label></div>
-        <div class="opt"><label><input type="radio" name="q2" value="2"> Frequentemente</label></div>
-      </div>
-      <div class="q" style="margin-top:.6rem">
-        <label>Esquece compromissos/objetos com facilidade?</label>
-        <div class="opt"><label><input type="radio" name="q3" value="0" required> Raramente</label></div>
-        <div class="opt"><label><input type="radio" name="q3" value="1"> Às vezes</label></div>
-        <div class="opt"><label><input type="radio" name="q3" value="2"> Frequentemente</label></div>
-      </div>
-
-      <button class="btn" type="submit" style="margin-top:.8rem">Ver resultado gratuito</button>
-    </form>
-
+    <form id="formTdah"></form>
     <div id="resumo" class="resultBox" style="display:none;margin-top:1rem"></div>
   </section>
 
-  <!-- Premium -->
   <section class="card" id="buyBox">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
       <h3 style="margin:0">Relatório premium</h3>
       <span id="ownedBadge" class="badge ok hide">Desbloqueado</span>
     </div>
     <p class="small" id="premiumDesc">
-      Aprofunde sua análise (interpretação por domínios + recomendações). Custo:
-      <strong>10 Braincoins</strong>. Saldo: <strong id="saldoAqui">—</strong>
+      Interpretação por domínios + recomendações. Custo: <strong>10 Braincoins</strong>. Saldo: <strong id="saldoAqui">—</strong>
     </p>
     <div style="margin-top:.6rem">
       <button class="btn" id="btnBuy">Desbloquear relatório (10 BC)</button>
@@ -97,107 +74,69 @@ p{line-height:1.7;color:#303540}
 </div>
 
 <script>
-  // ---------- Config deste teste ----------
-  const PRODUCT = 'tdah';
-  const PRICE_CENTS = 1000;                 // 10 BC
-  const PREMIUM_URL = '/tdah-premium.html';
+const PRODUCT = 'tdah';
+const PRICE_CENTS = 1000;
+const PREMIUM_URL = '/tdah-premium.html';
 
-  // ---------- Sessão / header ----------
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    await waitForSupabaseSession();
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
 
-    const { data:{ user } } = await sb.auth.getUser();
-    const ui = document.getElementById('userInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
+  const { data:{ user } } = await sb.auth.getUser();
+  const ui = document.getElementById('userInfo');
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(!user){ ui.textContent='Visitante'; return; }
+  ui.textContent = user.email || 'Usuário';
+  logoutBtn.style.display='inline-block';
 
-    if(!user){
-      ui.textContent = 'Visitante';
-      logoutBtn.style.display = 'none';
-      return;
-    }
+  // saldo
+  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+  const bc = ((w?.balance_cents||0)/100).toFixed(2);
+  document.getElementById('saldoTop').textContent = bc;
+  document.getElementById('saldoAqui').textContent = `${bc} BC`;
 
-    ui.textContent = user.email || 'Usuário';
-    logoutBtn.style.display = 'inline-block';
-
-    // saldo
-    const { data: w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const bc = ((w?.balance_cents||0)/100).toFixed(2);
-    document.getElementById('saldoTop').textContent = bc;
-    document.getElementById('saldoAqui').textContent = `${bc} BC`;
-
-    // >>> NOVO: se já comprou, esconde “Desbloquear” e mostra “Abrir relatório”
-    const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
-    if(have){
-      document.getElementById('btnBuy').classList.add('hide');
-      document.getElementById('btnAdd').classList.add('hide');
-      document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
-      document.getElementById('btnOpen').classList.remove('hide');
-      document.getElementById('ownedBadge').classList.remove('hide');
-    }
-  });
-
-  document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{
-    await sb.auth.signOut();
-    location.href = '/index.html';
-  });
-
-  // ---------- Triagem básica (exemplo curto) ----------
-  document.getElementById('formTdah').addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const total = ['q1','q2','q3'].reduce((acc,k)=> acc + Number(data.get(k)||0), 0);
-
-    const caixa = document.getElementById('resumo');
-    let nivel = 'baixo';
-    if(total >= 2 && total <= 3) nivel = 'moderado';
-    if(total >= 4) nivel = 'elevado';
-
-    caixa.innerHTML = `
-      <strong>Resultado gratuito:</strong><br>
-      Pontuação: <b>${total}</b> — indícios ${nivel}.
-      <div class="small" style="margin-top:.5rem">
-        Para aprofundar (interpretações por domínio + recomendações), desbloqueie o relatório premium.
-      </div>
-    `;
-    caixa.style.display = 'block';
-  });
-
-  // ---------- Compra com Braincoins ----------
-  document.getElementById('btnBuy').addEventListener('click', desbloquearRelatorio);
-
-  async function desbloquearRelatorio(){
-    const { data:{ user } } = await sb.auth.getUser();
-    if(!user){
-      alert('Faça login para comprar o relatório.');
-      location.href = '/index.html';
-      return;
-    }
-
-    // saldo
-    const { data: w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const balance = w?.balance_cents || 0;
-    if(balance < PRICE_CENTS){
-      if(confirm('Saldo insuficiente. Deseja adicionar Braincoins agora?')){
-        location.href = '/carteira.html';
-      }
-      return;
-    }
-
-    // compra
-    const { error } = await sb.rpc('wallet_buy', {
-      p_product: PRODUCT,
-      p_price_cents: PRICE_CENTS,
-      p_description: 'Relatório premium: TDAH'
-    });
-
-    if(error){
-      alert('Não foi possível concluir a compra. Tente novamente.');
-      return;
-    }
-
-    // sucesso → abre premium
-    location.href = PREMIUM_URL + '?ok=1';
+  // já possui?
+  const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+  if(have){
+    document.getElementById('btnBuy').classList.add('hide');
+    document.getElementById('btnAdd').classList.add('hide');
+    document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+    document.getElementById('btnOpen').classList.remove('hide');
+    document.getElementById('ownedBadge').classList.remove('hide');
   }
+
+  // Carrega perguntas dinâmicas (15)
+  const engine = createTestEngine({
+    testKey: 'tdah',
+    qty: 15,
+    containerForm: document.getElementById('formTdah'),
+    containerResult: document.getElementById('resumo'),
+    onFreeResult: ({scoreLikert, countLikert})=>{
+      // Heurística simples para o gratuito:
+      // faixa 0..(2*count) => baixo/moderado/elevado
+      const max = 2*countLikert;
+      let nivel = 'baixo';
+      if(scoreLikert >= Math.ceil(max*0.40)) nivel = 'moderado';
+      if(scoreLikert >= Math.ceil(max*0.70)) nivel = 'elevado';
+      const box = document.getElementById('resumo');
+      box.innerHTML = `<strong>Resultado gratuito:</strong> Soma de sintomas: <b>${scoreLikert}/${max}</b><br><span class="small">Para interpretações por domínio e recomendações personalizadas, desbloqueie o relatório premium.</span>`;
+      box.style.display='block';
+    }
+  });
+  try{ await engine.load(); }catch(e){ alert('Não foi possível carregar as perguntas no momento.'); console.error(e); }
+});
+
+document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });
+
+document.getElementById('btnBuy').addEventListener('click', async ()=>{
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ alert('Faça login.'); return; }
+  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+  const balance = w?.balance_cents||0;
+  if(balance < PRICE_CENTS){ if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html'; return; }
+  const { error } = await sb.rpc('wallet_buy',{ p_product:PRODUCT, p_price_cents:PRICE_CENTS, p_description:'Relatório premium: TDAH' });
+  if(error){ alert('Não foi possível concluir a compra.'); return; }
+  location.href = PREMIUM_URL + '?ok=1';
+});
 </script>
 </body>
 </html>
