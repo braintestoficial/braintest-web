@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Burnout — Triagem | Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase centralizado -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+
+.grid{display:grid;gap:1rem;margin-top:1rem;grid-template-columns:1.1fr .9fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
+h3{color:#0e1d33;margin:.9rem 0 .4rem}
+.muted{color:#6b7380}
+.q{border-bottom:1px solid var(--borda);padding:.8rem 0}
+.q:last-child{border-bottom:none}
+.opts{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem}
+.opts label{border:1px solid var(--borda);border-radius:10px;padding:.45rem .6rem;background:#f9fbff;cursor:pointer}
+.opts input{display:none}
+.opts input:checked+span{font-weight:700}
+.result{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem;margin-top:.6rem}
+.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:.6rem}
+.small{font-size:.9rem;color:#6b7380}
+.center{text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="historico.html">Histórico</a>
+      <a href="sobre.html">Sobre</a>
+      <span id="user-info" class="badge">Carregando…</span>
+      <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
+    </nav>
+  </header>
+
+  <div class="grid">
+    <!-- Triagem -->
+    <section class="card">
+      <h2>Triagem de Burnout</h2>
+      <p class="muted">Responda considerando as <strong>últimas 4–8 semanas</strong>. Esta triagem é informativa e não substitui avaliação clínica.</p>
+
+      <form id="formBurnout">
+        <div id="qs"></div>
+
+        <div style="display:flex;gap:.6rem;margin-top:1rem">
+          <button class="btn" type="submit">Ver resultado gratuito</button>
+          <button class="btn secondary" type="button" onclick="resetForm()">Limpar</button>
+        </div>
+      </form>
+
+      <div id="freeResult" class="result" style="display:none"></div>
+
+      <div id="ctaPremium" style="display:none;margin-top:.8rem">
+        <button class="btn" id="buyPremiumBtn">Desbloquear relatório premium (10 Braincoins)</button>
+        <p class="small" style="margin-top:.4rem">O relatório premium traz análise detalhada dos domínios (exaustão, distanciamento/cinismo, eficácia), gatilhos e recomendações. Preço: <strong>10 Braincoins</strong>.</p>
+      </div>
+
+      <div id="loginWarn" class="warn" style="display:none;">
+        <strong>Você não está logado.</strong>
+        <p class="small">Faça login para salvar seu progresso e desbloquear o relatório premium.</p>
+        <button class="btn" onclick="location.href='index.html'">Entrar na conta</button>
+      </div>
+    </section>
+
+    <!-- Lateral -->
+    <aside class="card">
+      <h3>Sobre esta triagem</h3>
+      <p class="small">Sinais de burnout envolvem <strong>exaustão emocional</strong>, <strong>distanciamento/cinismo</strong> em relação ao trabalho e <strong>redução da eficácia</strong>. Procure ajuda profissional se houver prejuízos significativos.</p>
+
+      <div class="result" style="margin-top:.8rem">
+        <strong>Seu saldo:</strong> <span id="saldoBC">0.00</span> BC
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+/** ------------------ Perguntas (15 itens) ------------------ **/
+const perguntas = [
+  // Exaustão (5)
+  "Sente cansaço extremo mesmo após descanso?",
+  "Sente-se emocionalmente esgotado(a) pelo trabalho?",
+  "Tem dificuldade para recuperar energia entre os dias?",
+  "Sente tensão física (dores, insônia) ligada ao trabalho?",
+  "Sente-se ‘no limite’ com frequência?",
+  // Distanciamento/Cinismo (5)
+  "Sente-se indiferente ou cínico(a) em relação ao trabalho?",
+  "Evita envolver-se com as pessoas/assuntos do trabalho?",
+  "Sente irritação/falta de paciência com colegas/clientes?",
+  "Percebe perda de sentido no que faz profissionalmente?",
+  "Tem vontade de faltar/adiar atividades por aversão ao trabalho?",
+  // Eficácia (reversa) (5)
+  "Sente que seu desempenho caiu nas últimas semanas?",
+  "Dificuldade em concentrar-se em tarefas do trabalho?",
+  "Sente-se menos capaz de resolver problemas do trabalho?",
+  "Comete mais erros do que o normal?",
+  "Sente que “nada rende” no trabalho?"
+];
+
+const opcoes = [
+  {val:0, rot:"Nunca"},
+  {val:1, rot:"Raramente"},
+  {val:2, rot:"Às vezes"},
+  {val:3, rot:"Frequentemente"},
+  {val:4, rot:"Quase sempre"},
+];
+
+/** ------------------ Sessão / UI header ------------------ **/
+async function boot(){
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  const info = document.getElementById('user-info');
+  const logout = document.getElementById('logout-btn');
+  const warn = document.getElementById('loginWarn');
+
+  if(user){
+    info.textContent = user.email || 'Usuário';
+    logout.style.display = 'inline-block';
+    warn.style.display = 'none';
+    await carregarSaldo();
+  }else{
+    info.textContent = 'Visitante';
+    logout.style.display = 'none';
+    warn.style.display = 'block';
+  }
+}
+
+async function carregarSaldo(){
+  const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
+  const cents = data?.balance_cents || 0;
+  document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+}
+
+document.getElementById('logout-btn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  location.href = 'index.html';
+});
+
+/** ------------------ Render das perguntas ------------------ **/
+function renderPerguntas(){
+  const qs = document.getElementById('qs');
+  qs.innerHTML = perguntas.map((p,idx)=>{
+    const opts = opcoes.map(o=>`
+      <label>
+        <input type="radio" name="q${idx}" value="${o.val}">
+        <span>${o.rot}</span>
+      </label>
+    `).join('');
+    return `<div class="q"><div><strong>${idx+1}.</strong> ${p}</div><div class="opts">${opts}</div></div>`;
+  }).join('');
+}
+
+function resetForm(){
+  document.getElementById('formBurnout').reset();
+  document.getElementById('freeResult').style.display='none';
+  document.getElementById('ctaPremium').style.display='none';
+}
+
+/** ------------------ Scoring simples ------------------ **/
+function calcularScore(fd){
+  let total=0, exa=0, cin=0, eff=0;
+  for(let i=0;i<perguntas.length;i++){
+    const v = Number(fd.get(`q${i}`) ?? -1);
+    if(v<0) return {ok:false, msg:`Responda a pergunta ${i+1}.`};
+    total += v;
+    if(i<5) exa+=v;        // 0-4
+    else if(i<10) cin+=v;  // 5-9
+    else eff+=v;           // 10-14
+  }
+  const pct = Math.round((total/(15*4))*100);
+  let faixa = 'Baixo';
+  if(pct>=35 && pct<60) faixa='Moderado';
+  else if(pct>=60) faixa='Alto';
+  return {ok:true, pct, exa, cin, eff};
+}
+
+/** ------------------ Submit da triagem ------------------ **/
+document.getElementById('formBurnout').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const r = calcularScore(fd);
+  if(!r.ok){ alert(r.msg); return; }
+
+  const free = document.getElementById('freeResult');
+  free.innerHTML = `
+    <strong>Resultado gratuito:</strong><br>
+    Risco de burnout: <strong>${r.faixa}</strong> (score ${r.pct}/100).<br>
+    <span class="small">
+      Exaustão: ${Math.round((r.exa/(5*4))*100)} / 100 •
+      Cinismo/Distanciamento: ${Math.round((r.cin/(5*4))*100)} / 100 •
+      Eficácia reduzida: ${Math.round((r.eff/(5*4))*100)} / 100
+    </span>
+    <br><br>
+    <span class="small">Este material é informativo e não substitui avaliação clínica.</span>
+  `;
+  free.style.display='block';
+  document.getElementById('ctaPremium').style.display='block';
+});
+
+/** ------------------ Compra atômica via RPC (10 BC) ------------------ **/
+async function comprarPremiumBurnout(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ alert('Entre na sua conta para comprar.'); return; }
+
+  const preco = 10*100;
+  const { data, error } = await sb.rpc('wallet_spend_and_purchase', {
+    p_product: 'burnout',
+    p_price_cents: preco,
+    p_description: 'Relatório Premium — Burnout'
+  });
+
+  if(error){
+    if(error.message && /insufficient_funds/i.test(error.message)){
+      if(confirm('Saldo insuficiente. Ir para Carteira e adicionar Braincoins?')){
+        location.href = 'carteira.html';
+      }
+      return;
+    }
+    alert('Não foi possível concluir a compra. Tente novamente.');
+    return;
+  }
+  // data = purchase_id (uuid)
+  location.href = 'burnout-premium.html?ok=1';
+}
+document.getElementById('buyPremiumBtn').addEventListener('click', comprarPremiumBurnout);
+
+/** ------------------ Init ------------------ **/
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await boot();
+  renderPerguntas();
+});
+</script>
+</body>
+</html>

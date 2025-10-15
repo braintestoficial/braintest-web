@@ -53,10 +53,10 @@ p{line-height:1.7;color:#303540}
   <header class="top">
     <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
-      <a href="historico.html">Histórico</a>
-      <a href="faq.html">FAQ</a>
-      <a href="sobre.html">Sobre</a>
+      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
+      <a href="/historico.html">Histórico</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/sobre.html">Sobre</a>
       <span id="userInfo" class="badge">Carregando…</span>
       <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
@@ -74,8 +74,8 @@ p{line-height:1.7;color:#303540}
           <span class="small">Seu saldo</span>
           <span class="val"><span id="saldoHero">0.00</span> BC</span>
         </div>
-        <button class="btn small" onclick="location.href='carteira.html'">Adicionar Braincoins</button>
-        <button class="btn secondary small" onclick="location.href='historico.html'">Abrir meus relatórios</button>
+        <button class="btn small" onclick="location.href='/carteira.html'">Adicionar Braincoins</button>
+        <button class="btn secondary small" onclick="location.href='/historico.html'">Abrir meus relatórios</button>
       </div>
 
       <div class="hr"></div>
@@ -86,24 +86,24 @@ p{line-height:1.7;color:#303540}
           <h4>TDAH</h4>
           <p class="small">Triagem rápida para sinais de desatenção e hiperatividade/impulsividade.</p>
           <div class="actions">
-            <a class="btn small" href="teste-tdah.html">Fazer triagem</a>
-            <a class="btn secondary small" href="tdah-premium.html">Abrir relatório (se comprado)</a>
+            <a class="btn small" href="/teste-tdah.html">Fazer triagem</a>
+            <a class="btn secondary small" href="/tdah-premium.html">Abrir relatório (se comprado)</a>
           </div>
         </div>
         <div class="tile">
           <h4>Burnout</h4>
           <p class="small">Avalie exaustão, cinismo/distanciamento e eficácia no trabalho.</p>
           <div class="actions">
-            <a class="btn small" href="teste-burnout.html">Fazer triagem</a>
-            <a class="btn secondary small" href="burnout-premium.html">Abrir relatório (se comprado)</a>
+            <a class="btn small" href="/teste-burnout.html">Fazer triagem</a>
+            <a class="btn secondary small" href="/burnout-premium.html">Abrir relatório (se comprado)</a>
           </div>
         </div>
         <div class="tile">
           <h4>QI</h4>
           <p class="small">Raciocínio lógico, numérico e padrões. Estimativa de QI e percentil.</p>
           <div class="actions">
-            <a class="btn small" href="teste-qi.html">Fazer triagem</a>
-            <a class="btn secondary small" href="qi-premium.html">Abrir relatório (se comprado)</a>
+            <a class="btn small" href="/teste-qi.html">Fazer triagem</a>
+            <a class="btn secondary small" href="/qi-premium.html">Abrir relatório (se comprado)</a>
           </div>
         </div>
       </div>
@@ -119,8 +119,8 @@ p{line-height:1.7;color:#303540}
           <p class="small">Escolha uma triagem ao lado ou adicione Braincoins para desbloquear relatórios premium.</p>
         </div>
         <div class="hr"></div>
-        <button class="btn" onclick="location.href='carteira.html'">Minha carteira</button>
-        <button class="btn secondary" style="margin-left:.4rem" onclick="location.href='historico.html'">Meu histórico</button>
+        <button class="btn" onclick="location.href='/carteira.html'">Minha carteira</button>
+        <button class="btn secondary" style="margin-left:.4rem" onclick="location.href='/historico.html'">Meu histórico</button>
       </div>
 
       <div id="loginBox" style="display:none">
@@ -148,7 +148,7 @@ p{line-height:1.7;color:#303540}
       </div>
       <div>
         <h3>Suporte</h3>
-        <p class="small">Dúvidas? Consulte o <a href="faq.html">FAQ</a> ou envie e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+        <p class="small">Dúvidas? Consulte o <a href="/faq.html">FAQ</a> ou envie e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
       </div>
     </div>
   </section>
@@ -200,7 +200,6 @@ p{line-height:1.7;color:#303540}
   // Logout
   document.getElementById('logoutBtn').addEventListener('click', async ()=>{
     await sb.auth.signOut();
-    // zera mostradores de saldo no topo
     document.getElementById('saldoBC').textContent = '0.00';
     document.getElementById('saldoHero').textContent = '0.00';
     location.reload();
