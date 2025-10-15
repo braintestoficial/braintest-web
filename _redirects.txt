@@ -2,4 +2,18 @@ https://www.braintest.com.br/*   https://braintest.com.br/:splat   301!
 http://braintest.com.br/*        https://braintest.com.br/:splat   301!
 http://www.braintest.com.br/*    https://braintest.com.br/:splat   301!
 
+/teste-tdah.html      /teste-tdah.html      200
+/tdah-premium.html    /tdah-premium.html    200
+/teste-burnout.html   /teste-burnout.html   200
+/burnout-premium.html /burnout-premium.html 200
+/teste-qi.html        /teste-qi.html        200
+/qi-premium.html      /qi-premium.html      200
+
+/teste-tdah       /teste-tdah.html       200
+/tdah-premium     /tdah-premium.html     200
+/teste-burnout    /teste-burnout.html    200
+/burnout-premium  /burnout-premium.html  200
+/teste-qi         /teste-qi.html         200
+/qi-premium       /qi-premium.html       200
+
 /*   /404.html   404
