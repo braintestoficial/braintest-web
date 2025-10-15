@@ -2,13 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TDAH — Triagem Gratuita | Braintest (debug)</title>
+<title>TDAH — Triagem Gratuita | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -23,6 +20,7 @@ nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn.small{padding:.4rem .7rem}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+.badge.ok{background:#f2fff5;border-color:#cdebd4;color:#184d2b}
 
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
@@ -30,16 +28,8 @@ h3{color:#0e1d33;margin:.8rem 0 .4rem}
 p{line-height:1.7;color:#303540}
 .small{font-size:.92rem;color:#6b7380}
 .hr{height:1px;background:var(--borda);margin:1rem 0}
-.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:1rem}
-.success{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem;margin-top:1rem}
-.center{text-align:center}
-.debug{background:#fff9e6;border:1px solid #f4d06f;border-radius:12px;padding:1rem;white-space:pre-wrap;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:.9rem}
-.hidden{display:none}
-
-.q{margin:.8rem 0}
-.q label{display:block;font-weight:600;margin-bottom:.3rem}
-.q .opt{margin:.25rem 0}
 .resultBox{padding:.9rem;border:1px solid var(--borda);border-radius:12px;background:#f9fbff}
+.hide{display:none}
 </style>
 </head>
 <body>
@@ -48,25 +38,13 @@ p{line-height:1.7;color:#303540}
     <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
       <a href="/index.html">Início</a>
-      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoTop">0.00</span> BC</span></a>
+      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoTop">0.00</span> BC</a>
       <a href="/historico.html">Histórico</a>
       <a href="/perfil.html">Perfil</a>
       <span id="userInfo" class="badge">Carregando…</span>
       <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
-
-  <!-- Painel de diagnóstico -->
-  <section class="card">
-    <h3>Diagnóstico rápido</h3>
-    <p class="small">Se algo falhar, os detalhes aparecem abaixo.</p>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0">
-      <button class="btn secondary small" id="btnPing">Testar conexão (now())</button>
-      <button class="btn secondary small" id="btnWho">Ver usuário & saldo</button>
-      <span class="small" id="whoMini">—</span>
-    </div>
-    <div id="debugBox" class="debug hidden"></div>
-  </section>
 
   <!-- Triagem -->
   <section class="card">
@@ -81,94 +59,91 @@ p{line-height:1.7;color:#303540}
         <div class="opt"><label><input type="radio" name="q1" value="1"> Às vezes</label></div>
         <div class="opt"><label><input type="radio" name="q1" value="2"> Frequentemente</label></div>
       </div>
-      <div class="q">
+      <div class="q" style="margin-top:.6rem">
         <label>Costuma interromper os outros ou responder antes de terminar a pergunta?</label>
         <div class="opt"><label><input type="radio" name="q2" value="0" required> Raramente</label></div>
         <div class="opt"><label><input type="radio" name="q2" value="1"> Às vezes</label></div>
         <div class="opt"><label><input type="radio" name="q2" value="2"> Frequentemente</label></div>
       </div>
-      <div class="q">
+      <div class="q" style="margin-top:.6rem">
         <label>Esquece compromissos/objetos com facilidade?</label>
         <div class="opt"><label><input type="radio" name="q3" value="0" required> Raramente</label></div>
         <div class="opt"><label><input type="radio" name="q3" value="1"> Às vezes</label></div>
         <div class="opt"><label><input type="radio" name="q3" value="2"> Frequentemente</label></div>
       </div>
-      <button class="btn" type="submit">Ver resultado gratuito</button>
+
+      <button class="btn" type="submit" style="margin-top:.8rem">Ver resultado gratuito</button>
     </form>
 
     <div id="resumo" class="resultBox" style="display:none;margin-top:1rem"></div>
   </section>
 
   <!-- Premium -->
-  <section class="card">
-    <h3>Relatório premium</h3>
-    <p class="small">
+  <section class="card" id="buyBox">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+      <h3 style="margin:0">Relatório premium</h3>
+      <span id="ownedBadge" class="badge ok hide">Desbloqueado</span>
+    </div>
+    <p class="small" id="premiumDesc">
       Aprofunde sua análise (interpretação por domínios + recomendações). Custo:
-      <strong>10 Braincoins</strong>. Saldo atual: <strong id="saldoAqui">—</strong>
+      <strong>10 Braincoins</strong>. Saldo: <strong id="saldoAqui">—</strong>
     </p>
     <div style="margin-top:.6rem">
       <button class="btn" id="btnBuy">Desbloquear relatório (10 BC)</button>
-      <button class="btn secondary" onclick="location.href='/carteira.html'" style="margin-left:.5rem">Adicionar Braincoins</button>
+      <button class="btn secondary" id="btnAdd" onclick="location.href='/carteira.html'" style="margin-left:.5rem">Adicionar Braincoins</button>
+      <button class="btn hide" id="btnOpen" onclick="location.href='/tdah-premium.html'">Abrir relatório</button>
     </div>
   </section>
 </div>
 
 <script>
-  // -------- Config deste teste ----------
+  // ---------- Config deste teste ----------
   const PRODUCT = 'tdah';
-  const PRICE_CENTS = 1000;
+  const PRICE_CENTS = 1000;                 // 10 BC
   const PREMIUM_URL = '/tdah-premium.html';
 
-  const dbg = (obj) =>{
-    const box = document.getElementById('debugBox');
-    box.classList.remove('hidden');
-    box.textContent = (typeof obj === 'string') ? obj : JSON.stringify(obj, null, 2);
-  };
-
-  const hideDbg = ()=> document.getElementById('debugBox').classList.add('hidden');
-
-  // -------- Sessão / header ----------
+  // ---------- Sessão / header ----------
   document.addEventListener('DOMContentLoaded', async ()=>{
-    try{
-      await waitForSupabaseSession();
-    }catch(e){
-      dbg({error:'waitForSupabaseSession falhou', details:''+e});
-    }
+    await waitForSupabaseSession();
 
-    const { data:{ user }, error: uErr } = await sb.auth.getUser();
+    const { data:{ user } } = await sb.auth.getUser();
     const ui = document.getElementById('userInfo');
     const logoutBtn = document.getElementById('logoutBtn');
-
-    if(uErr){ dbg({error:'getUser', details:uErr}); }
 
     if(!user){
       ui.textContent = 'Visitante';
       logoutBtn.style.display = 'none';
-      document.getElementById('whoMini').textContent = 'sem login';
-    }else{
-      ui.textContent = user.email || 'Usuário';
-      logoutBtn.style.display = 'inline-block';
-      document.getElementById('whoMini').textContent = `uid=${user.id} | ${user.email}`;
+      return;
+    }
 
-      // saldo topo + card premium
-      const { data: w, error: wErr } = await sb.from('wallets')
-        .select('balance_cents').eq('user_id', user.id).single();
-      if(wErr){ dbg({error:'select wallets', details:wErr}); }
-      const bc = ((w?.balance_cents||0)/100).toFixed(2);
-      document.getElementById('saldoTop').textContent = bc;
-      document.getElementById('saldoAqui').textContent = `${bc} BC`;
+    ui.textContent = user.email || 'Usuário';
+    logoutBtn.style.display = 'inline-block';
+
+    // saldo
+    const { data: w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const bc = ((w?.balance_cents||0)/100).toFixed(2);
+    document.getElementById('saldoTop').textContent = bc;
+    document.getElementById('saldoAqui').textContent = `${bc} BC`;
+
+    // >>> NOVO: se já comprou, esconde “Desbloquear” e mostra “Abrir relatório”
+    const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+    if(have){
+      document.getElementById('btnBuy').classList.add('hide');
+      document.getElementById('btnAdd').classList.add('hide');
+      document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+      document.getElementById('btnOpen').classList.remove('hide');
+      document.getElementById('ownedBadge').classList.remove('hide');
     }
   });
 
-  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{
     await sb.auth.signOut();
     location.href = '/index.html';
   });
 
-  // -------- Triagem básica (exemplo curto) ----------
+  // ---------- Triagem básica (exemplo curto) ----------
   document.getElementById('formTdah').addEventListener('submit', (e)=>{
     e.preventDefault();
-    hideDbg();
     const data = new FormData(e.target);
     const total = ['q1','q2','q3'].reduce((acc,k)=> acc + Number(data.get(k)||0), 0);
 
@@ -187,11 +162,10 @@ p{line-height:1.7;color:#303540}
     caixa.style.display = 'block';
   });
 
-  // -------- Compra com Braincoins (debugando on-screen) ----------
+  // ---------- Compra com Braincoins ----------
   document.getElementById('btnBuy').addEventListener('click', desbloquearRelatorio);
 
   async function desbloquearRelatorio(){
-    hideDbg();
     const { data:{ user } } = await sb.auth.getUser();
     if(!user){
       alert('Faça login para comprar o relatório.');
@@ -199,10 +173,8 @@ p{line-height:1.7;color:#303540}
       return;
     }
 
-    const { data: w, error: wErr } = await sb.from('wallets')
-      .select('balance_cents').eq('user_id', user.id).single();
-    if(wErr){ dbg({error:'select wallets (saldo)', details:wErr}); }
-
+    // saldo
+    const { data: w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
     const balance = w?.balance_cents || 0;
     if(balance < PRICE_CENTS){
       if(confirm('Saldo insuficiente. Deseja adicionar Braincoins agora?')){
@@ -211,54 +183,21 @@ p{line-height:1.7;color:#303540}
       return;
     }
 
+    // compra
     const { error } = await sb.rpc('wallet_buy', {
       p_product: PRODUCT,
       p_price_cents: PRICE_CENTS,
-      p_description: `Relatório premium: ${PRODUCT.toUpperCase()}`
+      p_description: 'Relatório premium: TDAH'
     });
 
     if(error){
-      const payload = {
-        error_from: 'wallet_buy',
-        code: error.code || null,
-        message: error.message || null,
-        details: error.details || null,
-        hint: error.hint || null
-      };
-      dbg(payload);               // <<<<<< mostra erro real na tela
-      alert('Não foi possível concluir a compra. Veja detalhes no painel de diagnóstico.');
+      alert('Não foi possível concluir a compra. Tente novamente.');
       return;
     }
 
-    // Sucesso → abre premium
+    // sucesso → abre premium
     location.href = PREMIUM_URL + '?ok=1';
   }
-
-  // -------- Botões de diagnóstico --------
-  document.getElementById('btnPing').addEventListener('click', async ()=>{
-    hideDbg();
-    try{
-      const { data, error } = await sb.rpc('pg_sleep', { seconds: 0 }); // força ida ao DB; algumas instâncias não expõem pg_sleep
-      // fallback simples: consulta boba
-      const ping = await sb.from('wallets').select('user_id').limit(1);
-      dbg({ ping_ok: true, wallets_query_error: ping.error || null });
-    }catch(e){
-      dbg({ error:'ping fail', details: ''+e });
-    }
-  });
-
-  document.getElementById('btnWho').addEventListener('click', async ()=>{
-    hideDbg();
-    const { data:{ user } } = await sb.auth.getUser();
-    if(!user){ dbg('sem usuário'); return; }
-    const w = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    dbg({
-      user_id: user.id,
-      email: user.email,
-      balance_cents: w.data?.balance_cents ?? null,
-      wallets_error: w.error ?? null
-    });
-  });
 </script>
 </body>
 </html>

@@ -2,294 +2,227 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Carteira — Braintest</title>
+<title>Carteira | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-init.js"></script>
-
+<script src="/assets/supabase-init.js"></script>
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-.btn.small{padding:.45rem .7rem;font-weight:700}
+.btn.small{padding:.35rem .6rem}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
 
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
 h3{color:#0e1d33;margin:.8rem 0 .4rem}
-p{line-height:1.6;color:#303540}
+p{line-height:1.7;color:#303540}
 .small{font-size:.92rem;color:#6b7380}
 .hr{height:1px;background:var(--borda);margin:1rem 0}
 
-.grid{display:grid;gap:1rem;grid-template-columns:1fr 1fr}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
-.kpi{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
-.balance{display:flex;align-items:center;gap:.8rem}
-.balance .val{font-size:1.6rem;font-weight:800;color:#0e1d33}
-.pack-grid{display:grid;gap:.7rem;grid-template-columns:repeat(3,1fr)}
-@media(max-width:640px){.pack-grid{grid-template-columns:1fr 1fr}}
-.pack{border:1px solid var(--borda);border-radius:12px;padding:.9rem;background:#f9fbff;display:flex;flex-direction:column;gap:.2rem}
-.pack strong{color:#0e1d33}
-.pack .price{font-size:.95rem;color:#6b7380}
-.pack .buy{margin-top:.5rem}
-
-.table{width:100%;border-collapse:collapse;margin-top:.6rem}
-.table th,.table td{border-bottom:1px solid var(--borda);padding:.6rem .2rem;text-align:left;font-size:.94rem}
-.table th{color:#6b7380;font-weight:600}
-.center{text-align:center}
-.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
-.success{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(3,1fr)}
+@media(max-width:960px){.grid{grid-template-columns:1fr}}
+.tile{border:1px solid var(--borda);border-radius:12px;background:#f9fbff;padding:1rem;display:flex;flex-direction:column;gap:.35rem}
+.tile .price{font-size:1.3rem;font-weight:800;color:#0e1d33}
+.tile .desc{font-size:.92rem;color:#6b7380}
+.kpi{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.kpi .val{font-size:1.5rem;font-weight:800;color:#0e1d33}
+.note{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:.7rem;border-bottom:1px solid var(--borda);text-align:left}
+.table th{font-weight:700;color:#0e1d33;background:#f9fbff}
+.row-empty{padding:1rem;text-align:center;color:#6b7380}
+.badge-kind{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
+.badge-credit{background:#f2fff5;border:1px solid #cdebd4;color:#184d2b}
+.badge-debit{background:#fff7f5;border:1px solid #ffd5cb;color:#5f1f12}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="historico.html">Histórico</a>
-      <a href="faq.html">FAQ</a>
+      <a href="/index.html">Início</a>
+      <a href="/historico.html">Histórico</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/sobre.html">Sobre</a>
       <span id="userInfo" class="badge">Carregando…</span>
       <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
 
-  <!-- Saldo + Sincronizar -->
+  <!-- Saldo -->
   <section class="card">
     <div class="kpi">
-      <div class="balance">
-        <span class="small">Saldo</span>
-        <span class="val"><span id="saldoBC">0.00</span> BC</span>
+      <div>
+        <div class="small">Seu saldo</div>
+        <div class="val"><span id="saldoNow">0.00</span> Braincoins</div>
       </div>
-      <div style="display:flex;gap:.5rem;align-items:center">
-        <button class="btn small" id="syncBtn">Sincronizar saldo</button>
-        <span class="small" id="syncMsg" style="display:none;">Saldo atualizado.</span>
-      </div>
+      <button class="btn small" id="btnSync">Sincronizar saldo</button>
+      <span class="small" id="syncMsg" style="margin-left:.4rem;color:#6b7380"></span>
     </div>
-    <p class="small" style="margin-top:.6rem">Braincoin (BC) é a moeda interna da Braintest. Relação: <strong>1 BC = R$1</strong>. Use o saldo para desbloquear relatórios premium dos testes.</p>
+    <div class="note" style="margin-top:.8rem">
+      <strong>Como funciona:</strong>
+      <p class="small">Escolha um pacote abaixo para adicionar Braincoins. Após o pagamento no Stripe, volte para esta página e clique em <em>Sincronizar saldo</em> para atualizar. Se o crédito não aparecer em alguns minutos, fale com <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+    </div>
   </section>
 
-  <div class="grid">
-    <!-- Pacotes -->
-    <section class="card">
-      <h2>Adicionar Braincoins</h2>
-      <p class="small">Escolha um pacote. O pagamento é processado pelo Stripe em ambiente seguro.</p>
-
-      <div class="pack-grid" style="margin-top:.6rem">
-        <div class="pack">
-          <strong>10 Braincoins</strong>
-          <span class="price">R$ 10,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04" target="_blank" rel="noopener">Comprar</a>
-        </div>
-        <div class="pack">
-          <strong>30 Braincoins</strong>
-          <span class="price">R$ 30,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05" target="_blank" rel="noopener">Comprar</a>
-        </div>
-        <div class="pack">
-          <strong>50 Braincoins</strong>
-          <span class="price">R$ 50,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06" target="_blank" rel="noopener">Comprar</a>
-        </div>
-        <div class="pack">
-          <strong>100 Braincoins</strong>
-          <span class="price">R$ 100,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07" target="_blank" rel="noopener">Comprar</a>
-        </div>
-        <div class="pack">
-          <strong>500 Braincoins</strong>
-          <span class="price">R$ 500,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08" target="_blank" rel="noopener">Comprar</a>
-        </div>
-        <div class="pack">
-          <strong>1000 Braincoins</strong>
-          <span class="price">R$ 1.000,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09" target="_blank" rel="noopener">Comprar</a>
-        </div>
-        <div class="pack">
-          <strong>3000 Braincoins</strong>
-          <span class="price">R$ 3.000,00</span>
-          <a class="btn buy center" href="https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a" target="_blank" rel="noopener">Comprar</a>
-        </div>
+  <!-- Pacotes -->
+  <section class="card">
+    <h2>Adicionar Braincoins</h2>
+    <div class="grid" style="margin-top:.4rem">
+      <div class="tile">
+        <div class="price">10 BC</div>
+        <div class="desc">R$ 10,00</div>
+        <button class="btn" onclick="openStripe('https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04')">Comprar 10 BC</button>
       </div>
 
-      <div class="success" id="afterPayHint" style="display:none;margin-top:1rem">
-        <strong>Pagou agora há pouco?</strong>
-        <p class="small">Clique em <em>Sincronizar saldo</em> acima. Se não atualizar, aguarde alguns instantes e tente novamente. Sem webhook automático ainda.</p>
-      </div>
-    </section>
-
-    <!-- Extrato e compras -->
-    <section class="card">
-      <h2>Extrato</h2>
-      <p class="small">Movimentações da sua carteira (créditos e débitos).</p>
-      <div class="hr"></div>
-
-      <div id="txEmpty" class="warn" style="display:none">
-        <strong>Sem movimentações.</strong>
-        <p class="small">Assim que você comprar Braincoins ou desbloquear relatórios, elas aparecerão aqui.</p>
+      <div class="tile">
+        <div class="price">30 BC</div>
+        <div class="desc">R$ 30,00</div>
+        <button class="btn" onclick="openStripe('https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05')">Comprar 30 BC</button>
       </div>
 
-      <table class="table" id="txTable" style="display:none">
-        <thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead>
-        <tbody id="txBody"></tbody>
-      </table>
-
-      <div class="hr"></div>
-
-      <h3>Meus relatórios</h3>
-      <p class="small">Compras de relatórios premium vinculadas à sua conta.</p>
-
-      <div id="purchEmpty" class="warn" style="display:none;margin-top:.6rem">
-        <strong>Nenhuma compra ainda.</strong>
-        <p class="small">Faça uma triagem e desbloqueie o relatório premium para aparecer aqui.</p>
+      <div class="tile">
+        <div class="price">100 BC</div>
+        <div class="desc">R$ 100,00</div>
+        <button class="btn" onclick="openStripe('https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07')">Comprar 100 BC</button>
       </div>
 
-      <table class="table" id="purchTable" style="display:none;margin-top:.4rem">
-        <thead><tr><th>Data</th><th>Produto</th><th>Abrir</th></tr></thead>
-        <tbody id="purchBody"></tbody>
-      </table>
-    </section>
-  </div>
+      <div class="tile">
+        <div class="price">500 BC</div>
+        <div class="desc">R$ 500,00</div>
+        <button class="btn" onclick="openStripe('https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08')">Comprar 500 BC</button>
+      </div>
+
+      <div class="tile">
+        <div class="price">1000 BC</div>
+        <div class="desc">R$ 1.000,00</div>
+        <button class="btn" onclick="openStripe('https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09')">Comprar 1000 BC</button>
+      </div>
+
+      <div class="tile">
+        <div class="price">3000 BC</div>
+        <div class="desc">R$ 3.000,00</div>
+        <button class="btn" onclick="openStripe('https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a')">Comprar 3000 BC</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Extrato recente -->
+  <section class="card">
+    <h3>Extrato recente</h3>
+    <table class="table" style="margin-top:.4rem">
+      <thead>
+        <tr><th>Tipo</th><th>Valor (BC)</th><th>Descrição</th><th>Data</th></tr>
+      </thead>
+      <tbody id="bodyExtrato">
+        <tr><td colspan="4" class="row-empty">Carregando…</td></tr>
+      </tbody>
+    </table>
+    <div class="hr"></div>
+    <button class="btn secondary small" onclick="location.href='/historico.html'">Ver histórico completo</button>
+  </section>
 </div>
 
 <script>
-  // ------------- Sessão e header -------------
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    await waitForSupabaseSession();
-    const { data:{ user } } = await sb.auth.getUser();
-    const ui = document.getElementById('userInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const afterPayHint = document.getElementById('afterPayHint');
+let userId = null;
 
-    if(!user){
-      ui.textContent = 'Visitante';
-      logoutBtn.style.display = 'none';
-      alert('Faça login para ver sua carteira.');
-      location.href = 'index.html';
-      return;
-    }
+function fmtBC(cents){ return (Math.abs(cents)/100).toFixed(2); }
+function fmtDate(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'});
+  }catch{ return iso || '-'; }
+}
 
-    ui.textContent = user.email || 'Usuário';
-    logoutBtn.style.display = 'inline-block';
+function openStripe(url){
+  // abre o checkout em nova aba para o usuário poder voltar e sincronizar
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
 
-    await carregarSaldo();
-    await carregarExtrato();
-    await carregarCompras();
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  const ui = document.getElementById('userInfo');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-    // Se voltou do Stripe (heurística simples): mostrar dica para sincronizar
-    if (document.referrer && document.referrer.includes('checkout.stripe.com')) {
-      afterPayHint.style.display = 'block';
-    }
-  });
+  if(!user){
+    ui.textContent = 'Visitante';
+    alert('Faça login para acessar sua carteira.');
+    location.href = '/index.html';
+    return;
+  }
+  userId = user.id;
+  ui.textContent = user.email || 'Usuário';
+  logoutBtn.style.display = 'inline-block';
 
-  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-    await sb.auth.signOut();
-    document.getElementById('saldoBC').textContent = '0.00';
-    location.href = 'index.html';
-  });
+  await refreshSaldo();
+  await loadExtrato();
+});
 
-  // ------------- Saldo -------------
-  async function carregarSaldo(){
-    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-    const { data, error } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    if(error){ console.warn(error); return; }
-    const cents = data?.balance_cents || 0;
-    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  location.href = '/index.html';
+});
+
+document.getElementById('btnSync').addEventListener('click', async ()=>{
+  const msg = document.getElementById('syncMsg');
+  msg.textContent = 'Sincronizando…';
+  await refreshSaldo();
+  await loadExtrato();
+  msg.textContent = 'Atualizado.';
+  setTimeout(()=> msg.textContent = '', 2000);
+});
+
+async function refreshSaldo(){
+  const { data, error } = await sb.from('wallets').select('balance_cents').eq('user_id', userId).single();
+  if(error){
+    document.getElementById('saldoNow').textContent = '—';
+    return;
+  }
+  document.getElementById('saldoNow').textContent = ((data?.balance_cents||0)/100).toFixed(2);
+}
+
+async function loadExtrato(){
+  const tbody = document.getElementById('bodyExtrato');
+  tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Carregando…</td></tr>`;
+
+  const { data, error } = await sb
+    .from('wallet_transactions')
+    .select('kind, amount_cents, description, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending:false })
+    .limit(10);
+
+  if(error){ tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Erro ao carregar extrato.</td></tr>`; return; }
+
+  if(!data || data.length===0){
+    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Sem movimentações ainda.</td></tr>`;
+    return;
   }
 
-  document.getElementById('syncBtn').addEventListener('click', async ()=>{
-    await carregarSaldo();
-    const msg = document.getElementById('syncMsg');
-    msg.style.display = 'inline';
-    setTimeout(()=> msg.style.display='none', 1800);
-  });
-
-  // ------------- Extrato -------------
-  async function carregarExtrato(){
-    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-    const { data, error } = await sb
-      .from('wallet_transactions')
-      .select('created_at, kind, amount_cents, description')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending:false })
-      .limit(50);
-
-    const tbody = document.getElementById('txBody');
-    const table = document.getElementById('txTable');
-    const empty = document.getElementById('txEmpty');
-
-    if(error || !data || data.length===0){
-      table.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
-
-    tbody.innerHTML = data.map(tx=>{
-      const dt = new Date(tx.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric', hour:'2-digit', minute:'2-digit'});
-      const tipo = tx.kind==='credit' ? 'Crédito' : 'Débito';
-      const val = (tx.amount_cents/100).toFixed(2);
-      return `<tr>
-        <td>${dt}</td>
-        <td>${tx.description || '-'}</td>
-        <td>${tipo}</td>
-        <td>${tipo==='Crédito' ? '+' : '-'} ${val} BC</td>
-      </tr>`;
-    }).join('');
-
-    empty.style.display = 'none';
-    table.style.display = 'table';
-  }
-
-  // ------------- Compras -------------
-  async function carregarCompras(){
-    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-    const { data, error } = await sb
-      .from('purchases')
-      .select('id, product, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending:false })
-      .limit(50);
-
-    const tbody = document.getElementById('purchBody');
-    const table = document.getElementById('purchTable');
-    const empty = document.getElementById('purchEmpty');
-
-    if(error || !data || data.length===0){
-      table.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
-
-    const mapUrl = (prod)=>{
-      if(prod==='tdah') return 'tdah-premium.html';
-      if(prod==='burnout') return 'burnout-premium.html';
-      if(prod==='qi') return 'qi-premium.html';
-      return '#';
-    };
-
-    tbody.innerHTML = data.map(p=>{
-      const dt = new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric', hour:'2-digit', minute:'2-digit'});
-      return `<tr>
-        <td>${dt}</td>
-        <td>${p.product.toUpperCase()}</td>
-        <td><a class="btn small" href="${mapUrl(p.product)}">Abrir</a></td>
-      </tr>`;
-    }).join('');
-
-    empty.style.display = 'none';
-    table.style.display = 'table';
-  }
+  tbody.innerHTML = data.map(row=>{
+    const badge = row.kind==='credit'
+      ? `<span class="badge-kind badge-credit">Crédito</span>`
+      : `<span class="badge-kind badge-debit">Débito</span>`;
+    const val = (row.kind==='credit' ? '+' : '-') + fmtBC(row.amount_cents);
+    return `<tr>
+      <td>${badge}</td>
+      <td>${val}</td>
+      <td>${row.description||'-'}</td>
+      <td>${fmtDate(row.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
 </script>
 </body>
 </html>

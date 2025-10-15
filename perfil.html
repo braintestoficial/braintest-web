@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meu Perfil | Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-init.js"></script>
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:800px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:#0e1d33;border:1px solid var(--borda)}
+.btn.small{padding:.35rem .6rem}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+label{font-weight:600;color:#0e1d33;display:block;margin-top:.7rem}
+input,select{width:100%;padding:.6rem;border:1px solid var(--borda);border-radius:10px;margin-top:.25rem}
+.small{font-size:.92rem;color:#6b7380}
+.row{display:grid;gap:.8rem;grid-template-columns:1fr 1fr}
+@media(max-width:760px){.row{grid-template-columns:1fr}}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.15rem .6rem;background:#f7f9ff;font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+      <a href="/index.html">Início</a>
+      <a href="/carteira.html">Carteira</a>
+      <a href="/historico.html">Histórico</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/sobre.html">Sobre</a>
+    </nav>
+  </header>
+
+  <section class="card" id="boxAuth" style="display:none">
+    <h2>Entrar</h2>
+    <p class="small">Use sua conta Google para entrar com segurança.</p>
+    <button class="btn" id="btnGoogle">Entrar com Google</button>
+  </section>
+
+  <section class="card" id="boxPerfil" style="display:none">
+    <h2>Meu perfil</h2>
+    <div class="small">Email: <span id="emailView">—</span> · ID: <span id="idView" class="badge">—</span></div>
+
+    <div class="row">
+      <div>
+        <label for="full_name">Nome completo</label>
+        <input id="full_name" placeholder="Seu nome" />
+      </div>
+      <div>
+        <label for="org_type">Tipo de conta</label>
+        <select id="org_type">
+          <option value="pessoa">Pessoa</option>
+          <option value="empresa">Empresa</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="orgNameRow" style="display:none">
+      <label for="org_name">Nome da empresa</label>
+      <input id="org_name" placeholder="Ex.: ACME Ltda." />
+    </div>
+
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem">
+      <button class="btn" id="btnSave">Salvar alterações</button>
+      <button class="btn secondary" id="btnLogout">Sair</button>
+    </div>
+    <div class="small" id="saveMsg" style="margin-top:.5rem;color:#6b7380"></div>
+  </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
+
+  const { data:{ user } } = await sb.auth.getUser();
+  const boxAuth   = document.getElementById('boxAuth');
+  const boxPerfil = document.getElementById('boxPerfil');
+
+  if(!user){
+    boxAuth.style.display = 'block';
+    document.getElementById('btnGoogle').onclick = async ()=>{
+      // redireciona para o provedor Google (supabase)
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/perfil.html' }
+      });
+      if(error) alert('Não foi possível iniciar o login.');
+    };
+    return;
+  }
+
+  // logado: mostra perfil
+  boxPerfil.style.display = 'block';
+  document.getElementById('emailView').textContent = user.email || '—';
+  document.getElementById('idView').textContent = user.id;
+
+  // carrega/gera profile
+  const { data:p } = await sb.from('profiles').select('full_name, org_type, org_name, email').eq('id', user.id).single();
+  if(!p){
+    // cria linha se não existir
+    await sb.from('profiles').upsert({ id:user.id, email:user.email, full_name:'', org_type:'pessoa', org_name:'' });
+    document.getElementById('full_name').value = '';
+    document.getElementById('org_type').value = 'pessoa';
+    document.getElementById('orgNameRow').style.display = 'none';
+  }else{
+    document.getElementById('full_name').value = p.full_name || '';
+    document.getElementById('org_type').value = p.org_type || 'pessoa';
+    document.getElementById('org_name').value = p.org_name || '';
+    document.getElementById('orgNameRow').style.display = (p.org_type==='empresa') ? 'block' : 'none';
+  }
+
+  document.getElementById('org_type').addEventListener('change', (e)=>{
+    document.getElementById('orgNameRow').style.display = (e.target.value==='empresa') ? 'block' : 'none';
+  });
+
+  // salvar
+  document.getElementById('btnSave').onclick = async ()=>{
+    const full_name = (document.getElementById('full_name').value||'').trim();
+    const org_type  = document.getElementById('org_type').value;
+    const org_name  = (document.getElementById('org_name').value||'').trim();
+
+    const { error } = await sb.from('profiles').upsert({
+      id: (await sb.auth.getUser()).data.user.id,
+      email: (await sb.auth.getUser()).data.user.email,
+      full_name, org_type, org_name
+    });
+    const msg = document.getElementById('saveMsg');
+    if(error){ msg.textContent = 'Não foi possível salvar agora. Tente novamente.'; return; }
+    msg.textContent = 'Alterações salvas.';
+    setTimeout(()=> msg.textContent='', 2000);
+  };
+
+  // sair
+  document.getElementById('btnLogout').onclick = async ()=>{
+    await sb.auth.signOut();
+    location.href = '/index.html';
+  };
+});
+</script>
+</body>
+</html>

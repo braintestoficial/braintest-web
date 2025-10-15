@@ -2,242 +2,176 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Q.I. — Triagem | Braintest</title>
+<title>QI — Triagem Gratuita | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- Supabase centralizado -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-init.js"></script>
-
+<script src="/assets/supabase-init.js"></script>
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn.secondary{background:#fff;color:#0e1d33;border:1px solid var(--borda)}
+.btn.small{padding:.4rem .7rem}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+.badge.ok{background:#f2fff5;border-color:#cdebd4;color:#184d2b}
 
-.grid{display:grid;gap:1rem;margin-top:1rem;grid-template-columns:1.1fr .9fr}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .5rem}
-h3{color:#0e1d33;margin:.9rem 0 .4rem}
-.muted{color:#6b7380}
-.q{border-bottom:1px solid var(--borda);padding:.8rem 0}
-.q:last-child{border-bottom:none}
-.opts{display:grid;gap:.45rem;margin-top:.5rem}
-.opts label{border:1px solid var(--borda);border-radius:10px;padding:.55rem .6rem;background:#f9fbff;cursor:pointer;display:flex;gap:.5rem;align-items:flex-start}
-.opts input{margin-top:.2rem}
-.result{background:#f7f9ff;border:1px solid var(--borda);border-radius:12px;padding:1rem;margin-top:.6rem}
-.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:.6rem}
-.small{font-size:.9rem;color:#6b7380}
-.center{text-align:center}
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+h3{color:#0e1d33;margin:.8rem 0 .4rem}
+p{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.hr{height:1px;background:var(--borda);margin:1rem 0}
+.resultBox{padding:.9rem;border:1px solid var(--borda);border-radius:12px;background:#f9fbff}
+.hide{display:none}
+.q{margin:.8rem 0}
+.q label{display:block;font-weight:600;margin-bottom:.3rem}
+.q .opt{margin:.25rem 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="carteira.html">Carteira</a>
-      <a href="historico.html">Histórico</a>
-      <a href="sobre.html">Sobre</a>
-      <span id="user-info" class="badge">Carregando…</span>
-      <button id="logout-btn" class="btn secondary" style="display:none;padding:.4rem 1rem;margin-left:.5rem;">Sair</button>
+      <a href="/index.html">Início</a>
+      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoTop">0.00</span> BC</a>
+      <a href="/historico.html">Histórico</a>
+      <a href="/perfil.html">Perfil</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
 
-  <div class="grid">
-    <!-- Triagem -->
-    <section class="card">
-      <h2>Triagem de Q.I. (15 itens)</h2>
-      <p class="muted">Responda sem calculadora e sem ajuda externa. O relatório premium estima seu <strong>QI numérico</strong> e percentil.</p>
+  <section class="card">
+    <h2>QI — Triagem Gratuita</h2>
+    <p class="small">Triagem indicativa. Não substitui avaliação formal.</p>
+    <div class="hr"></div>
 
-      <form id="formQi">
-        <div id="qs"></div>
-
-        <div style="display:flex;gap:.6rem;margin-top:1rem">
-          <button class="btn" type="submit">Ver resultado gratuito</button>
-          <button class="btn secondary" type="button" onclick="resetForm()">Limpar</button>
-        </div>
-      </form>
-
-      <div id="freeResult" class="result" style="display:none"></div>
-
-      <div id="ctaPremium" style="display:none;margin-top:.8rem">
-        <button class="btn" id="buyPremiumBtn">Desbloquear relatório premium (10 Braincoins)</button>
-        <p class="small" style="margin-top:.4rem">
-          O relatório premium converte sua pontuação para uma <strong>estimativa de QI</strong> com base em distribuição padronizada e mostra percentil, áreas de força e recomendações.
-        </p>
+    <form id="formQi">
+      <div class="q">
+        <label>Complete a sequência: 2, 4, 8, 16, ?</label>
+        <div class="opt"><label><input type="radio" name="q1" value="0" required> 20</label></div>
+        <div class="opt"><label><input type="radio" name="q1" value="2"> 32</label></div>
+        <div class="opt"><label><input type="radio" name="q1" value="0"> 24</label></div>
       </div>
-
-      <div id="loginWarn" class="warn" style="display:none;">
-        <strong>Você não está logado.</strong>
-        <p class="small">Faça login para salvar o resultado e desbloquear o relatório premium.</p>
-        <button class="btn" onclick="location.href='index.html'">Entrar na conta</button>
+      <div class="q">
+        <label>Qual a próxima figura lógica? (exemplo textual)</label>
+        <div class="opt"><label><input type="radio" name="q2" value="2" required> Padrão A</label></div>
+        <div class="opt"><label><input type="radio" name="q2" value="0"> Padrão B</label></div>
+        <div class="opt"><label><input type="radio" name="q2" value="0"> Padrão C</label></div>
       </div>
-    </section>
-
-    <!-- Lateral -->
-    <aside class="card">
-      <h3>Sobre esta triagem</h3>
-      <p class="small">Itens mistos: lógica, padrões, raciocínio numérico e verbal curto. O objetivo é ter uma <strong>estimativa</strong> inicial. Testes clínicos formais exigem aplicação padronizada.</p>
-
-      <div class="result" style="margin-top:.8rem">
-        <strong>Seu saldo:</strong> <span id="saldoBC">0.00</span> BC
+      <div class="q">
+        <label>Resolva: (15 × 2) + 6 / 3</label>
+        <div class="opt"><label><input type="radio" name="q3" value="2" required> 32</label></div>
+        <div class="opt"><label><input type="radio" name="q3" value="0"> 12</label></div>
+        <div class="opt"><label><input type="radio" name="q3" value="0"> 18</label></div>
       </div>
-    </aside>
-  </div>
+      <button class="btn" type="submit" style="margin-top:.8rem">Ver resultado gratuito</button>
+    </form>
+
+    <div id="resumo" class="resultBox" style="display:none;margin-top:1rem"></div>
+  </section>
+
+  <section class="card" id="buyBox">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+      <h3 style="margin:0">Relatório premium</h3>
+      <span id="ownedBadge" class="badge ok hide">Desbloqueado</span>
+    </div>
+    <p class="small" id="premiumDesc">
+      Estimativa indicativa de QI e percentil. Custo: <strong>10 Braincoins</strong>. Saldo: <strong id="saldoAqui">—</strong>
+    </p>
+    <div style="margin-top:.6rem">
+      <button class="btn" id="btnBuy">Desbloquear relatório (10 BC)</button>
+      <button class="btn secondary" id="btnAdd" onclick="location.href='/carteira.html'" style="margin-left:.5rem">Adicionar Braincoins</button>
+      <button class="btn hide" id="btnOpen" onclick="location.href='/qi-premium.html'">Abrir relatório</button>
+    </div>
+  </section>
 </div>
 
 <script>
-/** ------------------ Banco de questões (15 itens) ------------------ **/
-const Q = [
-  // Lógica/Sequências Numéricas (5)
-  {e:"Complete a sequência: 2, 6, 12, 20, 30, ?", a:["36","40","42","44"], c:2},
-  {e:"Qual é o próximo termo? 1, 1, 2, 3, 5, 8, ?", a:["11","12","13","14"], c:2},
-  {e:"Qual número falta? 9, 7, 8, 6, 7, 5, 6, ?", a:["3","4","5","6"], c:1},
-  {e:"Se 3▲=12 e 5▲=20, então 7▲ = ?", a:["21","24","28","35"], c:2},
-  {e:"Qual é o próximo par? (2,4), (3,9), (4,16), (5,25), (6, ?)", a:["30","32","34","36"], c:3},
+const PRODUCT = 'qi';
+const PRICE_CENTS = 1000;
+const PREMIUM_URL = '/qi-premium.html';
 
-  // Padrões/Analogias (5)
-  {e:"A é para Z assim como B é para ?", a:["X","Y","W","V"], c:1},
-  {e:"Se LIVRO : PÁGINA :: ÁRVORE : ?", a:["FLORESTA","FOLHA","GALHO","FRUTO"], c:1},
-  {e:"Qual completa o padrão de figuras mentais? ▢, △, ▢, △, ▢, ?", a:["○","△","◇","▩"], c:1},
-  {e:"Relação: CANETA : ESCREVER :: TESOURA : ?", a:["CORTAR","MEDIR","APAGAR","PRENDER"], c:0},
-  {e:"Se SEG a TER como QUA é para ?", a:["QUI","SEX","TER","DOM"], c:0},
-
-  // Verbal/Curto e Lógica (5)
-  {e:"Sinônimo mais próximo de 'conciso':", a:["prolixo","sucinto","ambíguo","longo"], c:1},
-  {e:"Qual a palavra que completa? 'Ele ____ chegar cedo.'", a:["há de","a de","ah de","há-de"], c:0},
-  {e:"Se todos os Zons são Deks e alguns Deks são Pors, então:", a:["alguns Zons são Pors","nenhum Zon é Por","talvez alguns Zons sejam Pors","todos os Pors são Zons"], c:2},
-  {e:"Em uma sala há 5 pessoas. Cada uma aperta a mão de todas as outras uma vez. Quantos apertos no total?", a:["5","8","10","12"], c:2},
-  {e:"Qual número torna a frase verdadeira? 3x + 5 = 20", a:["5","15","20","25"], c:0}
-];
-
-/** ------------------ Sessão / UI header ------------------ **/
-async function boot(){
+document.addEventListener('DOMContentLoaded', async ()=>{
   await waitForSupabaseSession();
+
   const { data:{ user } } = await sb.auth.getUser();
-  const info = document.getElementById('user-info');
-  const logout = document.getElementById('logout-btn');
-  const warn = document.getElementById('loginWarn');
+  const ui = document.getElementById('userInfo');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-  if(user){
-    info.textContent = user.email || 'Usuário';
-    logout.style.display = 'inline-block';
-    warn.style.display = 'none';
-    await carregarSaldo();
-  }else{
-    info.textContent = 'Visitante';
-    logout.style.display = 'none';
-    warn.style.display = 'block';
-  }
-}
-
-async function carregarSaldo(){
-  const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
-  const cents = data?.balance_cents || 0;
-  document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
-}
-
-document.getElementById('logout-btn').addEventListener('click', async ()=>{
-  await sb.auth.signOut();
-  location.href = 'index.html';
-});
-
-/** ------------------ Render das questões ------------------ **/
-function renderQuestoes(){
-  const qs = document.getElementById('qs');
-  qs.innerHTML = Q.map((q,idx)=>{
-    const opts = q.a.map((alt,i)=>`
-      <label>
-        <input type="radio" name="q${idx}" value="${i}">
-        <span><strong>${String.fromCharCode(65+i)})</strong> ${alt}</span>
-      </label>
-    `).join('');
-    return `<div class="q"><div><strong>${idx+1}.</strong> ${q.e}</div><div class="opts">${opts}</div></div>`;
-  }).join('');
-}
-
-function resetForm(){
-  document.getElementById('formQi').reset();
-  document.getElementById('freeResult').style.display='none';
-  document.getElementById('ctaPremium').style.display='none';
-}
-
-/** ------------------ Correção ------------------ **/
-function corrigir(fd){
-  let acertos = 0;
-  for(let i=0;i<Q.length;i++){
-    const v = fd.get(`q${i}`);
-    if(v===null){ return {ok:false, msg:`Responda a questão ${i+1}.`}; }
-    if(Number(v)===Q[i].c) acertos++;
-  }
-  const pct = Math.round((acertos/Q.length)*100);
-  let faixa = 'Básico';
-  if(pct>=40 && pct<60) faixa='Intermediário';
-  else if(pct>=60 && pct<80) faixa='Avançado';
-  else if(pct>=80) faixa='Muito avançado';
-  return {ok:true, acertos, pct, faixa};
-}
-
-/** ------------------ Submit da triagem ------------------ **/
-document.getElementById('formQi').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const r = corrigir(fd);
-  if(!r.ok){ alert(r.msg); return; }
-
-  const free = document.getElementById('freeResult');
-  free.innerHTML = `
-    <strong>Resultado gratuito:</strong><br>
-    Você acertou <strong>${r.acertos} de ${Q.length}</strong> (${r.pct}%). Nível estimado: <strong>${r.faixa}</strong>.
-    <br><span class="small">O relatório premium converte esta pontuação em um <strong>QI estimado</strong> com percentil.</span>
-  `;
-  free.style.display='block';
-  document.getElementById('ctaPremium').style.display='block';
-});
-
-/** ------------------ Compra atômica via RPC (10 BC) ------------------ **/
-async function comprarPremiumQi(){
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ alert('Entre na sua conta para comprar.'); return; }
-
-  const preco = 10*100; // 10 Braincoins
-  const { data, error } = await sb.rpc('wallet_spend_and_purchase', {
-    p_product: 'qi',
-    p_price_cents: preco,
-    p_description: 'Relatório Premium — QI'
-  });
-
-  if(error){
-    if(error.message && /insufficient_funds/i.test(error.message)){
-      if(confirm('Saldo insuficiente. Ir para Carteira e adicionar Braincoins?')){
-        location.href = 'carteira.html';
-      }
-      return;
-    }
-    alert('Não foi possível concluir a compra. Tente novamente.');
+  if(!user){
+    ui.textContent = 'Visitante';
+    logoutBtn.style.display = 'none';
     return;
   }
-  // data = purchase_id (uuid) — compra registrada
-  location.href = 'qi-premium.html?ok=1';
-}
-document.getElementById('buyPremiumBtn').addEventListener('click', comprarPremiumQi);
 
-/** ------------------ Init ------------------ **/
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await boot();
-  renderQuestoes();
+  ui.textContent = user.email || 'Usuário';
+  logoutBtn.style.display = 'inline-block';
+
+  // saldo
+  const { data: w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+  const bc = ((w?.balance_cents||0)/100).toFixed(2);
+  document.getElementById('saldoTop').textContent = bc;
+  document.getElementById('saldoAqui').textContent = `${bc} BC`;
+
+  // já possui?
+  const { data: have } = await sb.from('purchases')
+    .select('product')
+    .eq('user_id', user.id)
+    .eq('product', PRODUCT)
+    .maybeSingle();
+
+  if(have){
+    document.getElementById('btnBuy').classList.add('hide');
+    document.getElementById('btnAdd').classList.add('hide');
+    document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+    document.getElementById('btnOpen').classList.remove('hide');
+    document.getElementById('ownedBadge').classList.remove('hide');
+  }
+});
+
+document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  location.href = '/index.html';
+});
+
+document.getElementById('formQi').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const total = ['q1','q2','q3'].reduce((a,k)=> a + Number(f.get(k)||0), 0);
+  let nota = total * 10 + 70; // escala ilustrativa
+  const box = document.getElementById('resumo');
+  box.innerHTML = `<strong>Resultado gratuito:</strong> sua estimativa indicativa ficou em <b>${nota}</b> (escala simulada).<br><span class="small">Para a leitura completa, desbloqueie o relatório premium.</span>`;
+  box.style.display = 'block';
+});
+
+document.getElementById('btnBuy').addEventListener('click', async ()=>{
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ alert('Faça login para continuar.'); location.href='/index.html'; return; }
+
+  const { data: w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+  const balance = w?.balance_cents || 0;
+  if(balance < PRICE_CENTS){
+    if(confirm('Saldo insuficiente. Deseja adicionar Braincoins agora?')) location.href='/carteira.html';
+    return;
+  }
+
+  const { error } = await sb.rpc('wallet_buy', {
+    p_product: PRODUCT,
+    p_price_cents: PRICE_CENTS,
+    p_description: 'Relatório premium: QI'
+  });
+  if(error){ alert('Não foi possível concluir a compra. Tente novamente.'); return; }
+
+  location.href = PREMIUM_URL + '?ok=1';
 });
 </script>
 </body>

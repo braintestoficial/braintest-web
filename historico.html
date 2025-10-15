@@ -2,249 +2,339 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Histórico — Braintest</title>
+<title>Histórico | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-init.js"></script>
-
+<script src="/assets/supabase-init.js"></script>
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-.btn.small{padding:.4rem .7rem}
+.btn.small{padding:.35rem .6rem}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
 h3{color:#0e1d33;margin:.8rem 0 .4rem}
-p{line-height:1.6;color:#303540}
+p{line-height:1.7;color:#303540}
 .small{font-size:.92rem;color:#6b7380}
 .hr{height:1px;background:var(--borda);margin:1rem 0}
-.grid{display:grid;gap:1rem;grid-template-columns:1.2fr .8fr}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
 
-.toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.input{border:1px solid var(--borda);border-radius:10px;padding:.5rem .6rem;background:#f9fbff;min-width:220px}
-.select{border:1px solid var(--borda);border-radius:10px;padding:.5rem;background:#fff}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0}
+.tab{border:1px solid var(--borda);background:#f7f9ff;color:#0e1d33;border-radius:10px;padding:.4rem .8rem;cursor:pointer}
+.tab.active{background:#fff;border-color:var(--salmao);color:var(--azul);font-weight:700}
 
-.table{width:100%;border-collapse:collapse;margin-top:.6rem}
-.table th,.table td{border-bottom:1px solid var(--borda);padding:.6rem .2rem;text-align:left;font-size:.94rem}
-.table th{color:#6b7380;font-weight:600}
-.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
-.success{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem}
-.center{text-align:center}
+.toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:.4rem 0}
+.select{border:1px solid var(--borda);border-radius:10px;padding:.4rem .6rem;background:#fff}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:.7rem;border-bottom:1px solid var(--borda);text-align:left}
+.table th{font-weight:700;color:#0e1d33;background:#f9fbff}
+.row-empty{padding:1rem;text-align:center;color:#6b7380}
+.kpi{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.kpi .val{font-size:1.4rem;font-weight:800;color:#0e1d33}
+.pag{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem}
+.badge-kind{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
+.badge-credit{background:#f2fff5;border:1px solid #cdebd4;color:#184d2b}
+.badge-debit{background:#fff7f5;border:1px solid #ffd5cb;color:#5f1f12}
+.link{color:var(--azul);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
-      <a href="index.html">Início</a>
-      <a href="carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
-      <a href="faq.html">FAQ</a>
+      <a href="/index.html">Início</a>
+      <a href="/carteira.html" class="btn secondary">Carteira</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/sobre.html">Sobre</a>
       <span id="userInfo" class="badge">Carregando…</span>
       <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
 
-  <div class="grid">
-    <!-- Compras / Relatórios -->
-    <section class="card">
-      <h2>Meus relatórios</h2>
-      <div class="toolbar">
-        <input id="q" class="input" placeholder="Buscar por produto (ex.: tdah, burnout, qi)">
-        <select id="filterProd" class="select">
-          <option value="">Todos</option>
-          <option value="tdah">TDAH</option>
-          <option value="burnout">Burnout</option>
-          <option value="qi">QI</option>
+  <section class="card">
+    <div class="kpi">
+      <div>
+        <div class="small">Saldo atual</div>
+        <div class="val"><span id="saldoNow">0.00</span> BC</div>
+      </div>
+      <button class="btn small" onclick="location.href='/carteira.html'">Adicionar Braincoins</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Histórico</h2>
+    <div class="tabs">
+      <button class="tab active" id="tabCompras">Compras</button>
+      <button class="tab" id="tabExtrato">Extrato de Braincoins</button>
+    </div>
+
+    <div class="toolbar">
+      <label class="small">Período:</label>
+      <select id="selPeriodo" class="select">
+        <option value="all">Tudo</option>
+        <option value="7">Últimos 7 dias</option>
+        <option value="30">Últimos 30 dias</option>
+        <option value="90">Últimos 90 dias</option>
+      </select>
+
+      <div id="filtroKind" style="display:none">
+        <label class="small">Tipo:</label>
+        <select id="selKind" class="select">
+          <option value="all">Todos</option>
+          <option value="credit">Crédito</option>
+          <option value="debit">Débito</option>
         </select>
-        <button id="btnFiltrar" class="btn small">Filtrar</button>
-        <button id="btnLimpar" class="btn secondary small">Limpar</button>
       </div>
+    </div>
 
-      <div class="hr"></div>
-
-      <div id="purchEmpty" class="warn" style="display:none">
-        <strong>Nenhuma compra encontrada.</strong>
-        <p class="small">Quando você desbloquear relatórios premium, eles aparecerão aqui.</p>
-      </div>
-
-      <table class="table" id="purchTable" style="display:none">
-        <thead><tr><th>Data</th><th>Produto</th><th>Abrir</th></tr></thead>
-        <tbody id="purchBody"></tbody>
+    <!-- COMPRAS -->
+    <div id="boxCompras">
+      <table class="table" id="tblCompras">
+        <thead>
+          <tr><th>Produto</th><th>Preço (BC)</th><th>Data</th><th>Acesso</th></tr>
+        </thead>
+        <tbody id="bodyCompras">
+          <tr><td colspan="4" class="row-empty">Carregando…</td></tr>
+        </tbody>
       </table>
-    </section>
-
-    <!-- Extrato curto -->
-    <aside class="card">
-      <h3>Extrato recente</h3>
-      <p class="small">Últimas movimentações da carteira (até 10).</p>
-      <div class="hr"></div>
-
-      <div id="txEmpty" class="warn" style="display:none">
-        <strong>Sem movimentações.</strong>
-        <p class="small">Faça compras de Braincoins ou desbloqueie relatórios para ver aqui.</p>
+      <div class="pag">
+        <button class="btn secondary small" id="comprasPrev" disabled>Anterior</button>
+        <button class="btn secondary small" id="comprasNext" disabled>Próxima</button>
       </div>
+    </div>
 
-      <table class="table" id="txTable" style="display:none">
-        <thead><tr><th>Data</th><th>Tipo</th><th>Valor</th></tr></thead>
-        <tbody id="txBody"></tbody>
+    <!-- EXTRATO -->
+    <div id="boxExtrato" style="display:none">
+      <table class="table" id="tblExtrato">
+        <thead>
+          <tr><th>Tipo</th><th>Valor (BC)</th><th>Descrição</th><th>Data</th></tr>
+        </thead>
+        <tbody id="bodyExtrato">
+          <tr><td colspan="4" class="row-empty">Carregando…</td></tr>
+        </tbody>
       </table>
-
-      <div class="hr"></div>
-      <button class="btn secondary small" onclick="location.href='carteira.html'">Ver carteira completa</button>
-    </aside>
-  </div>
+      <div class="pag">
+        <button class="btn secondary small" id="extratoPrev" disabled>Anterior</button>
+        <button class="btn secondary small" id="extratoNext" disabled>Próxima</button>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script>
-  // --------- Sessão / Header ----------
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    await waitForSupabaseSession();
-    const { data:{ user } } = await sb.auth.getUser();
-    const ui = document.getElementById('userInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
+const PAGE = 15;
+let CURRENT_TAB = 'compras'; // 'compras' | 'extrato'
+let userId = null;
 
-    if(!user){
-      ui.textContent = 'Visitante';
-      logoutBtn.style.display = 'none';
-      alert('Faça login para ver seu histórico.');
-      location.href = 'index.html';
-      return;
-    }
+// período helpers
+function periodStart(days){
+  if(days==='all') return null;
+  const d = new Date();
+  d.setDate(d.getDate() - Number(days));
+  return d.toISOString();
+}
+function fmtBC(cents){ return (Math.abs(cents)/100).toFixed(2); }
+function fmtDate(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'});
+  }catch{ return iso || '-'; }
+}
+function productLink(p){
+  switch((p||'').toLowerCase()){
+    case 'tdah': return '/tdah-premium.html';
+    case 'burnout': return '/burnout-premium.html';
+    case 'qi': return '/qi-premium.html';
+    default: return '#';
+  }
+}
 
-    ui.textContent = user.email || 'Usuário';
-    logoutBtn.style.display = 'inline-block';
+// sessão
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  const ui = document.getElementById('userInfo');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-    await carregarSaldo();
-    await carregarCompras();
-    await carregarExtrato();
+  if(!user){
+    ui.textContent = 'Visitante';
+    alert('Faça login para ver seu histórico.');
+    location.href = '/index.html';
+    return;
+  }
+  userId = user.id;
+  ui.textContent = user.email || 'Usuário';
+  logoutBtn.style.display = 'inline-block';
 
-    document.getElementById('btnFiltrar').addEventListener('click', carregarCompras);
-    document.getElementById('btnLimpar').addEventListener('click', ()=>{
-      document.getElementById('q').value = '';
-      document.getElementById('filterProd').value = '';
-      carregarCompras();
-    });
-  });
+  // saldo
+  await refreshSaldo();
 
-  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-    await sb.auth.signOut();
-    document.getElementById('saldoBC').textContent = '0.00';
-    location.href = 'index.html';
-  });
+  // abas
+  document.getElementById('tabCompras').addEventListener('click', ()=>switchTab('compras'));
+  document.getElementById('tabExtrato').addEventListener('click', ()=>switchTab('extrato'));
 
-  async function carregarSaldo(){
-    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-    const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const cents = data?.balance_cents || 0;
-    document.getElementById('saldoBC').textContent = (cents/100).toFixed(2);
+  // filtros
+  document.getElementById('selPeriodo').addEventListener('change', reloadCurrentTab);
+  document.getElementById('selKind').addEventListener('change', reloadCurrentTab);
+
+  // paginação
+  document.getElementById('comprasPrev').addEventListener('click', ()=>changePage('compras', -1));
+  document.getElementById('comprasNext').addEventListener('click', ()=>changePage('compras', +1));
+  document.getElementById('extratoPrev').addEventListener('click', ()=>changePage('extrato', -1));
+  document.getElementById('extratoNext').addEventListener('click', ()=>changePage('extrato', +1));
+
+  // carrega inicial
+  await loadCompras(0);
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  location.href = '/index.html';
+});
+
+// saldo
+async function refreshSaldo(){
+  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', userId).single();
+  document.getElementById('saldoNow').textContent = ((data?.balance_cents||0)/100).toFixed(2);
+}
+
+// abas
+async function switchTab(tab){
+  if(CURRENT_TAB === tab) return;
+  CURRENT_TAB = tab;
+
+  // UI
+  document.getElementById('tabCompras').classList.toggle('active', tab==='compras');
+  document.getElementById('tabExtrato').classList.toggle('active', tab==='extrato');
+  document.getElementById('boxCompras').style.display = tab==='compras' ? 'block' : 'none';
+  document.getElementById('boxExtrato').style.display = tab==='extrato' ? 'block' : 'none';
+  document.getElementById('filtroKind').style.display = tab==='extrato' ? 'inline-block' : 'none';
+
+  // load
+  if(tab==='compras') await loadCompras(0);
+  else await loadExtrato(0);
+}
+
+let comprasPage = 0, comprasHasMore = false;
+let extratoPage = 0, extratoHasMore = false;
+
+async function reloadCurrentTab(){
+  if(CURRENT_TAB==='compras') await loadCompras(0);
+  else await loadExtrato(0);
+}
+
+// COMPRAS
+async function loadCompras(page){
+  comprasPage = page;
+  const tbody = document.getElementById('bodyCompras');
+  tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Carregando…</td></tr>`;
+
+  const days = document.getElementById('selPeriodo').value;
+  const from = periodStart(days);
+
+  let q = sb.from('purchases')
+            .select('product, price_cents, created_at')
+            .eq('user_id', userId)
+            .order('created_at', { ascending:false })
+            .range(page*PAGE, page*PAGE + PAGE - 1);
+
+  if(from) q = q.gte('created_at', from);
+
+  const { data, error, count } = await q;
+  if(error){
+    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Erro ao carregar compras.</td></tr>`;
+    console.warn(error); return;
   }
 
-  // --------- Compras / Relatórios ----------
-  function mapUrl(prod){
-    if(prod==='tdah') return 'tdah-premium.html';
-    if(prod==='burnout') return 'burnout-premium.html';
-    if(prod==='qi') return 'qi-premium.html';
-    return '#';
-  }
+  // hasMore: tenta pegar o próximo item (simples)
+  comprasHasMore = (data?.length||0) === PAGE;
 
-  async function carregarCompras(){
-    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
-
-    const q = (document.getElementById('q').value || '').trim().toLowerCase();
-    const filter = document.getElementById('filterProd').value;
-
-    let req = sb.from('purchases')
-      .select('id, product, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending:false })
-      .limit(200);
-
-    // Filtro no client (mais simples sem extensões de busca)
-    const { data, error } = await req;
-    const tbody = document.getElementById('purchBody');
-    const table = document.getElementById('purchTable');
-    const empty = document.getElementById('purchEmpty');
-
-    if(error || !data || data.length===0){
-      tbody.innerHTML = '';
-      table.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
-
-    let rows = data;
-    if(filter) rows = rows.filter(r => r.product === filter);
-    if(q) rows = rows.filter(r => r.product.toLowerCase().includes(q));
-
-    if(rows.length===0){
-      tbody.innerHTML = '';
-      table.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
-
-    tbody.innerHTML = rows.map(p=>{
-      const dt = new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  if(!data || data.length===0){
+    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Você ainda não possui compras neste período.</td></tr>`;
+  }else{
+    tbody.innerHTML = data.map(row=>{
+      const price = (row.price_cents ?? 1000); // fallback 10 BC para compras antigas
+      const href = productLink(row.product);
       return `<tr>
-        <td>${dt}</td>
-        <td>${p.product.toUpperCase()}</td>
-        <td><a class="btn small" href="${mapUrl(p.product)}">Abrir</a></td>
+        <td style="text-transform:capitalize">${row.product||'-'}</td>
+        <td>${(price/100).toFixed(2)}</td>
+        <td>${fmtDate(row.created_at)}</td>
+        <td>${href!=='#' ? `<a class="link" href="${href}">Abrir relatório</a>` : '-'}</td>
       </tr>`;
     }).join('');
-
-    empty.style.display = 'none';
-    table.style.display = 'table';
   }
 
-  // --------- Extrato curto ----------
-  async function carregarExtrato(){
-    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+  document.getElementById('comprasPrev').disabled = (page===0);
+  document.getElementById('comprasNext').disabled = !comprasHasMore;
+}
 
-    const { data, error } = await sb
-      .from('wallet_transactions')
-      .select('created_at, kind, amount_cents')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending:false })
-      .limit(10);
+// EXTRATO
+async function loadExtrato(page){
+  extratoPage = page;
+  const tbody = document.getElementById('bodyExtrato');
+  tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Carregando…</td></tr>`;
 
-    const tbody = document.getElementById('txBody');
-    const table = document.getElementById('txTable');
-    const empty = document.getElementById('txEmpty');
+  const days = document.getElementById('selPeriodo').value;
+  const kind = document.getElementById('selKind').value;
+  const from = periodStart(days);
 
-    if(error || !data || data.length===0){
-      tbody.innerHTML = '';
-      table.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
+  let q = sb.from('wallet_transactions')
+            .select('kind, amount_cents, description, created_at')
+            .eq('user_id', userId)
+            .order('created_at', { ascending:false })
+            .range(page*PAGE, page*PAGE + PAGE - 1);
 
-    tbody.innerHTML = data.map(tx=>{
-      const dt = new Date(tx.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const tipo = tx.kind==='credit' ? 'Crédito' : 'Débito';
-      const val = (tx.amount_cents/100).toFixed(2);
+  if(from) q = q.gte('created_at', from);
+  if(kind!=='all') q = q.eq('kind', kind);
+
+  const { data, error } = await q;
+  if(error){
+    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Erro ao carregar extrato.</td></tr>`;
+    console.warn(error); return;
+  }
+
+  extratoHasMore = (data?.length||0) === PAGE;
+
+  if(!data || data.length===0){
+    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Nenhuma movimentação neste período.</td></tr>`;
+  }else{
+    tbody.innerHTML = data.map(row=>{
+      const badge = row.kind==='credit'
+        ? `<span class="badge-kind badge-credit">Crédito</span>`
+        : `<span class="badge-kind badge-debit">Débito</span>`;
+      const val = (row.kind==='credit' ? '+' : '-') + fmtBC(row.amount_cents);
       return `<tr>
-        <td>${dt}</td>
-        <td>${tipo}</td>
-        <td>${tipo==='Crédito' ? '+' : '-'} ${val} BC</td>
+        <td>${badge}</td>
+        <td>${val}</td>
+        <td>${row.description||'-'}</td>
+        <td>${fmtDate(row.created_at)}</td>
       </tr>`;
     }).join('');
-
-    empty.style.display = 'none';
-    table.style.display = 'table';
   }
+
+  document.getElementById('extratoPrev').disabled = (page===0);
+  document.getElementById('extratoNext').disabled = !extratoHasMore;
+}
+
+async function changePage(which, delta){
+  if(which==='compras'){
+    const next = Math.max(0, comprasPage + delta);
+    await loadCompras(next);
+  }else{
+    const next = Math.max(0, extratoPage + delta);
+    await loadExtrato(next);
+  }
+}
 </script>
 </body>
 </html>
