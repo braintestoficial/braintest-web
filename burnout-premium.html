@@ -1,244 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Burnout — Relatório Premium | Braintest</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relatório Premium — Burnout | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-<script src="/assets/app.js" defer></script>
-<script src="/assets/print.js" defer></script>
-<style>
-.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.kpi .card{padding:12px}
-.sparks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.spark{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
-.spark h4{margin:0 0 6px;font-size:14px;color:#334}
-svg.sparkline{width:100%;height:48px;display:block}
-@media(max-width:920px){.sparks{grid-template-columns:1fr}}
-@media(max-width:720px){.kpi{grid-template-columns:1fr}}
-</style>
 </head>
 <body>
-<div class="shell">
-  <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
-    <div class="search"><input placeholder="Busque…"></div>
-    <div class="top-actions">
-      <div class="user-chip" id="userChip">Carregando…</div>
-      <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
-    </div>
-  </header>
-
-  <div class="body">
-    <aside class="sidebar">
-      <nav class="nav">
-        <h6>Relatórios</h6>
-        <a href="/tdah-premium.html" data-current>⚡ TDAH</a>
-        <a href="/burnout-premium.html" class="active" data-current>🔥 Burnout</a>
-        <a href="/qi-premium.html" data-current>🧠 QI</a>
-        <h6 style="margin-top:14px">Navegação</h6>
-        <a href="/index.html" data-current>🏠 Início</a>
-        <a href="/historico.html" data-current>🕘 Histórico</a>
-        <a href="/carteira.html" data-current>💳 Carteira</a>
-        <a href="/perfil.html" data-current>👤 Perfil</a>
-      </nav>
-    </aside>
-
-    <main class="content">
-      <div class="container">
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-            <h2 style="margin:0;font-family:Poppins,Inter">Relatório Premium — Burnout</h2>
-            <button class="btn alt small" onclick="exportPDF('Relatorio-Premium-Burnout','#content')">Exportar PDF</button>
-          </div>
-
-          <div id="gate" class="small" style="margin:8px 0 12px"></div>
-
-          <div id="content" style="display:none">
-            <p class="small">Baseado nas suas sessões recentes (até 8). Este material é educativo e não substitui orientação clínica.</p>
-
-            <div class="card" style="margin-top:8px">
-              <h3 style="margin:0 0 6px">Risco composto</h3>
-              <div id="resumo"></div>
-            </div>
-
-            <div class="kpi" style="margin-top:12px">
-              <div class="card">
-                <div class="title small">Exaustão</div>
-                <div class="value" id="v_ex" style="font-size:24px;font-weight:800">—</div>
-                <div class="small">Energia, sono, recuperação.</div>
-              </div>
-              <div class="card">
-                <div class="title small">Cinismo</div>
-                <div class="value" id="v_ci" style="font-size:24px;font-weight:800">—</div>
-                <div class="small">Desconexão com propósito/equipe.</div>
-              </div>
-              <div class="card">
-                <div class="title small">Eficácia percebida</div>
-                <div class="value" id="v_ef" style="font-size:24px;font-weight:800">—</div>
-                <div class="small">Sensação de capacidade/realização.</div>
-              </div>
-            </div>
-
-            <div class="grid cols-2" style="margin-top:12px">
-              <div class="card">
-                <h3 style="margin:0 0 6px">Interpretação personalizada</h3>
-                <div id="interp"></div>
-              </div>
-              <div class="card">
-                <h3 style="margin:0 0 6px">Plano em 3 frentes</h3>
-                <ol class="small" id="plano" style="margin-left:18px;line-height:1.7"></ol>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-              <h3 style="margin:0 0 6px">Evolução recente</h3>
-              <div class="sparks" id="evolucao"></div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-              <h3 style="margin:0 0 6px">Próximos passos</h3>
-              <ul class="small" id="next" style="margin:0 0 0 18px;line-height:1.7"></ul>
-            </div>
-
-            <p class="small" style="margin-top:12px;color:#5b6478">Aviso: este relatório não é diagnóstico. Se persistirem prejuízos significativos, procure avaliação com profissional de saúde.</p>
-          </div>
-        </div>
-      </div>
-    </main>
+<header class="topbar">
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <span id="userChip"></span> | 💰 <span id="saldoTop">0</span> BC
   </div>
+</header>
 
-  <nav class="mobilebar">
-    <a href="/index.html" data-current>🏠</a>
-    <a href="/teste-tdah.html" data-current>⚡</a>
-    <a href="/teste-burnout.html" data-current>🔥</a>
-    <a href="/teste-qi.html" data-current>🧠</a>
-    <a href="/perfil.html" data-current>👤</a>
-  </nav>
-</div>
+<main class="content">
+  <div class="card" id="relatorio">
+    <h2>Relatório Premium — Burnout</h2>
+    <p>Carregando resultado...</p>
+  </div>
+</main>
 
 <script>
-const PRODUCT='burnout';
-function pctFmt(v){ return isFinite(v)? Math.round(v)+'%' : '—'; }
-function sparkline(points){
-  if(!points || !points.length) return '';
-  const w=200,h=48,pad=2; const n=points.length; const step=(w-2*pad)/Math.max(1,n-1);
-  const ys=points.map(p=>{ const y=h-pad-(p/100)*(h-2*pad); return Math.max(pad,Math.min(h-pad,y)); });
-  const xs=Array.from({length:n},(_,i)=>pad+i*step);
-  const last=points[n-1]; const color= last>=66?'#ff7458': last>=33?'#f5b500':'#1d3557';
-  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-    <rect x="0" y="0" width="${w}" height="${h}" fill="white" rx="8" ry="8"></rect>
-    <polyline fill="none" stroke="${color}" stroke-width="2" points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}"/>
-  </svg>`;
-}
-function sev(p){ return p<33?'Baixo': p<66?'Moderado':'Elevado'; }
-function interpBurnout(ex,ci,ef){
-  const L=[];
-  if(ex<33) L.push('<b>Exaustão baixa</b>: energia razoável; mantenha higiene de sono e pausas programadas.');
-  else if(ex<66) L.push('<b>Exaustão moderada</b>: revise carga e agenda; adote micro-pausas (5/50).');
-  else L.push('<b>Exaustão elevada</b>: alta probabilidade de fadiga crônica; priorize recuperação e ajuste metas semanais.');
-  if(ci<33) L.push('<b>Cinismo baixo</b>: senso de propósito preservado; cultive feedbacks positivos semanais.');
-  else if(ci<66) L.push('<b>Cinismo moderado</b>: reforce significado do trabalho e conexão com pares.');
-  else L.push('<b>Cinismo elevado</b>: risco de desconexão com valores; alinhe expectativas com liderança.');
-  if(ef>66) L.push('<b>Eficácia alta</b>: senso de capacidade ajuda a amortecer estresse.');
-  else if(ef>33) L.push('<b>Eficácia moderada</b>: celebre entregas e defina metas processuais.');
-  else L.push('<b>Eficácia baixa</b>: sensação de insuficiência; quebre tarefas e defina critérios de “feito”.');
-  return `<ul class="small" style="margin:0 0 0 18px;line-height:1.7">${L.map(x=>`<li>${x}</li>`).join('')}</ul>`;
-}
-function plano(ex,ci,ef){
-  const P=[
-    'Recuperação: 2 noites com 30–60 min a mais de sono; pausa ativa 5/50 nos dias úteis.',
-    'Trabalho: alinhe prioridades semanais; limite WIP (máx. 2 tarefas simultâneas).',
-    'Autoeficácia: retrospectiva semanal de conquistas (3 itens).'
-  ];
-  if(ex>=66) P[0]='Recuperação+: bloqueie 1 manhã/semana para tarefas de baixa exigência cognitiva.';
-  if(ci>=66) P[1]='Trabalho/Propósito: anote 1 impacto positivo do seu trabalho por dia durante 1 semana.';
-  if(ef<=33) P[2]='Autoeficácia: defina “critério de sucesso mínimo” por tarefa e celebre micro-conclusões.';
-  return P.map(x=>`<li>${x}</li>`).join('');
-}
-function nextSteps(ex,ci,ef){
-  const N=[];
-  if(ex>=66 || ci>=66) N.push('TDAH: se houver dificuldades de foco/organização além do cansaço, avalie em <a href="/teste-tdah.html">triagem TDAH</a>.');
-  N.push('QI (Lógico): entender como seu raciocínio opera sob estresse pode orientar estratégias. <a href="/teste-qi.html">Fazer agora</a>');
-  N.push('Assinatura (em breve): relatórios ilimitados + série de micro-hábitos para energia e foco.');
-  return N.map(x=>`<li>${x}</li>`).join('');
-}
-
-document.addEventListener('DOMContentLoaded', async ()=>{
-  const user = await requireAuth('/burnout-premium.html'); if(!user) return;
+(async()=>{
+  const session=await waitForSupabaseSession();
+  if(!session){location.href='/login.html';return;}
+  const user=session.user;
   await ensureTopbarUser();
 
-  // Gate
-  const g=document.getElementById('gate'); const c=document.getElementById('content');
-  const {data:have}=await sb.from('purchases').select('product').eq('user_id',user.id).eq('product',PRODUCT).maybeSingle();
-  if(!have){ g.innerHTML=`<div style="padding:.8rem;border:1px dashed var(--line);border-radius:12px;background:#fff">
-    Relatório bloqueado. <a class="btn small" href="/teste-burnout.html" style="margin-left:6px">Desbloquear (10 BC)</a></div>`; return; }
-  g.innerHTML=`<span class="badge" style="background:#f2fff5;border-color:#cdebd4;color:#184d2b">Acesso liberado</span>`;
-  c.style.display='block';
+  const { data:sessao }=await sb.from('test_sessions')
+    .select('score_likert,created_at')
+    .eq('user_id',user.id).eq('test_key','burnout')
+    .order('created_at',{ascending:false}).limit(1).maybeSingle();
 
-  // Até 8 sessões
-  const { data:sessions } = await sb.from('test_sessions').select('id,created_at').eq('user_id',user.id).eq('test','burnout').order('created_at',{ascending:false}).limit(8);
+  const rel=document.getElementById('relatorio');
+  if(!sessao){rel.innerHTML='<p>Nenhum teste encontrado.</p>';return;}
 
-  let sum={exaustao:0, cinismo:0, eficacia:0}, count={exaustao:0, cinismo:0, eficacia:0};
-  const sEx=[], sCi=[], sEf=[], sRisco=[];
+  const score=sessao.score_likert;
+  let nivel="",descricao="";
+  if(score<=10){nivel="Baixo risco de Burnout";descricao="Você apresenta boa gestão de estresse e equilíbrio emocional.";}
+  else if(score<=20){nivel="Risco moderado";descricao="Alguns sinais de sobrecarga foram identificados. Atenção à sua rotina e descanso.";}
+  else{nivel="Risco elevado";descricao="Seu resultado sugere esgotamento acentuado. Procure apoio psicológico e reavalie seu ritmo de trabalho.";}
 
-  for(const s of (sessions||[]).reverse()){
-    const { data:ans } = await sb.from('test_answers').select('question_id,value').eq('session_id', s.id);
-    const qids=(ans||[]).map(a=>a.question_id);
-    const { data:qs } = await sb.from('test_questions').select('id,domain').in('id', qids);
-    const map = new Map((qs||[]).map(q=>[q.id, q.domain||'']));
-    let sess={exaustao:{sum:0,c:0}, cinismo:{sum:0,c:0}, eficacia:{sum:0,c:0}};
-    (ans||[]).forEach(a=>{
-      if(a.value===null) return;
-      const d = map.get(a.question_id); if(!d) return;
-      sess[d].sum+=Number(a.value); sess[d].c++;
-      sum[d]+=Number(a.value); count[d]++;
-    });
-    const ex = sess.exaustao.c? (sess.exaustao.sum/(sess.exaustao.c*2))*100 : 0;
-    const ci = sess.cinismo.c? (sess.cinismo.sum/(sess.cinismo.c*2))*100 : 0;
-    const ef_raw = sess.eficacia.c? (sess.eficacia.sum/(sess.eficacia.c*2))*100 : 0;
-    const ef = 100-ef_raw; // risco invertido
-    const risco = Math.min(100, Math.max(0, Math.round((ex*0.45 + ci*0.35 + ef*0.20))));
-    sEx.push(ex); sCi.push(ci); sEf.push(100-ef); sRisco.push(risco);
-  }
-
-  const ex = count.exaustao? (sum.exaustao/(count.exaustao*2))*100 : 0;
-  const ci = count.cinismo?   (sum.cinismo/(count.cinismo*2))*100   : 0;
-  const ef_raw = count.eficacia? (sum.eficacia/(count.eficacia*2))*100 : 0;
-  const ef = 100-ef_raw;
-  const risco = Math.min(100, Math.max(0, Math.round((ex*0.45 + ci*0.35 + ef*0.20))));
-  const faixa = risco<33?'Baixo': risco<66?'Moderado':'Elevado';
-
-  document.getElementById('resumo').innerHTML =
-    `<div class="grid cols-3">
-      <div><b>Risco composto:</b> ${pctFmt(risco)} <span class="badge">${faixa}</span></div>
-      <div><b>Fatores mais salientes:</b> ${[ ['Exaustão',ex],['Cinismo',ci],['Eficácia↓',ef] ].sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]).join(' • ')}</div>
-      <div><b>Tendência:</b> foque em energia e limites de carga (WIP)</div>
-    </div>`;
-
-  document.getElementById('v_ex').textContent = pctFmt(ex);
-  document.getElementById('v_ci').textContent = pctFmt(ci);
-  document.getElementById('v_ef').textContent = pctFmt(100-ef);
-
-  document.getElementById('interp').innerHTML = interpBurnout(ex,ci,100-ef);
-  document.getElementById('plano').innerHTML = plano(ex,ci,100-ef);
-  document.getElementById('next').innerHTML = nextSteps(ex,ci,100-ef);
-
-  // Evolução (sparks)
-  const evo=document.getElementById('evolucao');
-  [
-    ['Risco composto', sRisco],
-    ['Exaustão', sEx],
-    ['Cinismo', sCi],
-    ['Eficácia (direta)', sEf]
-  ].forEach(([title, serie])=>{
-    const div=document.createElement('div'); div.className='spark';
-    div.innerHTML = `<h4>${title}</h4>${sparkline(serie)}`;
-    evo.appendChild(div);
-  });
-});
+  rel.innerHTML=`
+    <h2>Resultado: ${nivel}</h2>
+    <p><b>Score:</b> ${score}</p>
+    <p>${descricao}</p>
+    <p style="font-size:.9rem;color:#666">*Este resultado é indicativo e não substitui diagnóstico médico.</p>
+  `;
+})();
 </script>
 </body>
 </html>

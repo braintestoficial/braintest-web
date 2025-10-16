@@ -1,53 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Perfil | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="/assets/supabase-init.js"></script>
-<style>
-.profile-box{max-width:600px;margin:2rem auto;padding:1.5rem;border:1px solid #ddd;border-radius:10px;background:#fff;}
-.profile-box h2{margin-bottom:1rem;font-size:1.3rem;}
-.field{margin-bottom:.75rem;}
-.field label{font-weight:600;display:block;margin-bottom:.25rem;}
-.field span{color:#333;}
-.btn{padding:.5rem 1rem;border:none;border-radius:8px;background:#0066ff;color:#fff;cursor:pointer;}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Perfil | Braintest</title>
+  <link rel="stylesheet" href="/assets/ui.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="/assets/supabase-init.js"></script>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"><span>Braintest</span></a>
-</header>
-<main>
-  <div class="profile-box" id="profileBox">
-    <h2>Carregando perfil...</h2>
-  </div>
-</main>
+  <header class="topbar">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <span id="userChip"></span> | 💰 <span id="saldoTop">0</span> BC
+    </div>
+  </header>
 
-<script>
-(async()=>{
-  const session=await waitForSupabaseSession();
-  if(!session){window.location='/login.html';return;}
-  const user=session.user;
-  const { data:profile } = await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
-  const { data:wallet }  = await sb.from('wallets').select('balance').eq('user_id',user.id).maybeSingle();
-  const saldo=(wallet&&wallet.balance)||0;
+  <main class="content">
+    <div class="card">
+      <h2>Meu Perfil</h2>
+      <div id="perfil-info">Carregando...</div>
+      <div style="margin-top:1rem;display:flex;gap:.5rem">
+        <button class="btn" id="logout">Sair</button>
+      </div>
+    </div>
+  </main>
 
-  const box=document.getElementById('profileBox');
-  box.innerHTML=`
-    <h2>Seu Perfil</h2>
-    <div class="field"><label>Nome</label><span>${profile?.name||user.email.split('@')[0]}</span></div>
-    <div class="field"><label>Email</label><span>${user.email}</span></div>
-    <div class="field"><label>Saldo Braincoins</label><span>${saldo}</span></div>
-    <button class="btn" id="logoutBtn">Sair</button>
-  `;
-  document.getElementById('logoutBtn').onclick=async()=>{
-    await sb.auth.signOut();
-    window.location='/login.html';
-  };
-})();
-</script>
+  <script>
+  (async()=>{
+    const session=await waitForSupabaseSession();
+    if(!session){location.href='/login.html';return;}
+    const user=session.user;
+    document.getElementById('userChip').textContent=user.email;
+    const { data:w }=await sb.from('wallets').select('balance').eq('user_id',user.id).maybeSingle();
+    document.getElementById('saldoTop').textContent=w?.balance||0;
+    document.getElementById('perfil-info').innerHTML=`
+      <p><b>E-mail:</b> ${user.email}</p>
+      <p><b>ID:</b> ${user.id}</p>
+    `;
+    document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();location.href='/';};
+  })();
+  </script>
 </body>
 </html>

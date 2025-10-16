@@ -1,7 +1,7 @@
 User-agent: *
+Allow: /
 Disallow: /netlify/
 Disallow: /assets/
-Disallow: /404.html
-Allow: /
-
+Disallow: /carteira.html
+Disallow: /perfil.html
 Sitemap: https://braintest.com.br/sitemap.xml

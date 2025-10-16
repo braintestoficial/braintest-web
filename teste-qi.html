@@ -7,63 +7,45 @@
 <link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-<style>
-.question{margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);}
-.question p{margin:0 0 .25rem;font-weight:500;}
-.question label{display:block;margin-left:1rem;font-size:.95rem;color:#334;}
-</style>
 </head>
 <body>
-<div class="shell">
-  <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg"><span>Braintest</span></a>
-    <div class="search"><input placeholder="Busque... (Ex: TDAH, Burnout, QI)"></div>
-  </header>
-  <main class="content">
-    <div class="container">
-      <div class="card">
-        <h2>Teste de QI (estimativa)</h2>
-        <p class="small">Responda às <b>15</b> perguntas abaixo. O relatório completo é premium e não substitui avaliação profissional.</p>
-        <div id="quiz">Carregando perguntas...</div>
-        <button class="btn" id="enviar">Gerar resultado</button>
-      </div>
-    </div>
-  </main>
-</div>
+<header class="topbar">
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <span id="userChip"></span> | 💰 <span id="saldoTop">0</span> BC
+  </div>
+</header>
+
+<main class="content">
+  <div class="card">
+    <h2>Teste de QI (Estimativa)</h2>
+    <p>Responda 15 perguntas lógicas e descubra uma estimativa do seu QI.</p>
+    <div id="quiz">Carregando perguntas...</div>
+    <button class="btn" id="enviar">Gerar resultado</button>
+  </div>
+</main>
 
 <script>
 (async()=>{
   const session=await waitForSupabaseSession();
-  if(!session){window.location='/login.html';return;}
+  if(!session){location.href='/login.html';return;}
   const user=session.user;
-
-  const searchInput=document.querySelector('.search input');
-  if(searchInput){
-    searchInput.addEventListener('keypress',e=>{
-      if(e.key==='Enter'){
-        const term=searchInput.value.toLowerCase();
-        if(term.includes('tdah'))location.href='/teste-tdah.html';
-        else if(term.includes('burn'))location.href='/teste-burnout.html';
-        else if(term.includes('qi'))location.href='/teste-qi.html';
-        else location.href='/index.html';
-      }
-    });
-  }
+  await ensureTopbarUser();
 
   const TEST='qi';
   const quizEl=document.getElementById('quiz');
   let perguntas=[];
+
   try{
-    const { data:qs,error,status }=await sb.from('test_questions')
+    const { data:qs,error }=await sb.from('test_questions')
       .select('id,prompt,kind,domain,test_question_options(label,value,is_correct)')
-      .eq('test',TEST).order('random()').limit(15);
-    if(error||!qs||status>=400)throw error;
+      .eq('test_key',TEST).order('random()').limit(15);
+    if(error||!qs)throw error;
     perguntas=qs;
-  }catch(err){
-    console.warn('Fallback offline por erro',err);
+  }catch(e){
     perguntas=Array.from({length:15},(_,i)=>({
-      id:i+1000,
-      prompt:`Questão temporária ${i+1} (modo offline).`,
+      id:i+1,
+      prompt:`Questão temporária ${i+1}`,
       test_question_options:[
         {label:'Opção A',value:1,is_correct:false},
         {label:'Opção B',value:2,is_correct:true},
@@ -76,8 +58,7 @@
     <div class="question">
       <p><b>${i+1}.</b> ${q.prompt}</p>
       ${q.test_question_options.map(o=>`
-        <label><input type="radio" name="q${q.id}" value="${o.value}" data-correct="${o.is_correct}"> ${o.label}</label>
-      `).join('')}
+        <label><input type="radio" name="q${q.id}" value="${o.value}" data-correct="${o.is_correct}"> ${o.label}</label>`).join('')}
     </div>`).join('');
 
   document.getElementById('enviar').onclick=async()=>{
@@ -85,11 +66,11 @@
       const v=document.querySelector(`input[name="q${q.id}"]:checked`);
       return{question_id:q.id,is_correct:v?.dataset.correct==='true'};
     });
-    let acertos=respostas.filter(r=>r.is_correct).length;
+    const acertos=respostas.filter(r=>r.is_correct).length;
     await sb.from('test_sessions').insert({
-      user_id:user.id,test:TEST,items_qty:respostas.length,score_qi:(acertos/respostas.length)*100
+      user_id:user.id,test_key:TEST,items_qty:respostas.length,score_qi:(acertos/respostas.length)*100
     });
-    window.location='/qi-premium.html';
+    location.href='/qi-premium.html';
   };
 })();
 </script>
