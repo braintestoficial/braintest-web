@@ -1,19 +1,12 @@
 <script>
 /**
- * Motor para carregar perguntas aleatórias do Supabase e renderizar o formulário.
- * Mostra estados de "carregando", "login exigido", "sem perguntas" e erros.
- *
- * Requer:
- *  - window.sb (do /assets/supabase-init.js)
- *  - containerForm: <form> onde as perguntas serão montadas
- *  - containerResult: div para o resultado gratuito
- *  - containerStatus (opcional): div para mensagens de status
+ * test-runtime.js (hotfix debug)
+ * - Mostra mensagens detalhadas (login, RPC, pool vazio, erros reais).
+ * - Faz um "probe" no pool quando a RPC retorna vazio.
+ * Uso: igual ao anterior (createTestEngine(...)).
  */
 function createTestEngine(cfg){
-  const state = {
-    questions: [],
-    answers: {} // question_id -> { option_id, value(int|null), is_correct(bool) }
-  };
+  const state = { questions: [], answers: {} };
 
   function setStatus(msg, type='info'){
     if(!cfg.containerStatus) return;
@@ -23,28 +16,55 @@ function createTestEngine(cfg){
       color:#303540;font-size:.92rem">${msg}</div>`;
   }
 
+  function renderEmpty(){
+    const f = cfg.containerForm;
+    f.innerHTML = `<p style="color:#6b7380">Sem perguntas para exibir.</p>`;
+  }
+
   async function load(){
     try{
-      setStatus('Carregando perguntas…', 'info');
+      setStatus('Carregando perguntas…');
 
+      // 1) Sessão?
       const { data:{ user }, error:errUser } = await sb.auth.getUser();
       if(errUser) throw errUser;
-
       if(!user){
         setStatus('Você precisa entrar para realizar esta triagem. <a href="/perfil.html">Entrar com Google</a>', 'error');
         renderEmpty();
         return;
       }
 
-      const { data, error } = await sb.rpc('get_random_questions', {
-        p_test: cfg.testKey,
-        p_qty: cfg.qty || 15
-      });
+      // 2) RPC
+      const { data, error } = await sb.rpc('get_random_questions', { p_test: cfg.testKey, p_qty: cfg.qty || 15 });
+      if(error){
+        console.error('RPC get_random_questions error', error);
+        setStatus(`Erro ao carregar perguntas (RPC): <code style="font-family:monospace">${error.message||'desconhecido'}</code>`, 'error');
+        renderEmpty();
+        return;
+      }
 
-      if(error) throw error;
-
+      // 3) Vazio? Faz "probe" no pool bruto para diagnosticar.
       if(!data || data.length === 0){
-        setStatus('Não encontramos perguntas ativas para este teste. Tente novamente em alguns minutos.', 'error');
+        // probe 1: existe pelo menos 1 pergunta ativa desse teste?
+        const { data:probeQ, error:probeErr } = await sb
+          .from('test_questions')
+          .select('id', { count:'exact', head:true })
+          .eq('test_key', cfg.testKey)
+          .eq('active', true);
+
+        if(probeErr){
+          console.error('Probe test_questions error', probeErr);
+          setStatus(`Sem perguntas. Erro ao verificar pool: <code style="font-family:monospace">${probeErr.message||'desconhecido'}</code>`, 'error');
+          renderEmpty();
+          return;
+        }
+
+        if((probeQ === null) || (probeQ?.length === 0)){
+          // count não vem no head:true, então cuidamos pela ausência; mensagem amigável:
+          setStatus('Não encontramos perguntas ativas para este teste. Verifique se o pool foi criado no Supabase (tabela <b>test_questions</b>) e se há opções em <b>test_question_options</b>.', 'error');
+        }else{
+          setStatus('Existe pool, mas a função retornou vazio. Confirme se a RPC <b>get_random_questions</b> está criada e com <i>grant execute to authenticated</i>.', 'error');
+        }
         renderEmpty();
         return;
       }
@@ -53,15 +73,10 @@ function createTestEngine(cfg){
       setStatus(''); // limpa
       renderForm();
     }catch(e){
-      console.error('engine.load error', e);
-      setStatus('Não foi possível carregar as perguntas agora. Tente recarregar a página.', 'error');
+      console.error('engine.load fatal error', e);
+      setStatus(`Falha inesperada ao carregar. <code style="font-family:monospace">${e.message||e.toString()}</code>`, 'error');
       renderEmpty();
     }
-  }
-
-  function renderEmpty(){
-    const f = cfg.containerForm;
-    f.innerHTML = `<p style="color:#6b7380">Sem perguntas para exibir.</p>`;
   }
 
   function renderForm(){
@@ -116,7 +131,6 @@ function createTestEngine(cfg){
   }
 
   function computeAndRender(){
-    // coleta respostas
     state.answers = {};
     state.questions.forEach(q=>{
       const sel = document.querySelector(`input[name="q_${q.question_id}"]:checked`);
@@ -129,7 +143,6 @@ function createTestEngine(cfg){
       }
     });
 
-    // pontuação
     let scoreLikert = 0, countLikert = 0;
     let scoreQI = 0, countQI = 0;
 
