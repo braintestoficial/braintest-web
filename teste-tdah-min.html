@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TDAH (mínimo) — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-init.js"></script>
+<style>
+body{font-family:Inter,system-ui,Arial;background:#f6f7fb;color:#1d3557;margin:0}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid #e9ecf2;border-radius:12px;padding:14px;margin:12px 0}
+h1{font-weight:700} .q{margin:10px 0} .opt{margin:6px 0}
+.bad{color:#b00020} .ok{color:#0a7a33}
+.btn{background:#ff8a73;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>TDAH — Triagem (mínimo)</h1>
+  <div id="status" class="card">Inicializando…</div>
+  <div id="quiz" class="card" style="display:none"></div>
+  <div id="res" class="card" style="display:none"></div>
+</div>
+
+<script>
+(async ()=>{
+  const status = (msg, ok=false)=> {
+    const el = document.getElementById('status');
+    el.innerHTML = msg;
+    el.className = 'card ' + (ok?'ok':'');
+  };
+
+  if(!window.sb){
+    status('<b class="bad">/assets/supabase-init.js não carregou.</b> Verifique o caminho e o arquivo no deploy.');
+    return;
+  }
+
+  // Sessão
+  const { data:{ user }, error:authErr } = await sb.auth.getUser();
+  if(authErr){ status('Erro de auth: '+authErr.message); return; }
+  if(!user){ status('Sem sessão. <a href="/perfil.html">Entrar com Google</a>'); return; }
+
+  // Busca perguntas
+  const { data, error } = await sb.rpc('get_random_questions', { p_test:'tdah', p_qty:15 });
+  if(error){ status('Erro na RPC: <code>'+ (error.message||'desconhecido') +'</code>'); return; }
+  if(!data || !data.length){ status('Pool vazio: não há perguntas ativas para TDAH.'); return; }
+
+  status('Perguntas carregadas.', true);
+
+  // Render mínimo
+  const quiz = document.getElementById('quiz');
+  quiz.style.display='block';
+  const form = document.createElement('form');
+
+  data.forEach((q, i)=>{
+    const div = document.createElement('div'); div.className='q';
+    const title = document.createElement('div'); title.innerHTML = `<b>${i+1}.</b> ${q.prompt}`;
+    div.appendChild(title);
+    (q.options||[]).forEach(opt=>{
+      const optDiv = document.createElement('div'); optDiv.className='opt';
+      optDiv.innerHTML = `
+        <label>
+          <input type="radio" name="q_${q.question_id}" data-val="${opt.value ?? ''}" required>
+          ${opt.label}
+        </label>`;
+      div.appendChild(optDiv);
+    });
+    form.appendChild(div);
+  });
+
+  const btn = document.createElement('button'); btn.className='btn'; btn.type='submit'; btn.textContent='Ver resultado';
+  form.appendChild(btn);
+  quiz.appendChild(form);
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    let score=0, count=0;
+    data.forEach(q=>{
+      const sel = form.querySelector(`input[name="q_${q.question_id}"]:checked`);
+      if(sel){
+        const v = sel.dataset.val === '' ? null : Number(sel.dataset.val);
+        if(v!==null){ score += v; count++; }
+      }
+    });
+    const res = document.getElementById('res');
+    res.style.display='block';
+    const max = 2*count;
+    res.innerHTML = `Soma de sintomas: <b>${score}/${max}</b>`;
+  });
+})();
+</script>
+</body>
+</html>

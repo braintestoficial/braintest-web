@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Debug Triagem — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<!-- IMPORTANTÍSSIMO: este caminho precisa existir e definir window.sb -->
+<script src="/assets/supabase-init.js"></script>
+<style>
+body{font-family:Inter,system-ui,Arial;background:#f6f7fb;color:#1d3557;padding:16px}
+.card{background:#fff;border:1px solid #e9ecf2;border-radius:12px;padding:14px;margin:10px 0}
+code,pre{font-family:ui-monospace,Menlo,Consolas,monospace}
+.bad{color:#b00020} .ok{color:#0a7a33}
+</style>
+</head>
+<body>
+<h1>Debug Triagem</h1>
+
+<div class="card">
+  <h3>Sessão</h3>
+  <div id="auth" class="bad">Checando...</div>
+</div>
+
+<div class="card">
+  <h3>get_random_questions()</h3>
+  <p>Retorno bruto da RPC para <b>tdah</b>, <b>burnout</b> e <b>qi</b> (3 itens cada).</p>
+  <pre id="out">Carregando...</pre>
+</div>
+
+<script>
+(async ()=>{
+  if(!window.sb){
+    document.getElementById('auth').innerHTML = '<span class="bad">/assets/supabase-init.js NÃO carregou. Confirme o caminho e o arquivo no deploy.</span>';
+    document.getElementById('out').textContent = 'Abortado: sb indefinido.';
+    return;
+  }
+
+  // 1) Sessão
+  const { data:{ user }, error:authErr } = await sb.auth.getUser();
+  const authEl = document.getElementById('auth');
+  if(authErr){
+    authEl.textContent = 'Erro de auth: '+authErr.message;
+    authEl.className='bad';
+    return;
+  }
+  if(!user){
+    authEl.innerHTML = 'Sem sessão. <a href="/perfil.html">Entrar com Google</a>';
+    authEl.className='bad';
+    return;
+  }
+  authEl.innerHTML = 'Logado como: <b>'+ (user.email || user.id) +'</b>';
+  authEl.className='ok';
+
+  // 2) RPC
+  const out = document.getElementById('out');
+  try{
+    const tests = ['tdah','burnout','qi'];
+    const results = {};
+    for(const t of tests){
+      const { data, error } = await sb.rpc('get_random_questions',{ p_test:t, p_qty:3 });
+      results[t] = error ? { error:error.message } : data;
+    }
+    out.textContent = JSON.stringify(results, null, 2);
+  }catch(e){
+    out.textContent = 'Falha inesperada: '+ (e.message || e.toString());
+  }
+})();
+</script>
+</body>
+</html>
