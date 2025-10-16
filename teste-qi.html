@@ -49,9 +49,10 @@ h3{color:#0e1d33;margin:.8rem 0 .4rem}
 
   <section class="card">
     <h2>QI — Triagem Aleatória (15 itens)</h2>
-    <p class="small">Indicativa. O relatório premium traz análise por domínios e percentil.</p>
+    <p class="small">Indicativa. O relatório premium traz análise por domínio e percentil.</p>
     <div class="hr"></div>
 
+    <div id="statusBox" class="small" style="margin-bottom:.6rem"></div>
     <form id="formQi"></form>
     <div id="resumo" class="resultBox" style="display:none;margin-top:1rem"></div>
   </section>
@@ -83,46 +84,51 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const { data:{ user } } = await sb.auth.getUser();
   const ui = document.getElementById('userInfo');
   const logoutBtn = document.getElementById('logoutBtn');
-  if(!user){ ui.textContent='Visitante'; return; }
-  ui.textContent = user.email || 'Usuário';
-  logoutBtn.style.display='inline-block';
 
-  // saldo
-  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-  const bc = ((w?.balance_cents||0)/100).toFixed(2);
-  document.getElementById('saldoTop').textContent = bc;
-  document.getElementById('saldoAqui').textContent = `${bc} BC`;
+  if(!user){
+    ui.textContent = 'Visitante';
+    logoutBtn.style.display='none';
+  } else {
+    ui.textContent = user.email || 'Usuário';
+    logoutBtn.style.display='inline-block';
 
-  // já possui?
-  const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
-  if(have){
-    document.getElementById('btnBuy').classList.add('hide');
-    document.getElementById('btnAdd').classList.add('hide');
-    document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
-    document.getElementById('btnOpen').classList.remove('hide');
-    document.getElementById('ownedBadge').classList.remove('hide');
+    // saldo
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const bc = ((w?.balance_cents||0)/100).toFixed(2);
+    document.getElementById('saldoTop').textContent = bc;
+    document.getElementById('saldoAqui').textContent = `${bc} BC`;
+
+    // já possui?
+    const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+    if(have){
+      document.getElementById('btnBuy').classList.add('hide');
+      document.getElementById('btnAdd').classList.add('hide');
+      document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+      document.getElementById('btnOpen').classList.remove('hide');
+      document.getElementById('ownedBadge').classList.remove('hide');
+    }
   }
 
-  // Carrega perguntas dinâmicas
   const engine = createTestEngine({
     testKey: 'qi',
     qty: 15,
     containerForm: document.getElementById('formQi'),
     containerResult: document.getElementById('resumo'),
+    containerStatus: document.getElementById('statusBox'),
     onFreeResult: ({scoreQI, countQI})=>{
       const box = document.getElementById('resumo');
       box.innerHTML = `<strong>Resultado gratuito:</strong> Corretas: <b>${scoreQI}/${countQI}</b> (estimativa ilustrativa).<br><span class="small">Para análise por domínio (numérico, lógico, espacial) e percentil, desbloqueie o premium.</span>`;
       box.style.display='block';
     }
   });
-  try{ await engine.load(); }catch(e){ alert('Não foi possível carregar as perguntas.'); console.error(e); }
+  await engine.load();
 });
 
 document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });
 
 document.getElementById('btnBuy').addEventListener('click', async ()=>{
   const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ alert('Faça login.'); return; }
+  if(!user){ alert('Faça login para continuar.'); location.href='/perfil.html'; return; }
   const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
   const balance = w?.balance_cents||0;
   if(balance < PRICE_CENTS){ if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html'; return; }

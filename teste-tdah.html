@@ -8,7 +8,6 @@
 <script src="/assets/supabase-init.js"></script>
 <script src="/assets/test-runtime.js"></script>
 <style>
-/* (Mesmo CSS que você vem usando) */
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
@@ -18,7 +17,7 @@ header.top{display:flex;align-items:center;justify-content:space-between;backgro
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn.secondary{background:#fff;color:#0e1d33;border:1px solid var(--borda)}
 .btn.small{padding:.4rem .7rem}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
@@ -53,6 +52,7 @@ h3{color:#0e1d33;margin:.8rem 0 .4rem}
     <p class="small">Indicativa e não substitui avaliação médica.</p>
     <div class="hr"></div>
 
+    <div id="statusBox" class="small" style="margin-bottom:.6rem"></div>
     <form id="formTdah"></form>
     <div id="resumo" class="resultBox" style="display:none;margin-top:1rem"></div>
   </section>
@@ -84,52 +84,56 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const { data:{ user } } = await sb.auth.getUser();
   const ui = document.getElementById('userInfo');
   const logoutBtn = document.getElementById('logoutBtn');
-  if(!user){ ui.textContent='Visitante'; return; }
-  ui.textContent = user.email || 'Usuário';
-  logoutBtn.style.display='inline-block';
 
-  // saldo
-  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-  const bc = ((w?.balance_cents||0)/100).toFixed(2);
-  document.getElementById('saldoTop').textContent = bc;
-  document.getElementById('saldoAqui').textContent = `${bc} BC`;
+  if(!user){
+    ui.textContent = 'Visitante';
+    logoutBtn.style.display='none';
+  } else {
+    ui.textContent = user.email || 'Usuário';
+    logoutBtn.style.display='inline-block';
 
-  // já possui?
-  const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
-  if(have){
-    document.getElementById('btnBuy').classList.add('hide');
-    document.getElementById('btnAdd').classList.add('hide');
-    document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
-    document.getElementById('btnOpen').classList.remove('hide');
-    document.getElementById('ownedBadge').classList.remove('hide');
+    // saldo
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const bc = ((w?.balance_cents||0)/100).toFixed(2);
+    document.getElementById('saldoTop').textContent = bc;
+    document.getElementById('saldoAqui').textContent = `${bc} BC`;
+
+    // já possui?
+    const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+    if(have){
+      document.getElementById('btnBuy').classList.add('hide');
+      document.getElementById('btnAdd').classList.add('hide');
+      document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+      document.getElementById('btnOpen').classList.remove('hide');
+      document.getElementById('ownedBadge').classList.remove('hide');
+    }
   }
 
-  // Carrega perguntas dinâmicas (15)
+  // Carrega perguntas dinâmicas
   const engine = createTestEngine({
     testKey: 'tdah',
     qty: 15,
     containerForm: document.getElementById('formTdah'),
     containerResult: document.getElementById('resumo'),
+    containerStatus: document.getElementById('statusBox'),
     onFreeResult: ({scoreLikert, countLikert})=>{
-      // Heurística simples para o gratuito:
-      // faixa 0..(2*count) => baixo/moderado/elevado
       const max = 2*countLikert;
       let nivel = 'baixo';
       if(scoreLikert >= Math.ceil(max*0.40)) nivel = 'moderado';
       if(scoreLikert >= Math.ceil(max*0.70)) nivel = 'elevado';
       const box = document.getElementById('resumo');
-      box.innerHTML = `<strong>Resultado gratuito:</strong> Soma de sintomas: <b>${scoreLikert}/${max}</b><br><span class="small">Para interpretações por domínio e recomendações personalizadas, desbloqueie o relatório premium.</span>`;
+      box.innerHTML = `<strong>Resultado gratuito:</strong> Soma de sintomas: <b>${scoreLikert}/${max}</b> — indícios ${nivel}.<br><span class="small">Para interpretações por domínio e recomendações, desbloqueie o relatório premium.</span>`;
       box.style.display='block';
     }
   });
-  try{ await engine.load(); }catch(e){ alert('Não foi possível carregar as perguntas no momento.'); console.error(e); }
+  await engine.load();
 });
 
 document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });
 
 document.getElementById('btnBuy').addEventListener('click', async ()=>{
   const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ alert('Faça login.'); return; }
+  if(!user){ alert('Faça login para continuar.'); location.href='/perfil.html'; return; }
   const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
   const balance = w?.balance_cents||0;
   if(balance < PRICE_CENTS){ if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html'; return; }
