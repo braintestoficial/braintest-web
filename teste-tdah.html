@@ -8,25 +8,23 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
 <style>
-.question {
-  margin-bottom: 1rem;
-  padding-bottom: .5rem;
-  border-bottom: 1px solid var(--line);
-}
-.question p { margin: 0 0 .25rem; font-weight: 500; }
-.question label { display: block; margin-left: 1rem; font-size: .95rem; color: #334; }
+.question{margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);}
+.question p{margin:0 0 .25rem;font-weight:500;}
+.question label{display:block;margin-left:1rem;font-size:.95rem;color:#334;}
 </style>
 </head>
 <body>
 <div class="shell">
   <header class="topbar">
     <a class="brand" href="/index.html"><img src="/assets/logo.svg"><span>Braintest</span></a>
+    <div class="search"><input placeholder="Busque... (Ex: TDAH, Burnout, QI)"></div>
   </header>
+
   <main class="content">
     <div class="container">
       <div class="card">
         <h2>Triagem — TDAH</h2>
-        <p class="small">Responda às <b>15</b> perguntas abaixo. As respostas geram um <b>resultado gratuito</b>; o relatório completo é premium e não substitui diagnóstico médico.</p>
+        <p class="small">Responda às <b>15</b> perguntas abaixo. O relatório completo é premium e não substitui diagnóstico médico.</p>
         <div id="quiz">Carregando perguntas...</div>
         <button class="btn" id="enviar">Gerar resultado</button>
       </div>
@@ -39,45 +37,76 @@ const TEST='tdah';
 const quizEl=document.getElementById('quiz');
 let perguntas=[];
 
+// Barra de pesquisa funcional
+document.addEventListener('DOMContentLoaded',()=>{
+  const s=document.querySelector('.search input');
+  if(!s)return;
+  s.addEventListener('keypress',e=>{
+    if(e.key==='Enter'){
+      const term=s.value.toLowerCase();
+      if(term.includes('tdah'))location.href='/teste-tdah.html';
+      else if(term.includes('burn'))location.href='/teste-burnout.html';
+      else if(term.includes('qi'))location.href='/teste-qi.html';
+      else if(term.includes('perfil'))location.href='/perfil.html';
+      else location.href='/index.html';
+    }
+  });
+});
+
 (async()=>{
   const { data:user }=await sb.auth.getUser();
   if(!user){window.location='/login.html';return;}
 
-  const { data:qs, error } = await sb.from('test_questions')
-    .select('id,prompt,kind,domain,test_question_options(label,value)')
-    .eq('test',TEST)
-    .order('random()')
-    .limit(15);
-
-  if(error){ quizEl.innerHTML='<p>Erro ao carregar perguntas.</p>'; console.error(error); return; }
+  let qs=[];
+  try{
+    const { data,error,status }=await sb.from('test_questions')
+      .select('id,prompt,kind,domain,test_question_options(label,value)')
+      .eq('test',TEST).order('random()').limit(15);
+    if(error||!data||status>=400){
+      console.warn('Erro ou vazio, usando fallback',error||status);
+      qs=Array.from({length:15},(_,i)=>({
+        id:i+1000,
+        prompt:`Pergunta temporária ${i+1} (modo offline).`,
+        test_question_options:[
+          {label:'Raramente',value:0},
+          {label:'Às vezes',value:1},
+          {label:'Frequentemente',value:2}
+        ]
+      }));
+    }else{qs=data;}
+  }catch(e){
+    console.error(e);
+    qs=Array.from({length:15},(_,i)=>({
+      id:i+1000,prompt:`Pergunta temporária ${i+1} (modo offline).`,
+      test_question_options:[
+        {label:'Raramente',value:0},
+        {label:'Às vezes',value:1},
+        {label:'Frequentemente',value:2}
+      ]
+    }));
+  }
 
   perguntas=qs;
-  quizEl.innerHTML = qs.map((q,i)=>{
-    const opts = q.test_question_options?.length
-      ? q.test_question_options
-      : [{label:'Raramente',value:0},{label:'Às vezes',value:1},{label:'Frequentemente',value:2}];
-    return `
-      <div class="question">
-        <p><b>${i+1}.</b> ${q.prompt}</p>
-        ${opts.map(o=>`
-          <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>
-        `).join('')}
-      </div>
-    `;
-  }).join('');
+  quizEl.innerHTML=qs.map((q,i)=>`
+    <div class="question">
+      <p><b>${i+1}.</b> ${q.prompt}</p>
+      ${q.test_question_options.map(o=>`
+        <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>
+      `).join('')}
+    </div>
+  `).join('');
 })();
 
-document.getElementById('enviar').onclick = async()=>{
+document.getElementById('enviar').onclick=async()=>{
   const user=(await sb.auth.getUser()).data.user;
   if(!user)return;
-
-  const respostas = perguntas.map(q=>{
+  const respostas=perguntas.map(q=>{
     const val=document.querySelector(`input[name="q${q.id}"]:checked`);
-    return {question_id:q.id,value:val?Number(val.value):null};
+    return{question_id:q.id,value:val?Number(val.value):null};
   });
   const items_qty=respostas.length;
-  const score_likert = respostas.reduce((s,r)=>s+(r.value??0),0);
-  const { data:sess } = await sb.from('test_sessions').insert({
+  const score_likert=respostas.reduce((s,r)=>s+(r.value??0),0);
+  const{data:sess}=await sb.from('test_sessions').insert({
     user_id:user.id,test:TEST,items_qty,score_likert
   }).select().single();
   for(const r of respostas){
