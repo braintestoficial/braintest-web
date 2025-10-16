@@ -14,9 +14,11 @@
 
   <header class="topbar">
     <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
-    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
-    <div class="user-chip" id="userChip">Carregando…</div>
-    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+    <div class="search"><input placeholder="Busque…"></div>
+    <div class="top-actions">
+      <div class="user-chip" id="userChip">Carregando…</div>
+      <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+    </div>
   </header>
 
   <div class="body">
@@ -36,26 +38,38 @@
 
     <main class="content">
       <div class="container">
-        <div class="card">
-          <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Seu perfil</h2>
-          <div id="status" class="small" style="margin:.25rem 0 .5rem"></div>
-          <div class="grid cols-2">
-            <div class="card">
-              <h3 style="margin:0 0 8px">Dados da conta</h3>
-              <div class="kv">
-                <div>Email</div><div id="pEmail">—</div>
-                <div>Nome</div><div id="pName">—</div>
-                <div>Usuário</div><div id="pId">—</div>
-              </div>
-              <div style="margin-top:10px"><button class="btn alt" id="btnLogout">Sair</button></div>
+
+        <!-- Gate não logado -->
+        <div class="card" id="boxLogin" style="display:none">
+          <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Entre na sua conta</h2>
+          <p class="small">Use sua conta Google para criar/entrar.</p>
+          <button class="btn" id="btnLogin">Entrar com Google</button>
+        </div>
+
+        <!-- Área logado -->
+        <div class="grid cols-2" id="boxLogado" style="display:none">
+          <div class="card">
+            <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Seu perfil</h2>
+            <div class="kv" style="display:grid;grid-template-columns:160px 1fr;gap:.4rem .8rem;margin:.5rem 0">
+              <div>Email</div><div id="pEmail">—</div>
+              <div>Nome</div><div id="pName">—</div>
+              <div>ID</div><div id="pId">—</div>
             </div>
-            <div class="card">
-              <h3 style="margin:0 0 8px">Sessão</h3>
-              <p class="small">Use “Entrar com Google” para criar/entrar na sua conta.</p>
-              <button class="btn" id="btnLogin">Entrar com Google</button>
+            <div class="hr"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn alt" id="btnLogout">Sair</button>
+              <button class="btn" id="btnEdit">Editar nome</button>
+              <button class="btn alt" id="btnDelete">Solicitar exclusão</button>
             </div>
           </div>
+
+          <div class="card">
+            <h3 style="margin:0 0 8px">Preferências</h3>
+            <p class="small">Mais configurações chegarão com a assinatura e jogos.</p>
+            <a class="btn" href="/assinatura.html">Ver planos</a>
+          </div>
         </div>
+
       </div>
     </main>
   </div>
@@ -69,33 +83,101 @@
   </nav>
 </div>
 
+<!-- Modal editar nome -->
+<div class="modal" id="mEdit">
+  <div class="box">
+    <h3 style="margin-top:0">Editar nome</h3>
+    <p class="small">Este nome aparece nos seus relatórios.</p>
+    <input id="inpNome" placeholder="Seu nome" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn alt" id="cancelEdit">Cancelar</button>
+      <button class="btn" id="saveEdit">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal exclusão -->
+<div class="modal" id="mDelete">
+  <div class="box">
+    <h3 style="margin-top:0">Solicitar exclusão</h3>
+    <p class="small">A exclusão completa da conta (autenticação) requer uma operação segura no servidor. Enquanto não ativamos isso, você pode solicitar pelo e-mail abaixo. Seus dados de respostas podem ser excluídos sob demanda.</p>
+    <a class="btn" id="mailtoDel" target="_blank">Enviar solicitação por e-mail</a>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn alt" id="closeDelete">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <script>
+let currentUser=null;
+
+function show(el,flag){ el.style.display = flag ? '' : 'none'; }
+
 document.addEventListener('DOMContentLoaded', async ()=>{
   await waitForSupabaseSession();
   const { data:{ user } } = await sb.auth.getUser();
-  const status=document.getElementById('status');
+  currentUser=user||null;
 
   if(user){
-    const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const saldo=((w?.balance_cents||0)/100); setTopUser(user.email||'Usuário', saldo);
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    setTopUser(user.email||'Usuário', ((w?.balance_cents||0)/100));
+
     document.getElementById('pEmail').textContent=user.email||'-';
     document.getElementById('pName').textContent=user.user_metadata?.full_name || user.user_metadata?.name || '-';
     document.getElementById('pId').textContent=user.id;
-    status.textContent='Você está conectado.';
+
+    show(document.getElementById('boxLogado'), true);
+    show(document.getElementById('boxLogin'), false);
   }else{
     document.getElementById('userChip').textContent='Visitante';
-    status.textContent='Entre para acessar sua carteira e histórico.';
+    show(document.getElementById('boxLogin'), true);
+    show(document.getElementById('boxLogado'), false);
   }
 
-  document.getElementById('btnLogin').addEventListener('click', async ()=>{
-    await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: location.origin + '/perfil.html' }
-    });
+  // Entrar
+  document.getElementById('btnLogin')?.addEventListener('click', async ()=>{
+    const params=new URLSearchParams(location.search); const next=params.get('next') || '/index.html';
+    await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.origin + next }});
   });
-  document.getElementById('btnLogout').addEventListener('click', async ()=>{
-    await sb.auth.signOut(); location.reload();
+
+  // Sair
+  document.getElementById('btnLogout')?.addEventListener('click', async ()=>{
+    await sb.auth.signOut(); location.href='/perfil.html';
   });
+
+  // Editar nome
+  const mEdit=document.getElementById('mEdit');
+  document.getElementById('btnEdit')?.addEventListener('click', ()=>{
+    document.getElementById('inpNome').value = document.getElementById('pName').textContent || '';
+    mEdit.style.display='flex';
+  });
+  document.getElementById('cancelEdit')?.addEventListener('click', ()=> mEdit.style.display='none');
+  document.getElementById('saveEdit')?.addEventListener('click', async ()=>{
+    const nome=document.getElementById('inpNome').value.trim();
+    if(!nome) return alert('Digite um nome.');
+    // atualiza metadata do auth
+    await sb.auth.updateUser({ data:{ full_name:nome } });
+    // upsert no perfil
+    if(currentUser){
+      await sb.from('profiles').upsert({ id: currentUser.id, email: currentUser.email, full_name: nome }, { onConflict: 'id' });
+      document.getElementById('pName').textContent=nome;
+      mEdit.style.display='none';
+    }
+  });
+
+  // Solicitar exclusão
+  const mDelete=document.getElementById('mDelete');
+  document.getElementById('btnDelete')?.addEventListener('click', ()=>{
+    const addr='contato@braintest.com.br';
+    const subj=encodeURIComponent('Solicitação de exclusão de conta Braintest');
+    const body=encodeURIComponent(`Olá,\n\nGostaria de solicitar a exclusão da minha conta e dados.\n\nID: ${currentUser?.id}\nEmail: ${currentUser?.email}\n\nObrigado(a).`);
+    document.getElementById('mailtoDel').href = `mailto:${addr}?subject=${subj}&body=${body}`;
+    mDelete.style.display='flex';
+  });
+  document.getElementById('closeDelete')?.addEventListener('click', ()=> mDelete.style.display='none');
+
+  // fechar modais clicando fora
+  [mEdit,mDelete].forEach(m=> m.addEventListener('click', (e)=>{ if(e.target===m) m.style.display='none'; }));
 });
 </script>
 </body>

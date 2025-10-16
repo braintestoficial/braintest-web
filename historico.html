@@ -14,9 +14,11 @@
 
   <header class="topbar">
     <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
-    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
-    <div class="user-chip" id="userChip">Carregando…</div>
-    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+    <div class="search"><input placeholder="Busque…"></div>
+    <div class="top-actions">
+      <div class="user-chip" id="userChip">Carregando…</div>
+      <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+    </div>
   </header>
 
   <div class="body">
@@ -58,17 +60,13 @@
           <table class="table" id="grid" style="margin-top:.6rem">
             <thead>
               <tr>
-                <th>Data</th>
-                <th>Teste</th>
-                <th>Itens</th>
-                <th>Resultado</th>
-                <th style="width:240px">Ações</th>
+                <th>Data</th><th>Teste</th><th>Itens</th><th>Resultado</th><th style="width:240px">Ações</th>
               </tr>
             </thead>
             <tbody id="tbody"><tr><td colspan="5" class="small">Carregando…</td></tr></tbody>
           </table>
 
-          <div class="pager" style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
+          <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
             <button id="prevBtn" disabled>◀ Anteriores</button>
             <button id="nextBtn" disabled>Próximas ▶</button>
           </div>
@@ -86,48 +84,58 @@
   </nav>
 </div>
 
-<!-- Modal -->
+<!-- Modal Detalhes -->
 <div class="modal" id="modal">
   <div class="box">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <h3 style="margin:.2rem 0">Detalhes da sessão</h3>
       <button class="btn alt small" id="closeModal">Fechar</button>
     </div>
-    <div id="detalhes" class="kv" style="margin-top:.5rem"></div>
+    <div id="detalhes" class="kv" style="display:grid;grid-template-columns:160px 1fr;gap:.4rem .8rem;margin-top:.5rem"></div>
     <div id="respostas"></div>
   </div>
 </div>
 
 <script>
 const PAGE_SIZE=10; let userId=null; let page=0; let lastPage=false;
-const premiumURL = (t)=>({tdah:'/tdah-premium.html',burnout:'/burnout-premium.html',qi:'/qi-premium.html'}[t]||'#');
+const premiumURL=(t)=>({tdah:'/tdah-premium.html',burnout:'/burnout-premium.html',qi:'/qi-premium.html'}[t]||'#');
 function fmt(iso){ if(!iso) return '-'; const d=new Date(iso); return d.toLocaleString('pt-BR',{dateStyle:'short', timeStyle:'short'}); }
 function setStatus(msg){ document.getElementById('status').innerHTML = msg||''; }
 function lineResultado(r){ if(r.test==='qi'){ return `QI: <b>${r.score_qi??0}</b> / ${r.items_qty}` } const max=(r.items_qty||0)*2; return `Likert: <b>${r.score_likert??0}</b> / ${max}`; }
 
-async function loadSaldo(uid){ const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id',uid).single(); return (w?.balance_cents||0)/100; }
-async function loadCompras(uid){ const {data:rows}=await sb.from('purchases').select('product').eq('user_id',uid); return new Set((rows||[]).map(r=>r.product)); }
-
-async function fetchPage(){
+async function fetchPage(retry=false){
   const tbody=document.getElementById('tbody'); tbody.innerHTML=`<tr><td colspan="5" class="small">Carregando…</td></tr>`;
   setStatus('Carregando histórico…');
+  let q=sb.from('test_sessions').select('id,created_at,test,items_qty,score_likert,score_qi').eq('user_id',userId);
 
   const fTeste=document.getElementById('fTeste').value||null;
   const fDe=document.getElementById('fDe').value||null;
   const fAte=document.getElementById('fAte').value||null;
-
-  let q=sb.from('test_sessions').select('id,created_at,test,items_qty,score_likert,score_qi').eq('user_id',userId);
   if(fTeste) q=q.eq('test',fTeste);
   if(fDe) q=q.gte('created_at', new Date(fDe+'T00:00:00').toISOString());
   if(fAte) q=q.lte('created_at', new Date(fAte+'T23:59:59').toISOString());
   q=q.order('created_at',{ascending:false}).range(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE-1);
 
   const { data:rows, error } = await q;
-  if(error){ setStatus(`<span style="color:#b00020">Erro: ${error.message}</span>`); return; }
-  const compras = await loadCompras(userId);
+  if(error){
+    // Tratamento especial para schema cache/race: tenta 1 retry
+    if(!retry && /schema cache|relation .* does not exist|42P01/i.test(error.message||'')){
+      setTimeout(()=>fetchPage(true), 800);
+      setStatus('Inicializando tabelas… tentando novamente.');
+      return;
+    }
+    setStatus(`<span style="color:#b00020">Erro: ${error.message}</span>`);
+    return;
+  }
 
   tbody.innerHTML='';
-  if(!rows||!rows.length){ tbody.innerHTML=`<tr><td colspan="5" class="small">Nenhuma sessão encontrada.</td></tr>`; setStatus(''); document.getElementById('prevBtn').disabled=(page===0); document.getElementById('nextBtn').disabled=true; return; }
+  if(!rows||!rows.length){
+    tbody.innerHTML=`<tr><td colspan="5" class="small">Nenhuma sessão encontrada.</td></tr>`;
+    setStatus(''); document.getElementById('prevBtn').disabled=(page===0); document.getElementById('nextBtn').disabled=true; return;
+  }
+
+  const { data:compras } = await sb.from('purchases').select('product').eq('user_id',userId);
+  const have=new Set((compras||[]).map(r=>r.product));
 
   rows.forEach(r=>{
     const tr=document.createElement('tr');
@@ -138,9 +146,8 @@ async function fetchPage(){
       <td>${lineResultado(r)}</td>
       <td>
         <button class="btn alt small" data-act="ver" data-id="${r.id}" data-test="${r.test}">Ver respostas</button>
-        ${compras.has(r.test) ? 
-          `<a class="btn small" data-act="open" href="${premiumURL(r.test)}">Abrir relatório</a>` :
-          `<button class="btn small" data-act="comprar" data-test="${r.test}">Desbloquear (10 BC)</button>`}
+        ${have.has(r.test) ? `<a class="btn small" href="${premiumURL(r.test)}">Abrir relatório</a>`
+                           : `<a class="btn small" href="/teste-${r.test}.html">Desbloquear (10 BC)</a>`}
       </td>`;
     tbody.appendChild(tr);
   });
@@ -168,31 +175,19 @@ async function openModalDetalhes(sessionId){
   });
 }
 
-async function handleClick(e){
-  const btn=e.target.closest('[data-act]'); if(!btn) return;
-  const act=btn.dataset.act; const test=btn.dataset.test;
-  if(act==='ver'){ openModalDetalhes(btn.dataset.id); }
-  if(act==='comprar'){
-    const PRICE_CENTS=1000; const {data:{user}}=await sb.auth.getUser();
-    const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
-    const bal=w?.balance_cents||0; if(bal<PRICE_CENTS){ if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html'; return; }
-    const {error}=await sb.rpc('wallet_buy',{ p_product:test, p_price_cents:PRICE_CENTS, p_description:`Relatório premium: ${test.toUpperCase()}` });
-    if(error){ alert('Não foi possível concluir a compra.'); return; }
-    alert('Relatório desbloqueado!'); fetchPage();
-  }
-}
-
 document.addEventListener('DOMContentLoaded', async ()=>{
   await waitForSupabaseSession();
   const {data:{user}}=await sb.auth.getUser();
-  if(!user){ location.href='/perfil.html'; return; }
-  document.getElementById('userChip').textContent=user.email||'Usuário';
+  if(!user){ const next=encodeURIComponent('/historico.html'); location.href='/perfil.html?next='+next; return; }
   const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
   setTopUser(user.email||'Usuário', ((w?.balance_cents||0)/100));
   userId=user.id; fetchPage();
 });
 
-document.getElementById('tbody').addEventListener('click', handleClick);
+document.getElementById('tbody').addEventListener('click', (e)=>{
+  const btn=e.target.closest('[data-act="ver"]'); if(!btn) return;
+  openModalDetalhes(btn.dataset.id);
+});
 document.getElementById('closeModal').addEventListener('click', ()=>{ document.getElementById('modal').style.display='none'; });
 document.getElementById('modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') e.currentTarget.style.display='none'; });
 document.getElementById('btnFiltrar').addEventListener('click', ()=>{ page=0; fetchPage(); });
