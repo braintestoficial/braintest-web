@@ -57,7 +57,7 @@
 
           <div id="status" class="small" style="margin:.4rem 0 0"></div>
 
-          <table class="table" id="grid" style="margin-top:.6rem">
+          <table class="table responsive" id="grid" style="margin-top:.6rem">
             <thead>
               <tr>
                 <th>Data</th><th>Teste</th><th>Itens</th><th>Resultado</th><th style="width:240px">Ações</th>
@@ -98,16 +98,19 @@
 
 <script>
 const PAGE_SIZE=10; let userId=null; let page=0; let lastPage=false;
-const premiumURL=(t)=>({tdah:'/tdah-premium.html',burnout:'/burnout-premium.html',qi:'/qi-premium.html'}[t]||'#');
+
+// ✅ corrigido: burnout premium
+const premiumURL=(t)=>({tdah:'/tdah-premium.html', burnout:'/burnout-premium.html', qi:'/qi-premium.html'}[t]||'#');
+
 function fmt(iso){ if(!iso) return '-'; const d=new Date(iso); return d.toLocaleString('pt-BR',{dateStyle:'short', timeStyle:'short'}); }
 function setStatus(msg){ document.getElementById('status').innerHTML = msg||''; }
 function lineResultado(r){ if(r.test==='qi'){ return `QI: <b>${r.score_qi??0}</b> / ${r.items_qty}` } const max=(r.items_qty||0)*2; return `Likert: <b>${r.score_likert??0}</b> / ${max}`; }
 
-async function fetchPage(retry=false){
+async function fetchPage(retry=0){
   const tbody=document.getElementById('tbody'); tbody.innerHTML=`<tr><td colspan="5" class="small">Carregando…</td></tr>`;
-  setStatus('Carregando histórico…');
-  let q=sb.from('test_sessions').select('id,created_at,test,items_qty,score_likert,score_qi').eq('user_id',userId);
+  setStatus(retry?`Tentando novamente (${retry}/3)…`:'Carregando histórico…');
 
+  let q=sb.from('test_sessions').select('id,created_at,test,items_qty,score_likert,score_qi').eq('user_id',userId);
   const fTeste=document.getElementById('fTeste').value||null;
   const fDe=document.getElementById('fDe').value||null;
   const fAte=document.getElementById('fAte').value||null;
@@ -118,20 +121,22 @@ async function fetchPage(retry=false){
 
   const { data:rows, error } = await q;
   if(error){
-    // Tratamento especial para schema cache/race: tenta 1 retry
-    if(!retry && /schema cache|relation .* does not exist|42P01/i.test(error.message||'')){
-      setTimeout(()=>fetchPage(true), 800);
-      setStatus('Inicializando tabelas… tentando novamente.');
+    const msg = error.message || '';
+    if(retry<3 && /schema cache|relation .* does not exist|42P01/i.test(msg)){
+      setTimeout(()=>fetchPage(retry+1), 700);
       return;
     }
-    setStatus(`<span style="color:#b00020">Erro: ${error.message}</span>`);
+    setStatus(`<span style="color:#b00020">Erro: ${msg || 'Falha ao carregar.'}</span>`);
     return;
   }
 
   tbody.innerHTML='';
   if(!rows||!rows.length){
     tbody.innerHTML=`<tr><td colspan="5" class="small">Nenhuma sessão encontrada.</td></tr>`;
-    setStatus(''); document.getElementById('prevBtn').disabled=(page===0); document.getElementById('nextBtn').disabled=true; return;
+    setStatus('');
+    document.getElementById('prevBtn').disabled=(page===0);
+    document.getElementById('nextBtn').disabled=true;
+    return;
   }
 
   const { data:compras } = await sb.from('purchases').select('product').eq('user_id',userId);
@@ -139,24 +144,41 @@ async function fetchPage(retry=false){
 
   rows.forEach(r=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${fmt(r.created_at)}</td>
-      <td>${r.test.toUpperCase()}</td>
-      <td>${r.items_qty||0}</td>
-      <td>${lineResultado(r)}</td>
-      <td>
-        <button class="btn alt small" data-act="ver" data-id="${r.id}" data-test="${r.test}">Ver respostas</button>
-        ${have.has(r.test) ? `<a class="btn small" href="${premiumURL(r.test)}">Abrir relatório</a>`
-                           : `<a class="btn small" href="/teste-${r.test}.html">Desbloquear (10 BC)</a>`}
-      </td>`;
+
+    const tdData   = document.createElement('td'); tdData.setAttribute('data-label','Data');      tdData.innerHTML = fmt(r.created_at);
+    const tdTeste  = document.createElement('td'); tdTeste.setAttribute('data-label','Teste');     tdTeste.textContent = r.test.toUpperCase();
+    const tdItens  = document.createElement('td'); tdItens.setAttribute('data-label','Itens');     tdItens.textContent = r.items_qty || 0;
+    const tdRes    = document.createElement('td'); tdRes.setAttribute('data-label','Resultado');   tdRes.innerHTML = lineResultado(r);
+
+    const tdAcoes  = document.createElement('td'); tdAcoes.setAttribute('data-label','Ações');
+    const btnVer = `<button class="btn alt small" data-act="ver" data-id="${r.id}" data-test="${r.test}">Ver respostas</button>`;
+    const btnRel = have.has(r.test)
+      ? `<a class="btn small" href="${premiumURL(r.test)}">Abrir relatório</a>`
+      : `<a class="btn small" href="/teste-${r.test}.html">Desbloquear (10 BC)</a>`;
+    tdAcoes.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${btnVer}${btnRel}</div>`;
+
+    tr.appendChild(tdData); tr.appendChild(tdTeste); tr.appendChild(tdItens); tr.appendChild(tdRes); tr.appendChild(tdAcoes);
     tbody.appendChild(tr);
   });
+
   lastPage = rows.length<PAGE_SIZE;
   document.getElementById('prevBtn').disabled=(page===0);
   document.getElementById('nextBtn').disabled=lastPage;
   setStatus('');
 }
 
+document.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('/historico.html'); if(!user) return; // força login
+  await ensureTopbarUser();
+  userId=user.id; fetchPage();
+});
+
+document.getElementById('tbody').addEventListener('click', (e)=>{
+  const btn=e.target.closest('[data-act="ver"]'); if(!btn) return;
+  openModalDetalhes(btn.dataset.id);
+});
+
+// Modal
 async function openModalDetalhes(sessionId){
   const modal=document.getElementById('modal'); modal.style.display='flex';
   const detalhes=document.getElementById('detalhes'); const respostas=document.getElementById('respostas');
@@ -167,7 +189,7 @@ async function openModalDetalhes(sessionId){
   const {data:qRows}=await sb.from('test_questions').select('id,prompt').in('id',qids);
   const {data:oRows}=await sb.from('test_question_options').select('id,label').in('id',oids);
   const mapQ=new Map((qRows||[]).map(q=>[q.id,q.prompt])); const mapO=new Map((oRows||[]).map(o=>[o.id,o.label]));
-  detalhes.innerHTML=`<div>Data</div><div>${fmt(s.created_at)}</div><div>Teste</div><div>${s.test.toUpperCase()}</div><div>Itens</div><div>${s.items_qty||0}</div><div>Resultado</div><div>${s.test==='qi'?(s.score_qi||0)+' / '+(s.items_qty||0):(s.score_likert||0)+' / '+((s.items_qty||0)*2)}</div>`;
+  detalhes.innerHTML=`<div>Data</div><div>${new Date(s.created_at).toLocaleString('pt-BR')}</div><div>Teste</div><div>${s.test.toUpperCase()}</div><div>Itens</div><div>${s.items_qty||0}</div><div>Resultado</div><div>${s.test==='qi'?(s.score_qi||0)+' / '+(s.items_qty||0):(s.score_likert||0)+' / '+((s.items_qty||0)*2)}</div>`;
   (aRows||[]).forEach(a=>{
     const dv=document.createElement('div'); dv.className='resposta';
     dv.innerHTML=`<div class="small" style="color:var(--muted)">${a.question_id}</div><div style="font-weight:800;margin:.2rem 0">${mapQ.get(a.question_id)||'Pergunta'}</div><div>Resposta: <b>${mapO.get(a.option_id)||(a.value ?? '-')}</b> ${a.is_correct?'<span class="badge" style="margin-left:.25rem;background:#f2fff5;border-color:#cdebd4;color:#184d2b">Correta</span>':''}</div>`;
@@ -175,19 +197,6 @@ async function openModalDetalhes(sessionId){
   });
 }
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await waitForSupabaseSession();
-  const {data:{user}}=await sb.auth.getUser();
-  if(!user){ const next=encodeURIComponent('/historico.html'); location.href='/perfil.html?next='+next; return; }
-  const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-  setTopUser(user.email||'Usuário', ((w?.balance_cents||0)/100));
-  userId=user.id; fetchPage();
-});
-
-document.getElementById('tbody').addEventListener('click', (e)=>{
-  const btn=e.target.closest('[data-act="ver"]'); if(!btn) return;
-  openModalDetalhes(btn.dataset.id);
-});
 document.getElementById('closeModal').addEventListener('click', ()=>{ document.getElementById('modal').style.display='none'; });
 document.getElementById('modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') e.currentTarget.style.display='none'; });
 document.getElementById('btnFiltrar').addEventListener('click', ()=>{ page=0; fetchPage(); });

@@ -8,15 +8,27 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
 <script src="/assets/app.js" defer></script>
+<script src="/assets/print.js" defer></script>
+<style>
+.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kpi .card{padding:12px}
+.sparks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.spark{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.spark h4{margin:0 0 6px;font-size:14px;color:#334}
+svg.sparkline{width:100%;height:48px;display:block}
+@media(max-width:920px){.sparks{grid-template-columns:1fr}}
+@media(max-width:720px){.kpi{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="shell">
-
   <header class="topbar">
     <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
-    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
-    <div class="user-chip" id="userChip">Carregando…</div>
-    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+    <div class="search"><input placeholder="Busque…"></div>
+    <div class="top-actions">
+      <div class="user-chip" id="userChip">Carregando…</div>
+      <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+    </div>
   </header>
 
   <div class="body">
@@ -37,14 +49,61 @@
     <main class="content">
       <div class="container">
         <div class="card">
-          <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Relatório Premium — QI</h2>
-          <div id="gate" class="small" style="margin-bottom:8px"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+            <h2 style="margin:0;font-family:Poppins,Inter">Relatório Premium — QI (estimativa)</h2>
+            <button class="btn alt small" onclick="exportPDF('Relatorio-Premium-QI','#content')">Exportar PDF</button>
+          </div>
+
+          <div id="gate" class="small" style="margin:8px 0 12px"></div>
+
           <div id="content" style="display:none">
-            <div class="grid cols-3" id="dominios"></div>
-            <div class="card" style="margin-top:16px">
-              <h3 style="margin:0 0 6px">Leitura do resultado</h3>
-              <p class="small">Estimativa baseada em acertos por domínio (numérico, lógico, espacial simples). Não é um teste psicométrico padronizado.</p>
+            <p class="small">Baseado nas suas sessões recentes (até 8). Estimativa educacional; não é teste psicométrico padronizado.</p>
+
+            <div class="card" style="margin-top:8px">
+              <h3 style="margin:0 0 6px">Resumo executivo</h3>
+              <div id="resumo"></div>
             </div>
+
+            <div class="kpi" style="margin-top:12px">
+              <div class="card">
+                <div class="title small">Numérico</div>
+                <div class="value" id="v_num" style="font-size:24px;font-weight:800">—</div>
+                <div class="small">Aritmética e sequências.</div>
+              </div>
+              <div class="card">
+                <div class="title small">Lógico</div>
+                <div class="value" id="v_log" style="font-size:24px;font-weight:800">—</div>
+                <div class="small">Analogia e dedução.</div>
+              </div>
+              <div class="card">
+                <div class="title small">Espacial (simplif.)</div>
+                <div class="value" id="v_esp" style="font-size:24px;font-weight:800">—</div>
+                <div class="small">Padrões e relações visuais.</div>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="margin-top:12px">
+              <div class="card">
+                <h3 style="margin:0 0 6px">Interpretação personalizada</h3>
+                <div id="interp"></div>
+              </div>
+              <div class="card">
+                <h3 style="margin:0 0 6px">Como evoluir</h3>
+                <ul class="small" id="evoluir" style="margin:0 0 0 18px;line-height:1.7"></ul>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <h3 style="margin:0 0 6px">Evolução recente</h3>
+              <div class="sparks" id="evolucao"></div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <h3 style="margin:0 0 6px">Próximos passos</h3>
+              <ul class="small" id="next" style="margin:0 0 0 18px;line-height:1.7"></ul>
+            </div>
+
+            <p class="small" style="margin-top:12px;color:#5b6478">Aviso: não substitui avaliação psicométrica conduzida por profissional.</p>
           </div>
         </div>
       </div>
@@ -62,37 +121,114 @@
 
 <script>
 const PRODUCT='qi';
-function domCard(title,score,desc){ return `<div class="card"><div class="title small">${title}</div><div class="value" style="font-size:22px;font-weight:800">${score}</div><p class="small" style="margin-top:6px">${desc}</p></div>`; }
+function pctFmt(v){ return isFinite(v)? Math.round(v)+'%' : '—'; }
+function estIQ(p){ const z = (p - 50) / 24; return Math.round(100 + z*15); }
+function pctToPercentil(p){ if(p<=5) return '≤ 5º'; if(p<=16) return '16º'; if(p<=25) return '25º'; if(p<=50) return '50º'; if(p<=75) return '75º'; if(p<=84) return '84º'; if(p<=95) return '95º'; return '≥ 97º'; }
+function sparkline(points){
+  if(!points || !points.length) return '';
+  const w=200,h=48,pad=2; const n=points.length; const step=(w-2*pad)/Math.max(1,n-1);
+  const ys=points.map(p=>{ const y=h-pad-(p/100)*(h-2*pad); return Math.max(pad,Math.min(h-pad,y)); });
+  const xs=Array.from({length:n},(_,i)=>pad+i*step);
+  const last=points[n-1]; const color= last>=66?'#ff7458': last>=33?'#f5b500':'#1d3557';
+  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <rect x="0" y="0" width="${w}" height="${h}" fill="white" rx="8" ry="8"></rect>
+    <polyline fill="none" stroke="${color}" stroke-width="2" points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}"/>
+  </svg>`;
+}
+
 document.addEventListener('DOMContentLoaded', async ()=>{
-  await waitForSupabaseSession();
+  const user = await requireAuth('/qi-premium.html'); if(!user) return;
+  await ensureTopbarUser();
+
+  // Gate
   const g=document.getElementById('gate'); const c=document.getElementById('content');
-  const {data:{user}}=await sb.auth.getUser(); if(!user){ location.href='/perfil.html'; return; }
-
-  const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
-  setTopUser(user.email||'Usuário', ((w?.balance_cents||0)/100));
-
   const {data:have}=await sb.from('purchases').select('product').eq('user_id',user.id).eq('product',PRODUCT).maybeSingle();
-  if(!have){
-    g.innerHTML=`<div style="padding:.8rem;border:1px dashed var(--line);border-radius:12px;background:#fff">Relatório bloqueado. <a class="btn small" href="/teste-qi.html" style="margin-left:6px">Desbloquear (10 BC)</a></div>`;
-    return;
-  }
+  if(!have){ g.innerHTML=`<div style="padding:.8rem;border:1px dashed var(--line);border-radius:12px;background:#fff">
+    Relatório bloqueado. <a class="btn small" href="/teste-qi.html" style="margin-left:6px">Desbloquear (10 BC)</a></div>`; return; }
   g.innerHTML=`<span class="badge" style="background:#f2fff5;border-color:#cdebd4;color:#184d2b">Acesso liberado</span>`;
   c.style.display='block';
 
-  const { data:sessions } = await sb.from('test_sessions').select('id').eq('user_id',user.id).eq('test','qi').order('created_at',{ascending:false}).limit(3);
-  let dom={ numerico:0, logico:0, espacial:0 }, tot={ numerico:0, logico:0, espacial:0 };
-  for(const s of (sessions||[])){
-    const { data:ans } = await sb.from('test_answers').select('question_id,is_correct').eq('session_id',s.id);
+  // Até 8 sessões
+  const { data:sessions } = await sb.from('test_sessions').select('id,created_at,items_qty,score_qi').eq('user_id',user.id).eq('test','qi').order('created_at',{ascending:false}).limit(8);
+
+  let tot=0, items=0;
+  let dom={ numerico:{ok:0,tot:0}, logico:{ok:0,tot:0}, espacial:{ok:0,tot:0} };
+  const sGlobal=[], sNum=[], sLog=[], sEsp=[];
+
+  for(const s of (sessions||[]).reverse()){
+    tot += s.score_qi||0; items += s.items_qty||0;
+    const { data:ans } = await sb.from('test_answers').select('question_id,is_correct').eq('session_id', s.id);
     const qids=(ans||[]).map(a=>a.question_id);
-    const { data:qs } = await sb.from('test_questions').select('id,domain').in('id',qids);
-    const map=new Map((qs||[]).map(q=>[q.id,q.domain||'']));
-    (ans||[]).forEach(a=>{ const d=map.get(a.question_id); if(d){ tot[d]++; if(a.is_correct) dom[d]++; }});
+    const { data:qs } = await sb.from('test_questions').select('id,domain').in('id', qids);
+    const map = new Map((qs||[]).map(q=>[q.id, q.domain||'']));
+    let sess={ numerico:{ok:0,tot:0}, logico:{ok:0,tot:0}, espacial:{ok:0,tot:0} };
+    (ans||[]).forEach(a=>{
+      const d=map.get(a.question_id); if(!d) return;
+      sess[d].tot++; if(a.is_correct) sess[d].ok++;
+      dom[d].tot++; if(a.is_correct) dom[d].ok++;
+    });
+    const pNum = sess.numerico.tot? (sess.numerico.ok/sess.numerico.tot)*100 : 0;
+    const pLog = sess.logico.tot?   (sess.logico.ok/sess.logico.tot)*100   : 0;
+    const pEsp = sess.espacial.tot? (sess.espacial.ok/sess.espacial.tot)*100 : 0;
+    const pGl  = (pNum+pLog+pEsp)/3;
+    sNum.push(pNum); sLog.push(pLog); sEsp.push(pEsp); sGlobal.push(pGl);
   }
-  const pct=(c,t)=> t? Math.round(c/t*100)+'%' : '—';
-  document.getElementById('dominios').innerHTML =
-    domCard('Numérico', pct(dom.numerico, tot.numerico), 'Aritmética e sequências.')+
-    domCard('Lógico', pct(dom.logico, tot.logico), 'Analogia e dedução.')+
-    domCard('Espacial (simplif.)', pct(dom.espacial, tot.espacial), 'Padrões e relações visuais.');
+
+  const pGlobal = items? (tot/items)*100 : 0;
+  const iq = estIQ(pGlobal);
+  const percentil = pctToPercentil(Math.round(pGlobal));
+
+  document.getElementById('resumo').innerHTML =
+    `<div class="grid cols-3">
+      <div><b>Estimativa de QI:</b> ${iq}</div>
+      <div><b>Acerto global:</b> ${pctFmt(pGlobal)} (${percentil} percentil aprox.)</div>
+      <div><b>Base amostral:</b> ${items} itens nas últimas sessões</div>
+    </div>`;
+
+  const pNum = dom.numerico.tot? (dom.numerico.ok/dom.numerico.tot)*100 : 0;
+  const pLog = dom.logico.tot?   (dom.logico.ok/dom.logico.tot)*100   : 0;
+  const pEsp = dom.espacial.tot? (dom.espacial.ok/dom.espacial.tot)*100 : 0;
+  document.getElementById('v_num').textContent = pctFmt(pNum);
+  document.getElementById('v_log').textContent = pctFmt(pLog);
+  document.getElementById('v_esp').textContent = pctFmt(pEsp);
+
+  const fortes = [ ['Numérico',pNum], ['Lógico',pLog], ['Espacial',pEsp] ].sort((a,b)=>b[1]-a[1]);
+  const fr=[
+    `<li><b>Ponto forte:</b> ${fortes[0][0]} (${pctFmt(fortes[0][1])}). Potencialize com desafios semanais nesse domínio.</li>`,
+    `<li><b>Oportunidade:</b> ${fortes[2][0]} (${pctFmt(fortes[2][1])}). Pratique 10–15 min/dia com problemas progressivos.</li>`,
+    iq>=115 ? '<li><b>Perfil:</b> acima da média; busque itens de dificuldade crescente.</li>' :
+    iq>=100 ? '<li><b>Perfil:</b> na média; consistência e estratégia aumentam o teto.</li>' :
+              '<li><b>Perfil:</b> em evolução; foco em fundamentos e revisão espaçada.</li>'
+  ];
+  document.getElementById('interp').innerHTML = `<ul class="small" style="margin:0 0 0 18px;line-height:1.7">${fr.join('')}</ul>`;
+
+  const evo=[
+    'Numérico: pratique sequências, proporções e operações cronometradas (2–3 séries curtas).',
+    'Lógico: resolva analogias e silogismos explicando sua linha de raciocínio.',
+    'Espacial: exercícios de padrões e rotações mentais (comece com 2D).',
+    'Metacognição: após cada questão, anote por que acertou/errou.'
+  ];
+  document.getElementById('evoluir').innerHTML = evo.map(x=>`<li>${x}</li>`).join('');
+
+  const next=[
+    'Psicológicos: teste TDAH e Burnout para entender fatores não cognitivos.',
+    'Assinatura (em breve): baterias maiores, histórico e benchmarks.',
+    'Jogos cognitivos (em breve): Sudoku, séries lógicas e memória de trabalho.'
+  ];
+  document.getElementById('next').innerHTML = next.map(x=>`<li>${x}</li>`).join('');
+
+  // Evolução (sparks)
+  const evoWrap=document.getElementById('evolucao');
+  [
+    ['Acerto global', sGlobal],
+    ['Numérico', sNum],
+    ['Lógico', sLog],
+    ['Espacial', sEsp]
+  ].forEach(([title, serie])=>{
+    const div=document.createElement('div'); div.className='spark';
+    div.innerHTML = `<h4>${title}</h4>${sparkline(serie)}`;
+    evoWrap.appendChild(div);
+  });
 });
 </script>
 </body>
