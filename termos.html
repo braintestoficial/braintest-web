@@ -1,21 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Termos de Uso | Braintest</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Termos — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/ui.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-init.js"></script>
+<script src="/assets/app.js" defer></script>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
-</header>
-<main class="content">
-  <div class="card">
-    <h2>Termos de Uso</h2>
-    <p>Ao utilizar o Braintest, você concorda com estes termos. Os testes disponibilizados são de caráter educativo e de autoconhecimento, não substituindo diagnósticos médicos ou psicológicos.</p>
-    <p>Os dados coletados são utilizados apenas para aprimorar sua experiência e manter o histórico de testes. Nenhuma informação pessoal é compartilhada com terceiros.</p>
+<div class="shell">
+
+  <header class="topbar">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
+    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
+    <div class="user-chip" id="userChip">Carregando…</div>
+    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+  </header>
+
+  <div class="body">
+    <aside class="sidebar">
+      <nav class="nav">
+        <h6>Navegação</h6>
+        <a href="/index.html" data-current>🏠 Início</a>
+        <a href="/historico.html" data-current>🕘 Histórico</a>
+        <a href="/carteira.html" data-current>💳 Carteira</a>
+        <a href="/perfil.html" data-current>👤 Perfil</a>
+        <h6 style="margin-top:14px">Testes</h6>
+        <a href="/teste-tdah.html" data-current>⚡ TDAH</a>
+        <a href="/teste-burnout.html" data-current>🔥 Burnout</a>
+        <a href="/teste-qi.html" data-current>🧠 QI</a>
+        <h6 style="margin-top:14px">Suporte</h6>
+        <a href="/faq.html" data-current>📚 FAQ</a>
+        <a href="/termos.html" class="active" data-current>📄 Termos</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="container">
+        <div class="card">
+          <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Termos de Uso e Privacidade</h2>
+          <p class="small" style="margin:0 0 12px">Última atualização: 16/10/2025</p>
+          <div class="hr"></div>
+
+          <h3>1. Objetivo da Plataforma</h3>
+          <p class="small">A Braintest oferece triagens de autoconhecimento e relatórios premium para fins informativos. Não substituem avaliação clínica, psicológica ou médica.</p>
+
+          <h3>2. Conta e Acesso</h3>
+          <ul class="small" style="margin-left:18px; line-height:1.6">
+            <li>Você pode entrar com sua conta Google.</li>
+            <li>Não compartilhe suas credenciais.</li>
+            <li>Conteúdos premium comprados ficam vinculados à sua conta.</li>
+          </ul>
+
+          <h3>3. Braincoins</h3>
+          <ul class="small" style="margin-left:18px; line-height:1.6">
+            <li>Moeda interna com paridade 1:1 com o Real (1 BC = R$ 1).</li>
+            <li>Usada para desbloquear relatórios e, futuramente, assinaturas e jogos.</li>
+            <li>Não é transferível entre usuários, não representa investimento e não tem mercado secundário.</li>
+          </ul>
+
+          <h3>4. Coleta e Uso de Dados</h3>
+          <ul class="small" style="margin-left:18px; line-height:1.6">
+            <li>Coletamos e armazenamos suas respostas, resultados e compras para gerar histórico, relatórios e melhorar a plataforma.</li>
+            <li>Dados pessoais (como e-mail) são usados para autenticação e comunicação essencial.</li>
+            <li>Não vendemos seus dados. Podemos usar serviços de terceiros (ex.: provedores de pagamento) conforme necessário.</li>
+          </ul>
+
+          <h3>5. Seus Direitos</h3>
+          <ul class="small" style="margin-left:18px; line-height:1.6">
+            <li>Você pode solicitar a exclusão de conta e dados pelo <a href="/perfil.html">Perfil</a> ou via e-mail.</li>
+            <li>Você pode exportar seus relatórios manualmente (em breve: exportação em PDF).</li>
+          </ul>
+
+          <h3>6. Limitação de Responsabilidade</h3>
+          <p class="small">As análises são indicativas. A Braintest não se responsabiliza por decisões tomadas exclusivamente com base nos relatórios. Busque orientação profissional sempre que necessário.</p>
+
+          <h3>7. Alterações nos Termos</h3>
+          <p class="small">Os termos podem ser atualizados. Publicaremos a data de revisão nesta página. O uso contínuo implica aceitação.</p>
+
+          <div class="hr"></div>
+          <p class="small">Contato: <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a></p>
+        </div>
+      </div>
+    </main>
   </div>
-</main>
+
+  <nav class="mobilebar">
+    <a href="/index.html" data-current>🏠</a>
+    <a href="/teste-tdah.html" data-current>⚡</a>
+    <a href="/teste-burnout.html" data-current>🔥</a>
+    <a href="/teste-qi.html" data-current>🧠</a>
+    <a href="/perfil.html" data-current>👤</a>
+  </nav>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  if(user){
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    setTopUser(user.email||'Usuário', ((w?.balance_cents||0)/100));
+  }else{
+    document.getElementById('userChip').textContent='Visitante';
+  }
+});
+</script>
 </body>
 </html>

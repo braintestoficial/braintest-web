@@ -3,49 +3,67 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Teste de TDAH | Braintest</title>
+<title>Triagem — TDAH | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
+<style>
+.question{margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);}
+.question p{margin:0 0 .25rem;font-weight:500;}
+.question label{display:block;margin-left:1rem;font-size:.95rem;color:#334;}
+</style>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
-  <div style="display:flex;align-items:center;gap:.5rem">
-    <span id="userChip"></span> | 💰 <span id="saldoTop">0</span> BC
-  </div>
-</header>
-
-<main class="content">
-  <div class="card">
-    <h2>Triagem — TDAH</h2>
-    <p>Responda 15 perguntas abaixo e receba uma estimativa inicial.</p>
-    <div id="quiz">Carregando perguntas...</div>
-    <button class="btn" id="enviar">Gerar resultado</button>
-  </div>
-</main>
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg"><span>Braintest</span></a>
+    <div class="search"><input placeholder="Busque... (Ex: TDAH, Burnout, QI)"></div>
+  </header>
+  <main class="content">
+    <div class="container">
+      <div class="card">
+        <h2>Triagem — TDAH</h2>
+        <p class="small">Responda às <b>15</b> perguntas abaixo. O relatório completo é premium e não substitui diagnóstico médico.</p>
+        <div id="quiz">Carregando perguntas...</div>
+        <button class="btn" id="enviar">Gerar resultado</button>
+      </div>
+    </div>
+  </main>
+</div>
 
 <script>
 (async()=>{
   const session=await waitForSupabaseSession();
-  if(!session){location.href='/login.html';return;}
+  if(!session){window.location='/login.html';return;}
   const user=session.user;
-  await ensureTopbarUser();
+
+  const searchInput=document.querySelector('.search input');
+  if(searchInput){
+    searchInput.addEventListener('keypress',e=>{
+      if(e.key==='Enter'){
+        const term=searchInput.value.toLowerCase();
+        if(term.includes('tdah'))location.href='/teste-tdah.html';
+        else if(term.includes('burn'))location.href='/teste-burnout.html';
+        else if(term.includes('qi'))location.href='/teste-qi.html';
+        else location.href='/index.html';
+      }
+    });
+  }
 
   const TEST='tdah';
   const quizEl=document.getElementById('quiz');
   let perguntas=[];
-
   try{
-    const { data:qs,error }=await sb.from('test_questions')
+    const { data:qs,error,status }=await sb.from('test_questions')
       .select('id,prompt,kind,domain,test_question_options(label,value)')
-      .eq('test_key',TEST).order('random()').limit(15);
-    if(error||!qs)throw error;
+      .eq('test',TEST).order('random()').limit(15);
+    if(error||!qs||status>=400)throw error;
     perguntas=qs;
-  }catch(e){
+  }catch(err){
+    console.warn('Fallback offline por erro',err);
     perguntas=Array.from({length:15},(_,i)=>({
-      id:i+1,
-      prompt:`Pergunta temporária ${i+1}`,
+      id:i+1000,
+      prompt:`Pergunta temporária ${i+1} (modo offline).`,
       test_question_options:[
         {label:'Raramente',value:0},
         {label:'Às vezes',value:1},
@@ -58,7 +76,8 @@
     <div class="question">
       <p><b>${i+1}.</b> ${q.prompt}</p>
       ${q.test_question_options.map(o=>`
-        <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>`).join('')}
+        <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>
+      `).join('')}
     </div>`).join('');
 
   document.getElementById('enviar').onclick=async()=>{
@@ -68,9 +87,9 @@
     });
     const soma=respostas.reduce((s,r)=>s+(r.value??0),0);
     await sb.from('test_sessions').insert({
-      user_id:user.id,test_key:TEST,items_qty:respostas.length,score_likert:soma
+      user_id:user.id,test:TEST,items_qty:respostas.length,score_likert:soma
     });
-    location.href='/tdah-premium.html';
+    window.location='/tdah-premium.html';
   };
 })();
 </script>

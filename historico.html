@@ -1,51 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Histórico | Braintest</title>
-  <link rel="stylesheet" href="/assets/ui.css">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="/assets/supabase-init.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Histórico — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-init.js"></script>
+<script src="/assets/app.js" defer></script>
 </head>
 <body>
+<div class="shell">
+
   <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
-    <div style="display:flex;align-items:center;gap:.5rem">
-      <span id="userChip"></span> | 💰 <span id="saldoTop">0</span> BC
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
+    <div class="search"><input placeholder="Busque…"></div>
+    <div class="top-actions">
+      <div class="user-chip" id="userChip">Carregando…</div>
+      <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
     </div>
   </header>
 
-  <main class="content">
-    <div class="card">
-      <h2>Histórico de Testes</h2>
-      <table id="tabela" border="0" style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Teste</th><th>Data</th><th>Resultado</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </main>
+  <div class="body">
+    <aside class="sidebar">
+      <nav class="nav">
+        <h6>Navegação</h6>
+        <a href="/index.html" data-current>🏠 Início</a>
+        <a href="/historico.html" class="active" data-current>🕘 Histórico</a>
+        <a href="/carteira.html" data-current>💳 Carteira</a>
+        <a href="/perfil.html" data-current>👤 Perfil</a>
+        <h6 style="margin-top:14px">Testes</h6>
+        <a href="/teste-tdah.html" data-current>⚡ TDAH</a>
+        <a href="/teste-burnout.html" data-current>🔥 Burnout</a>
+        <a href="/teste-qi.html" data-current>🧠 QI</a>
+      </nav>
+    </aside>
 
-  <script>
-  (async()=>{
-    const session=await waitForSupabaseSession();
-    if(!session){location.href='/login.html';return;}
-    const user=session.user;
-    const { data:tests }=await sb.from('test_sessions')
-      .select('test_key,score_likert,score_qi,created_at')
-      .eq('user_id',user.id)
-      .order('created_at',{ascending:false});
-    const tbody=document.querySelector('#tabela tbody');
-    if(!tests||!tests.length){
-      tbody.innerHTML='<tr><td colspan="3">Nenhum teste realizado ainda.</td></tr>';
+    <main class="content">
+      <div class="container">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+            <h2 style="margin:0;font-family:Poppins,Inter">Histórico de triagens</h2>
+            <div class="controls">
+              <select id="fTeste">
+                <option value="">Todos os testes</option>
+                <option value="tdah">TDAH</option>
+                <option value="burnout">Burnout</option>
+                <option value="qi">QI</option>
+              </select>
+              <input type="date" id="fDe">
+              <input type="date" id="fAte">
+              <button class="btn small" id="btnFiltrar">Filtrar</button>
+              <button class="btn alt small" id="btnLimpar">Limpar</button>
+            </div>
+          </div>
+
+          <div id="status" class="small" style="margin:.4rem 0 0"></div>
+
+          <table class="table responsive" id="grid" style="margin-top:.6rem">
+            <thead>
+              <tr>
+                <th>Data</th><th>Teste</th><th>Itens</th><th>Resultado</th><th style="width:240px">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"><tr><td colspan="5" class="small">Carregando…</td></tr></tbody>
+          </table>
+
+          <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
+            <button id="prevBtn" disabled>◀ Anteriores</button>
+            <button id="nextBtn" disabled>Próximas ▶</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mobilebar">
+    <a href="/index.html" data-current>🏠</a>
+    <a href="/teste-tdah.html" data-current>⚡</a>
+    <a href="/teste-burnout.html" data-current>🔥</a>
+    <a href="/teste-qi.html" data-current>🧠</a>
+    <a href="/perfil.html" data-current>👤</a>
+  </nav>
+</div>
+
+<!-- Modal Detalhes -->
+<div class="modal" id="modal">
+  <div class="box">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:.2rem 0">Detalhes da sessão</h3>
+      <button class="btn alt small" id="closeModal">Fechar</button>
+    </div>
+    <div id="detalhes" class="kv" style="display:grid;grid-template-columns:160px 1fr;gap:.4rem .8rem;margin-top:.5rem"></div>
+    <div id="respostas"></div>
+  </div>
+</div>
+
+<script>
+const PAGE_SIZE=10; let userId=null; let page=0; let lastPage=false;
+
+// ✅ corrigido: burnout premium
+const premiumURL=(t)=>({tdah:'/tdah-premium.html', burnout:'/burnout-premium.html', qi:'/qi-premium.html'}[t]||'#');
+
+function fmt(iso){ if(!iso) return '-'; const d=new Date(iso); return d.toLocaleString('pt-BR',{dateStyle:'short', timeStyle:'short'}); }
+function setStatus(msg){ document.getElementById('status').innerHTML = msg||''; }
+function lineResultado(r){ if(r.test==='qi'){ return `QI: <b>${r.score_qi??0}</b> / ${r.items_qty}` } const max=(r.items_qty||0)*2; return `Likert: <b>${r.score_likert??0}</b> / ${max}`; }
+
+async function fetchPage(retry=0){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML=`<tr><td colspan="5" class="small">Carregando…</td></tr>`;
+  setStatus(retry?`Tentando novamente (${retry}/3)…`:'Carregando histórico…');
+
+  let q=sb.from('test_sessions').select('id,created_at,test,items_qty,score_likert,score_qi').eq('user_id',userId);
+  const fTeste=document.getElementById('fTeste').value||null;
+  const fDe=document.getElementById('fDe').value||null;
+  const fAte=document.getElementById('fAte').value||null;
+  if(fTeste) q=q.eq('test',fTeste);
+  if(fDe) q=q.gte('created_at', new Date(fDe+'T00:00:00').toISOString());
+  if(fAte) q=q.lte('created_at', new Date(fAte+'T23:59:59').toISOString());
+  q=q.order('created_at',{ascending:false}).range(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE-1);
+
+  const { data:rows, error } = await q;
+  if(error){
+    const msg = error.message || '';
+    if(retry<3 && /schema cache|relation .* does not exist|42P01/i.test(msg)){
+      setTimeout(()=>fetchPage(retry+1), 700);
       return;
     }
-    tbody.innerHTML=tests.map(t=>{
-      const data=new Date(t.created_at).toLocaleDateString('pt-BR');
-      const score=t.score_qi?t.score_qi.toFixed(0):t.score_likert;
-      return `<tr><td>${t.test_key.toUpperCase()}</td><td>${data}</td><td>${score}</td></tr>`;
-    }).join('');
-  })();
-  </script>
+    setStatus(`<span style="color:#b00020">Erro: ${msg || 'Falha ao carregar.'}</span>`);
+    return;
+  }
+
+  tbody.innerHTML='';
+  if(!rows||!rows.length){
+    tbody.innerHTML=`<tr><td colspan="5" class="small">Nenhuma sessão encontrada.</td></tr>`;
+    setStatus('');
+    document.getElementById('prevBtn').disabled=(page===0);
+    document.getElementById('nextBtn').disabled=true;
+    return;
+  }
+
+  const { data:compras } = await sb.from('purchases').select('product').eq('user_id',userId);
+  const have=new Set((compras||[]).map(r=>r.product));
+
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+
+    const tdData   = document.createElement('td'); tdData.setAttribute('data-label','Data');      tdData.innerHTML = fmt(r.created_at);
+    const tdTeste  = document.createElement('td'); tdTeste.setAttribute('data-label','Teste');     tdTeste.textContent = r.test.toUpperCase();
+    const tdItens  = document.createElement('td'); tdItens.setAttribute('data-label','Itens');     tdItens.textContent = r.items_qty || 0;
+    const tdRes    = document.createElement('td'); tdRes.setAttribute('data-label','Resultado');   tdRes.innerHTML = lineResultado(r);
+
+    const tdAcoes  = document.createElement('td'); tdAcoes.setAttribute('data-label','Ações');
+    const btnVer = `<button class="btn alt small" data-act="ver" data-id="${r.id}" data-test="${r.test}">Ver respostas</button>`;
+    const btnRel = have.has(r.test)
+      ? `<a class="btn small" href="${premiumURL(r.test)}">Abrir relatório</a>`
+      : `<a class="btn small" href="/teste-${r.test}.html">Desbloquear (10 BC)</a>`;
+    tdAcoes.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${btnVer}${btnRel}</div>`;
+
+    tr.appendChild(tdData); tr.appendChild(tdTeste); tr.appendChild(tdItens); tr.appendChild(tdRes); tr.appendChild(tdAcoes);
+    tbody.appendChild(tr);
+  });
+
+  lastPage = rows.length<PAGE_SIZE;
+  document.getElementById('prevBtn').disabled=(page===0);
+  document.getElementById('nextBtn').disabled=lastPage;
+  setStatus('');
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  const user = await requireAuth('/historico.html'); if(!user) return; // força login
+  await ensureTopbarUser();
+  userId=user.id; fetchPage();
+});
+
+document.getElementById('tbody').addEventListener('click', (e)=>{
+  const btn=e.target.closest('[data-act="ver"]'); if(!btn) return;
+  openModalDetalhes(btn.dataset.id);
+});
+
+// Modal
+async function openModalDetalhes(sessionId){
+  const modal=document.getElementById('modal'); modal.style.display='flex';
+  const detalhes=document.getElementById('detalhes'); const respostas=document.getElementById('respostas');
+  detalhes.innerHTML='Carregando…'; respostas.innerHTML='';
+  const {data:s}=await sb.from('test_sessions').select('*').eq('id',sessionId).single();
+  const {data:aRows}=await sb.from('test_answers').select('question_id, option_id, value, is_correct').eq('session_id',sessionId).order('question_id');
+  const qids=(aRows||[]).map(a=>a.question_id); const oids=(aRows||[]).map(a=>a.option_id);
+  const {data:qRows}=await sb.from('test_questions').select('id,prompt').in('id',qids);
+  const {data:oRows}=await sb.from('test_question_options').select('id,label').in('id',oids);
+  const mapQ=new Map((qRows||[]).map(q=>[q.id,q.prompt])); const mapO=new Map((oRows||[]).map(o=>[o.id,o.label]));
+  detalhes.innerHTML=`<div>Data</div><div>${new Date(s.created_at).toLocaleString('pt-BR')}</div><div>Teste</div><div>${s.test.toUpperCase()}</div><div>Itens</div><div>${s.items_qty||0}</div><div>Resultado</div><div>${s.test==='qi'?(s.score_qi||0)+' / '+(s.items_qty||0):(s.score_likert||0)+' / '+((s.items_qty||0)*2)}</div>`;
+  (aRows||[]).forEach(a=>{
+    const dv=document.createElement('div'); dv.className='resposta';
+    dv.innerHTML=`<div class="small" style="color:var(--muted)">${a.question_id}</div><div style="font-weight:800;margin:.2rem 0">${mapQ.get(a.question_id)||'Pergunta'}</div><div>Resposta: <b>${mapO.get(a.option_id)||(a.value ?? '-')}</b> ${a.is_correct?'<span class="badge" style="margin-left:.25rem;background:#f2fff5;border-color:#cdebd4;color:#184d2b">Correta</span>':''}</div>`;
+    respostas.appendChild(dv);
+  });
+}
+
+document.getElementById('closeModal').addEventListener('click', ()=>{ document.getElementById('modal').style.display='none'; });
+document.getElementById('modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') e.currentTarget.style.display='none'; });
+document.getElementById('btnFiltrar').addEventListener('click', ()=>{ page=0; fetchPage(); });
+document.getElementById('btnLimpar').addEventListener('click', ()=>{ document.getElementById('fTeste').value=''; document.getElementById('fDe').value=''; document.getElementById('fAte').value=''; page=0; fetchPage(); });
+document.getElementById('prevBtn').addEventListener('click', ()=>{ if(page>0){ page--; fetchPage(); }});
+document.getElementById('nextBtn').addEventListener('click', ()=>{ if(!lastPage){ page++; fetchPage(); }});
+</script>
 </body>
 </html>

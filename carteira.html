@@ -1,49 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Carteira | Braintest</title>
-  <link rel="stylesheet" href="/assets/ui.css">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="/assets/supabase-init.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carteira | Braintest</title>
+<link rel="stylesheet" href="/assets/ui.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-init.js"></script>
+<style>
+.wallet{max-width:600px;margin:2rem auto;padding:1.5rem;border:1px solid #ddd;border-radius:10px;background:#fff;}
+.balance{font-size:2rem;font-weight:700;color:#0066ff;margin-bottom:1rem;}
+.packages{display:grid;gap:1rem;}
+.pkg{border:1px solid #ccc;padding:1rem;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.pkg button{background:#0066ff;color:#fff;border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
-    <div style="display:flex;align-items:center;gap:.5rem">
-      <span id="userChip"></span> | 💰 <span id="saldoTop">0</span> BC
-    </div>
-  </header>
+<header class="topbar">
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"><span>Braintest</span></a>
+</header>
+<main>
+  <div class="wallet" id="walletBox">
+    <h2>Carregando carteira...</h2>
+  </div>
+</main>
 
-  <main class="content">
-    <div class="card">
-      <h2>Minha Carteira</h2>
-      <p>Adicione Braincoins para realizar testes e acessar relatórios premium.</p>
-      <div id="saldo-atual" style="font-size:1.3rem;margin:1rem 0;"></div>
-      <div>
-        <h3>Adicionar Braincoins</h3>
-        <ul>
-          <li><a href="https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04" target="_blank">10 Braincoins</a></li>
-          <li><a href="https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05" target="_blank">30 Braincoins</a></li>
-          <li><a href="https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06" target="_blank">50 Braincoins</a></li>
-          <li><a href="https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07" target="_blank">100 Braincoins</a></li>
-        </ul>
-      </div>
-    </div>
-  </main>
+<script>
+(async()=>{
+  const session=await waitForSupabaseSession();
+  if(!session){window.location='/login.html';return;}
+  const user=session.user;
+  const { data:wallet } = await sb.from('wallets').select('balance').eq('user_id',user.id).maybeSingle();
+  const saldo=(wallet&&wallet.balance)||0;
+  const box=document.getElementById('walletBox');
 
-  <script>
-  (async()=>{
-    const session=await waitForSupabaseSession();
-    if(!session){location.href='/login.html';return;}
-    const user=session.user;
-    const { data:w }=await sb.from('wallets').select('balance').eq('user_id',user.id).maybeSingle();
-    const saldo=w?.balance||0;
-    document.getElementById('userChip').textContent=user.email;
-    document.getElementById('saldoTop').textContent=saldo;
-    document.getElementById('saldo-atual').textContent=`Saldo atual: ${saldo} Braincoins`;
-  })();
-  </script>
+  const pacotes=[
+    {coins:10,link:'https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04'},
+    {coins:30,link:'https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05'},
+    {coins:50,link:'https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06'},
+    {coins:100,link:'https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07'},
+    {coins:500,link:'https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08'},
+    {coins:1000,link:'https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09'},
+    {coins:3000,link:'https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a'}
+  ];
+
+  box.innerHTML=`
+    <h2>Minha Carteira</h2>
+    <div class="balance">${saldo} Braincoins</div>
+    <div class="packages">
+      ${pacotes.map(p=>`
+        <div class="pkg">
+          <span>Adicionar ${p.coins} Braincoins</span>
+          <button onclick="window.open('${p.link}','_blank')">Comprar</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+})();
+</script>
 </body>
 </html>

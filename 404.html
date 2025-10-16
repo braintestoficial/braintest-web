@@ -1,16 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>404 — Página não encontrada | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página não encontrada — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Supabase -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-init.js"></script>
+
+<style>
+:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
+.wrap{max-width:900px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
+.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
+.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
+nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
+.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
+.btn.small{padding:.4rem .7rem}
+.btn:hover{background:var(--salmao-2)}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
+
+.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.6rem;margin-top:1rem}
+h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
+p{line-height:1.7;color:#303540}
+.small{font-size:.92rem;color:#6b7380}
+.center{text-align:center}
+</style>
 </head>
 <body>
-<main class="content" style="text-align:center;padding-top:10vh;">
-  <img src="/assets/logo.svg" height="60" alt="Braintest"><br><br>
-  <h2>Ops! Página não encontrada 😕</h2>
-  <p>A página que você procurava não existe. <a href="/index.html">Voltar ao início</a></p>
-</main>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="carteira.html">Carteira</a>
+      <a href="historico.html">Histórico</a>
+      <a href="faq.html">FAQ</a>
+      <span id="userInfo" class="badge">Carregando…</span>
+      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
+    </nav>
+  </header>
+
+  <section class="card center">
+    <h2>404 — Página não encontrada</h2>
+    <p class="small">O link pode ter sido removido, renomeado ou estar temporariamente indisponível.</p>
+    <div style="margin-top:1rem">
+      <button class="btn" onclick="location.href='index.html'">Voltar ao início</button>
+      <button class="btn secondary" style="margin-left:.4rem" onclick="history.back()">Voltar</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Sessão + saldo no topo (mesmo padrão das outras páginas)
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await waitForSupabaseSession();
+    const { data:{ user } } = await sb.auth.getUser();
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display = 'none';
+    }else{
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display = 'inline-block';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    location.href = 'index.html';
+  });
+</script>
 </body>
 </html>

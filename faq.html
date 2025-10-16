@@ -1,27 +1,108 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FAQ | Braintest</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ — Braintest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/ui.css">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-init.js"></script>
+<script src="/assets/app.js" defer></script>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"> Braintest</a>
-</header>
-<main class="content">
-  <div class="card">
-    <h2>Perguntas Frequentes</h2>
-    <p><b>1. Os testes da Braintest são diagnósticos médicos?</b><br>
-    Não. Os testes são ferramentas de autoconhecimento baseadas em metodologias reconhecidas, mas não substituem uma avaliação profissional.</p>
+<div class="shell">
 
-    <p><b>2. O que é Braincoin?</b><br>
-    É a moeda interna da plataforma usada para comprar testes e relatórios premium. 1 Braincoin = R$1.</p>
+  <header class="topbar">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
+    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
+    <div class="user-chip" id="userChip">Carregando…</div>
+    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+  </header>
 
-    <p><b>3. Como posso adicionar Braincoins?</b><br>
-    Na aba "Carteira" há opções de pacotes de recarga via Stripe, com pagamento rápido e seguro.</p>
+  <div class="body">
+    <aside class="sidebar">
+      <nav class="nav">
+        <h6>Navegação</h6>
+        <a href="/index.html" data-current>🏠 Início</a>
+        <a href="/historico.html" data-current>🕘 Histórico</a>
+        <a href="/carteira.html" data-current>💳 Carteira</a>
+        <a href="/perfil.html" data-current>👤 Perfil</a>
+        <h6 style="margin-top:14px">Testes</h6>
+        <a href="/teste-tdah.html" data-current>⚡ TDAH</a>
+        <a href="/teste-burnout.html" data-current>🔥 Burnout</a>
+        <a href="/teste-qi.html" data-current>🧠 QI</a>
+        <h6 style="margin-top:14px">Suporte</h6>
+        <a href="/faq.html" class="active" data-current>📚 FAQ</a>
+        <a href="/termos.html" data-current>📄 Termos</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="container">
+        <div class="card">
+          <h2 style="margin:0 0 10px;font-family:Poppins,Inter">Perguntas Frequentes (FAQ)</h2>
+          <p class="small" style="margin:0 0 12px">Tudo sobre Braincoins, relatórios e privacidade.</p>
+          <div class="hr"></div>
+
+          <div class="grid">
+            <div class="card">
+              <h4 style="margin:0 0 6px">O que é a Braincoin?</h4>
+              <p class="small">É a moeda interna da plataforma, usada para desbloquear relatórios premium e, em breve, assinaturas e jogos. Paridade 1:1 com o real (1 BC = R$ 1).</p>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">Como adiciono Braincoins?</h4>
+              <p class="small">Acesse <a href="/carteira.html">Carteira</a> e escolha um pacote. Após o pagamento, clique em “Atualizar saldo”.</p>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">Os testes substituem diagnóstico?</h4>
+              <p class="small">Não. Nossas triagens indicam tendências e auxiliam no autoconhecimento, mas não substituem avaliação clínica.</p>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">Preciso pagar para fazer a triagem?</h4>
+              <p class="small">Não. As triagens são gratuitas. A cobrança ocorre apenas para desbloquear o relatório premium.</p>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">Perdi acesso ao relatório. E agora?</h4>
+              <p class="small">Relatórios premium desbloqueados ficam vinculados à sua conta e podem ser reabertos via <a href="/historico.html">Histórico</a> ou diretamente em sua página premium.</p>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">Como vocês tratam meus dados?</h4>
+              <p class="small">Armazenamos respostas e resultados de forma segura para gerar histórico e relatórios. Você pode solicitar exclusão pela página de Perfil. Veja mais em <a href="/termos.html">Termos</a>.</p>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+          <p class="small">Ainda com dúvidas? Envie um e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+        </div>
+      </div>
+    </main>
   </div>
-</main>
+
+  <nav class="mobilebar">
+    <a href="/index.html" data-current>🏠</a>
+    <a href="/teste-tdah.html" data-current>⚡</a>
+    <a href="/teste-burnout.html" data-current>🔥</a>
+    <a href="/teste-qi.html" data-current>🧠</a>
+    <a href="/perfil.html" data-current>👤</a>
+  </nav>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
+  if(user){
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    setTopUser(user.email||'Usuário', ((w?.balance_cents||0)/100));
+  }else{
+    document.getElementById('userChip').textContent='Visitante';
+  }
+});
+</script>
 </body>
 </html>
