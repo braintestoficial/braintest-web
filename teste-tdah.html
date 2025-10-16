@@ -4,9 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TDAH — Triagem Aleatória | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- libs e supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-<script src="/assets/test-runtime.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -78,59 +80,148 @@ const PRODUCT = 'tdah';
 const PRICE_CENTS = 1000;
 const PREMIUM_URL = '/tdah-premium.html';
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await waitForSupabaseSession();
+function setStatus(msg, type='info'){
+  const el = document.getElementById('statusBox');
+  if(!el) return;
+  el.innerHTML = `<div style="
+    padding:.75rem;border:1px solid ${type==='error'?'#f5b5ab':'#e9ecf2'};
+    background:${type==='error'?'#fff7f5':'#f9fbff'};border-radius:12px;
+    color:#303540;font-size:.92rem">${msg}</div>`;
+}
 
-  const { data:{ user } } = await sb.auth.getUser();
-  const ui = document.getElementById('userInfo');
-  const logoutBtn = document.getElementById('logoutBtn');
+function renderForm(questions){
+  const f = document.getElementById('formTdah');
+  f.innerHTML = '';
+  questions.forEach((q, idx)=>{
+    const block = document.createElement('div');
+    block.className = 'q';
+    block.style.margin = '.8rem 0';
 
-  if(!user){
-    ui.textContent = 'Visitante';
-    logoutBtn.style.display='none';
-  } else {
-    ui.textContent = user.email || 'Usuário';
-    logoutBtn.style.display='inline-block';
+    const label = document.createElement('label');
+    label.style.fontWeight = '600';
+    label.style.display = 'block';
+    label.style.marginBottom = '.35rem';
+    label.textContent = `${idx+1}. ${q.prompt}`;
+    block.appendChild(label);
 
-    // saldo
-    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const bc = ((w?.balance_cents||0)/100).toFixed(2);
-    document.getElementById('saldoTop').textContent = bc;
-    document.getElementById('saldoAqui').textContent = `${bc} BC`;
+    (q.options || []).forEach(opt=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'opt';
+      wrap.style.margin = '.25rem 0';
+      const id = `q${q.question_id}_${opt.id}`;
+      wrap.innerHTML = `
+        <label>
+          <input type="radio" name="q_${q.question_id}" id="${id}" required
+                 data-qid="${q.question_id}"
+                 data-oid="${opt.id}"
+                 data-val="${opt.value ?? ''}">
+          ${opt.label}
+        </label>`;
+      block.appendChild(wrap);
+    });
 
-    // já possui?
-    const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
-    if(have){
-      document.getElementById('btnBuy').classList.add('hide');
-      document.getElementById('btnAdd').classList.add('hide');
-      document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
-      document.getElementById('btnOpen').classList.remove('hide');
-      document.getElementById('ownedBadge').classList.remove('hide');
-    }
+    f.appendChild(block);
+  });
+
+  if(!f.querySelector('button[type=submit]')){
+    const btn = document.createElement('button');
+    btn.type = 'submit';
+    btn.className = 'btn';
+    btn.textContent = 'Ver resultado gratuito';
+    btn.style.marginTop = '.8rem';
+    f.appendChild(btn);
   }
 
-  // Carrega perguntas dinâmicas
-  const engine = createTestEngine({
-    testKey: 'tdah',
-    qty: 15,
-    containerForm: document.getElementById('formTdah'),
-    containerResult: document.getElementById('resumo'),
-    containerStatus: document.getElementById('statusBox'),
-    onFreeResult: ({scoreLikert, countLikert})=>{
-      const max = 2*countLikert;
-      let nivel = 'baixo';
-      if(scoreLikert >= Math.ceil(max*0.40)) nivel = 'moderado';
-      if(scoreLikert >= Math.ceil(max*0.70)) nivel = 'elevado';
-      const box = document.getElementById('resumo');
-      box.innerHTML = `<strong>Resultado gratuito:</strong> Soma de sintomas: <b>${scoreLikert}/${max}</b> — indícios ${nivel}.<br><span class="small">Para interpretações por domínio e recomendações, desbloqueie o relatório premium.</span>`;
-      box.style.display='block';
+  f.onsubmit = (e)=>{
+    e.preventDefault();
+    // calcula resultado likert
+    let scoreLikert=0, countLikert=0;
+    questions.forEach(q=>{
+      const sel = f.querySelector(`input[name="q_${q.question_id}"]:checked`);
+      if(sel){
+        const v = sel.dataset.val === '' ? null : Number(sel.dataset.val);
+        if(v!==null && !isNaN(v)){ scoreLikert += v; countLikert++; }
+      }
+    });
+    const max = 2*countLikert;
+    let nivel = 'baixo';
+    if(scoreLikert >= Math.ceil(max*0.40)) nivel = 'moderado';
+    if(scoreLikert >= Math.ceil(max*0.70)) nivel = 'elevado';
+    const box = document.getElementById('resumo');
+    box.innerHTML = `<strong>Resultado gratuito:</strong> Soma de sintomas: <b>${scoreLikert}/${max}</b> — indícios ${nivel}.<br><span class="small">Para interpretações por domínio e recomendações, desbloqueie o relatório premium.</span>`;
+    box.style.display='block';
+  };
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  try{
+    await waitForSupabaseSession();
+
+    // Header: user + saldo + purchase
+    const { data:{ user } } = await sb.auth.getUser();
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if(!user){
+      ui.textContent = 'Visitante';
+      logoutBtn.style.display='none';
+    } else {
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display='inline-block';
+
+      // saldo
+      const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const bc = ((w?.balance_cents||0)/100).toFixed(2);
+      document.getElementById('saldoTop').textContent = bc;
+      document.getElementById('saldoAqui').textContent = `${bc} BC`;
+
+      // já possui premium?
+      const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+      if(have){
+        document.getElementById('btnBuy').classList.add('hide');
+        document.getElementById('btnAdd').classList.add('hide');
+        document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+        document.getElementById('btnOpen').classList.remove('hide');
+        document.getElementById('ownedBadge').classList.remove('hide');
+      }
     }
-  });
-  await engine.load();
+
+    // Se não estiver logado, avisa e não busca (RLS bloqueia)
+    if(!user){
+      setStatus('Você precisa entrar para realizar esta triagem. <a href="/perfil.html">Entrar com Google</a>', 'error');
+      document.getElementById('formTdah').innerHTML = '<p class="small" style="color:#6b7380">Sem perguntas para exibir.</p>';
+      return;
+    }
+
+    setStatus('Carregando perguntas…');
+    const { data, error } = await sb.rpc('get_random_questions', { p_test:'tdah', p_qty:15 });
+    if(error){
+      console.error('RPC error:', error);
+      setStatus('Erro ao carregar perguntas: <code>'+ (error.message||'desconhecido') +'</code>', 'error');
+      document.getElementById('formTdah').innerHTML = '<p class="small" style="color:#6b7380">Sem perguntas para exibir.</p>';
+      return;
+    }
+
+    if(!data || data.length === 0){
+      setStatus('Não encontramos perguntas ativas para este teste. Tente novamente mais tarde.', 'error');
+      document.getElementById('formTdah').innerHTML = '<p class="small" style="color:#6b7380">Sem perguntas para exibir.</p>';
+      return;
+    }
+
+    setStatus('');
+    renderForm(data);
+
+  }catch(e){
+    console.error(e);
+    setStatus('Falha inesperada ao carregar o teste. <code>'+ (e.message||e.toString()) +'</code>', 'error');
+  }
 });
 
-document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });
+document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{
+  await sb.auth.signOut(); location.href='/index.html';
+});
 
+// compra premium por Braincoins
 document.getElementById('btnBuy').addEventListener('click', async ()=>{
   const { data:{ user } } = await sb.auth.getUser();
   if(!user){ alert('Faça login para continuar.'); location.href='/perfil.html'; return; }
