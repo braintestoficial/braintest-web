@@ -4,9 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QI — Triagem Aleatória | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- libs e supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-<script src="/assets/test-runtime.js"></script>
+
 <style>
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -18,13 +20,11 @@ header.top{display:flex;align-items:center;justify-content:space-between;backgro
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:#0e1d33;border:1px solid var(--borda)}
-.btn.small{padding:.4rem .7rem}
 .btn:hover{background:var(--salmao-2)}
 .badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
 .badge.ok{background:#f2fff5;border-color:#cdebd4;color:#184d2b}
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
-h3{color:#0e1d33;margin:.8rem 0 .4rem}
 .small{font-size:.92rem;color:#6b7380}
 .hr{height:1px;background:var(--borda);margin:1rem 0}
 .resultBox{padding:.9rem;border:1px solid var(--borda);border-radius:12px;background:#f9fbff}
@@ -78,50 +78,99 @@ const PRODUCT = 'qi';
 const PRICE_CENTS = 1000;
 const PREMIUM_URL = '/qi-premium.html';
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await waitForSupabaseSession();
+function setStatus(msg, type='info'){
+  const el = document.getElementById('statusBox');
+  if(!el) return;
+  el.innerHTML = `<div style="
+    padding:.75rem;border:1px solid ${type==='error'?'#f5b5ab':'#e9ecf2'};
+    background:${type==='error'?'#fff7f5':'#f9fbff'};border-radius:12px;
+    color:#303540;font-size:.92rem">${msg}</div>`;
+}
 
-  const { data:{ user } } = await sb.auth.getUser();
-  const ui = document.getElementById('userInfo');
-  const logoutBtn = document.getElementById('logoutBtn');
+function renderForm(questions){
+  const f = document.getElementById('formQi');
+  f.innerHTML = '';
+  questions.forEach((q, idx)=>{
+    const block = document.createElement('div');
+    block.className='q'; block.style.margin='.8rem 0';
 
-  if(!user){
-    ui.textContent = 'Visitante';
-    logoutBtn.style.display='none';
-  } else {
-    ui.textContent = user.email || 'Usuário';
-    logoutBtn.style.display='inline-block';
+    const label = document.createElement('label');
+    label.style.fontWeight='600'; label.style.display='block'; label.style.marginBottom='.35rem';
+    label.textContent = `${idx+1}. ${q.prompt}`;
+    block.appendChild(label);
 
-    // saldo
-    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const bc = ((w?.balance_cents||0)/100).toFixed(2);
-    document.getElementById('saldoTop').textContent = bc;
-    document.getElementById('saldoAqui').textContent = `${bc} BC`;
+    (q.options||[]).forEach(opt=>{
+      const wrap = document.createElement('div'); wrap.className='opt'; wrap.style.margin='.25rem 0';
+      wrap.innerHTML = `
+        <label>
+          <input type="radio" name="q_${q.question_id}" required data-correct="${opt.is_correct ? '1':'0'}">
+          ${opt.label}
+        </label>`;
+      block.appendChild(wrap);
+    });
 
-    // já possui?
-    const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
-    if(have){
-      document.getElementById('btnBuy').classList.add('hide');
-      document.getElementById('btnAdd').classList.add('hide');
-      document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
-      document.getElementById('btnOpen').classList.remove('hide');
-      document.getElementById('ownedBadge').classList.remove('hide');
-    }
+    f.appendChild(block);
+  });
+
+  if(!f.querySelector('button[type=submit]')){
+    const btn = document.createElement('button'); btn.type='submit'; btn.className='btn';
+    btn.textContent='Ver resultado gratuito'; btn.style.marginTop='.8rem'; f.appendChild(btn);
   }
 
-  const engine = createTestEngine({
-    testKey: 'qi',
-    qty: 15,
-    containerForm: document.getElementById('formQi'),
-    containerResult: document.getElementById('resumo'),
-    containerStatus: document.getElementById('statusBox'),
-    onFreeResult: ({scoreQI, countQI})=>{
-      const box = document.getElementById('resumo');
-      box.innerHTML = `<strong>Resultado gratuito:</strong> Corretas: <b>${scoreQI}/${countQI}</b> (estimativa ilustrativa).<br><span class="small">Para análise por domínio (numérico, lógico, espacial) e percentil, desbloqueie o premium.</span>`;
-      box.style.display='block';
+  f.onsubmit = (e)=>{
+    e.preventDefault();
+    let scoreQI=0, countQI=0;
+    questions.forEach(q=>{
+      const sel = f.querySelector(`input[name="q_${q.question_id}"]:checked`);
+      if(sel){ if(sel.dataset.correct === '1') scoreQI++; countQI++; }
+    });
+    const box = document.getElementById('resumo');
+    box.innerHTML = `<strong>Resultado gratuito:</strong> Corretas: <b>${scoreQI}/${countQI}</b> (estimativa ilustrativa).<br><span class="small">Para análise por domínio (numérico, lógico, espacial) e percentil, desbloqueie o premium.</span>`;
+    box.style.display='block';
+  };
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  try{
+    await waitForSupabaseSession();
+
+    const { data:{ user } } = await sb.auth.getUser();
+    const ui = document.getElementById('userInfo');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if(!user){
+      ui.textContent='Visitante'; logoutBtn.style.display='none';
+      setStatus('Você precisa entrar para realizar esta triagem. <a href="/perfil.html">Entrar com Google</a>', 'error');
+      document.getElementById('formQi').innerHTML = '<p class="small" style="color:#6b7380">Sem perguntas para exibir.</p>';
+      return;
+    }else{
+      ui.textContent = user.email || 'Usuário';
+      logoutBtn.style.display='inline-block';
+
+      const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+      const bc = ((w?.balance_cents||0)/100).toFixed(2);
+      document.getElementById('saldoTop').textContent = bc;
+      document.getElementById('saldoAqui').textContent = `${bc} BC`;
+
+      const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+      if(have){
+        document.getElementById('btnBuy').classList.add('hide');
+        document.getElementById('btnAdd').classList.add('hide');
+        document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
+        document.getElementById('btnOpen').classList.remove('hide');
+        document.getElementById('ownedBadge').classList.remove('hide');
+      }
     }
-  });
-  await engine.load();
+
+    setStatus('Carregando perguntas…');
+    const { data, error } = await sb.rpc('get_random_questions', { p_test:'qi', p_qty:15 });
+    if(error){ setStatus('Erro ao carregar perguntas: <code>'+ (error.message||'desconhecido') +'</code>', 'error'); return; }
+    if(!data || data.length===0){ setStatus('Não encontramos perguntas ativas para este teste.', 'error'); return; }
+
+    setStatus(''); renderForm(data);
+  }catch(e){
+    setStatus('Falha inesperada ao carregar o teste. <code>'+ (e.message||e.toString()) +'</code>', 'error');
+  }
 });
 
 document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });

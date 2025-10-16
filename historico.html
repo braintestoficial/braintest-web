@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Histórico | Braintest</title>
+<title>Histórico de Triagens | Braintest</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
@@ -10,41 +10,31 @@
 :root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1000px;margin:0 auto;padding:1rem}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
 header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
 .brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
 .brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
 nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
 .btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-.btn.small{padding:.35rem .6rem}
+.btn.secondary{background:#fff;color:#0e1d33;border:1px solid var(--borda)}
+.btn.small{padding:.35rem .6rem;font-weight:700;border-radius:8px}
 .btn:hover{background:var(--salmao-2)}
-.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-
 .card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
 h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
-h3{color:#0e1d33;margin:.8rem 0 .4rem}
-p{line-height:1.7;color:#303540}
 .small{font-size:.92rem;color:#6b7380}
-.hr{height:1px;background:var(--borda);margin:1rem 0}
-
-.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0}
-.tab{border:1px solid var(--borda);background:#f7f9ff;color:#0e1d33;border-radius:10px;padding:.4rem .8rem;cursor:pointer}
-.tab.active{background:#fff;border-color:var(--salmao);color:var(--azul);font-weight:700}
-
-.toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:.4rem 0}
-.select{border:1px solid var(--borda);border-radius:10px;padding:.4rem .6rem;background:#fff}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{padding:.7rem;border-bottom:1px solid var(--borda);text-align:left}
-.table th{font-weight:700;color:#0e1d33;background:#f9fbff}
-.row-empty{padding:1rem;text-align:center;color:#6b7380}
-.kpi{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.kpi .val{font-size:1.4rem;font-weight:800;color:#0e1d33}
-.pag{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem}
-.badge-kind{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
-.badge-credit{background:#f2fff5;border:1px solid #cdebd4;color:#184d2b}
-.badge-debit{background:#fff7f5;border:1px solid #ffd5cb;color:#5f1f12}
-.link{color:var(--azul);text-decoration:none}
+.controls{display:flex;gap:.6rem;flex-wrap:wrap;margin:.6rem 0}
+select,input[type="date"]{border:1px solid var(--borda);border-radius:10px;padding:.45rem .6rem;background:#fff}
+.table{width:100%;border-collapse:collapse;margin-top:.5rem}
+.table th,.table td{border-bottom:1px solid var(--borda);padding:.7rem;text-align:left;font-size:.95rem}
+.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.25rem}
+.pager{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem}
+.pager button{border:1px solid var(--borda);background:#fff;border-radius:8px;padding:.4rem .7rem;cursor:pointer}
+.pager button[disabled]{opacity:.5;cursor:not-allowed}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:1rem}
+.modal .box{background:#fff;border-radius:14px;max-width:800px;width:100%;padding:1rem;border:1px solid var(--borda);max-height:85vh;overflow:auto}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:.4rem .8rem;margin:.5rem 0}
+.kv div{padding:.25rem 0;border-bottom:1px dashed #eef2f7}
+.resposta{margin:.6rem 0;padding:.6rem;border:1px solid var(--borda);border-radius:10px;background:#fafcff}
 </style>
 </head>
 <body>
@@ -53,288 +43,272 @@ p{line-height:1.7;color:#303540}
     <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
     <nav>
       <a href="/index.html">Início</a>
-      <a href="/carteira.html" class="btn secondary">Carteira</a>
-      <a href="/faq.html">FAQ</a>
-      <a href="/sobre.html">Sobre</a>
+      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoTop">0.00</span> BC</a>
+      <a href="/historico.html"><b>Histórico</b></a>
+      <a href="/perfil.html">Perfil</a>
       <span id="userInfo" class="badge">Carregando…</span>
       <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
     </nav>
   </header>
 
   <section class="card">
-    <div class="kpi">
-      <div>
-        <div class="small">Saldo atual</div>
-        <div class="val"><span id="saldoNow">0.00</span> BC</div>
-      </div>
-      <button class="btn small" onclick="location.href='/carteira.html'">Adicionar Braincoins</button>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Histórico</h2>
-    <div class="tabs">
-      <button class="tab active" id="tabCompras">Compras</button>
-      <button class="tab" id="tabExtrato">Extrato de Braincoins</button>
-    </div>
-
-    <div class="toolbar">
-      <label class="small">Período:</label>
-      <select id="selPeriodo" class="select">
-        <option value="all">Tudo</option>
-        <option value="7">Últimos 7 dias</option>
-        <option value="30">Últimos 30 dias</option>
-        <option value="90">Últimos 90 dias</option>
-      </select>
-
-      <div id="filtroKind" style="display:none">
-        <label class="small">Tipo:</label>
-        <select id="selKind" class="select">
-          <option value="all">Todos</option>
-          <option value="credit">Crédito</option>
-          <option value="debit">Débito</option>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+      <h2>Histórico de triagens</h2>
+      <div class="controls">
+        <select id="fTeste">
+          <option value="">Todos os testes</option>
+          <option value="tdah">TDAH</option>
+          <option value="burnout">Burnout</option>
+          <option value="qi">QI</option>
         </select>
+        <input type="date" id="fDe">
+        <input type="date" id="fAte">
+        <button class="btn small" id="btnFiltrar">Filtrar</button>
+        <button class="btn secondary small" id="btnLimpar">Limpar</button>
       </div>
     </div>
 
-    <!-- COMPRAS -->
-    <div id="boxCompras">
-      <table class="table" id="tblCompras">
-        <thead>
-          <tr><th>Produto</th><th>Preço (BC)</th><th>Data</th><th>Acesso</th></tr>
-        </thead>
-        <tbody id="bodyCompras">
-          <tr><td colspan="4" class="row-empty">Carregando…</td></tr>
-        </tbody>
-      </table>
-      <div class="pag">
-        <button class="btn secondary small" id="comprasPrev" disabled>Anterior</button>
-        <button class="btn secondary small" id="comprasNext" disabled>Próxima</button>
-      </div>
-    </div>
+    <div id="status" class="small" style="margin:.4rem 0 0"></div>
 
-    <!-- EXTRATO -->
-    <div id="boxExtrato" style="display:none">
-      <table class="table" id="tblExtrato">
-        <thead>
-          <tr><th>Tipo</th><th>Valor (BC)</th><th>Descrição</th><th>Data</th></tr>
-        </thead>
-        <tbody id="bodyExtrato">
-          <tr><td colspan="4" class="row-empty">Carregando…</td></tr>
-        </tbody>
-      </table>
-      <div class="pag">
-        <button class="btn secondary small" id="extratoPrev" disabled>Anterior</button>
-        <button class="btn secondary small" id="extratoNext" disabled>Próxima</button>
-      </div>
+    <table class="table" id="grid">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Teste</th>
+          <th>Itens</th>
+          <th>Resultado</th>
+          <th style="width:240px">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="5" class="small">Carregando…</td></tr></tbody>
+    </table>
+
+    <div class="pager">
+      <button id="prevBtn" disabled>◀ Anteriores</button>
+      <button id="nextBtn" disabled>Próximas ▶</button>
     </div>
   </section>
 </div>
 
-<script>
-const PAGE = 15;
-let CURRENT_TAB = 'compras'; // 'compras' | 'extrato'
-let userId = null;
+<!-- Modal Respostas -->
+<div class="modal" id="modal">
+  <div class="box">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:.2rem 0">Detalhes da sessão</h3>
+      <button class="btn secondary small" id="closeModal">Fechar</button>
+    </div>
+    <div id="detalhes" class="kv"></div>
+    <div id="respostas"></div>
+  </div>
+</div>
 
-// período helpers
-function periodStart(days){
-  if(days==='all') return null;
-  const d = new Date();
-  d.setDate(d.getDate() - Number(days));
-  return d.toISOString();
-}
-function fmtBC(cents){ return (Math.abs(cents)/100).toFixed(2); }
+<script>
+const PAGE_SIZE = 10;
+let userId = null;
+let page = 0;
+let lastPage = false;
+
+const premiumURL = (test) => ({
+  tdah: '/tdah-premium.html',
+  burnout: '/burnout-premium.html',
+  qi: '/qi-premium.html'
+}[test] || '#');
+
 function fmtDate(iso){
-  try{
-    const d = new Date(iso);
-    return d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'});
-  }catch{ return iso || '-'; }
+  if(!iso) return '-';
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' });
 }
-function productLink(p){
-  switch((p||'').toLowerCase()){
-    case 'tdah': return '/tdah-premium.html';
-    case 'burnout': return '/burnout-premium.html';
-    case 'qi': return '/qi-premium.html';
-    default: return '#';
+
+function setStatus(msg){ document.getElementById('status').innerHTML = msg || ''; }
+function setUserTop(email, saldoBC){
+  document.getElementById('userInfo').textContent = email || 'Usuário';
+  document.getElementById('saldoTop').textContent = (saldoBC ?? 0).toFixed(2);
+}
+
+function lineResultado(row){
+  if(row.test === 'qi'){
+    return `QI: <b>${row.score_qi ?? 0}</b> / ${row.items_qty}`;
+  }else{
+    const max = (row.items_qty||0) * 2;
+    return `Likert: <b>${row.score_likert ?? 0}</b> / ${max}`;
   }
 }
 
-// sessão
+async function loadSaldo(uid){
+  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', uid).single();
+  return (w?.balance_cents || 0)/100;
+}
+
+async function loadCompras(uid){
+  const { data:rows } = await sb.from('purchases').select('product').eq('user_id', uid);
+  const set = new Set((rows||[]).map(r=>r.product));
+  return set;
+}
+
+async function fetchPage(){
+  if(!userId) return;
+  setStatus('Carregando histórico…');
+  const tbody = document.getElementById('tbody'); tbody.innerHTML = `<tr><td colspan="5" class="small">Carregando…</td></tr>`;
+
+  // filtros
+  const fTeste = document.getElementById('fTeste').value || null;
+  const fDe = document.getElementById('fDe').value || null;
+  const fAte = document.getElementById('fAte').value || null;
+
+  let q = sb.from('test_sessions')
+    .select('id, created_at, test, items_qty, score_likert, score_qi')
+    .eq('user_id', userId);
+
+  if(fTeste) q = q.eq('test', fTeste);
+  if(fDe)    q = q.gte('created_at', new Date(fDe+'T00:00:00').toISOString());
+  if(fAte)   q = q.lte('created_at', new Date(fAte+'T23:59:59').toISOString());
+
+  q = q.order('created_at', { ascending:false }).range(page*PAGE_SIZE, page*PAGE_SIZE + PAGE_SIZE - 1);
+
+  const { data:rows, error, count } = await q;
+  if(error){ setStatus(`<span style="color:#b00020">Erro: ${error.message}</span>`); return; }
+
+  const compras = await loadCompras(userId);
+
+  tbody.innerHTML = '';
+  if(!rows || rows.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" class="small">Nenhuma sessão encontrada.</td></tr>`;
+    setStatus('');
+    document.getElementById('prevBtn').disabled = (page===0);
+    document.getElementById('nextBtn').disabled = true;
+    return;
+  }
+
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fmtDate(r.created_at)}</td>
+      <td>${r.test.toUpperCase()}</td>
+      <td>${r.items_qty||0}</td>
+      <td>${lineResultado(r)}</td>
+      <td>
+        <button class="btn secondary small" data-act="ver" data-id="${r.id}" data-test="${r.test}">Ver respostas</button>
+        ${compras.has(r.test) ? 
+          `<button class="btn small" data-act="open" data-test="${r.test}">Abrir relatório</button>` :
+          `<button class="btn small" data-act="comprar" data-test="${r.test}">Desbloquear (10 BC)</button>`}
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  // simples: se veio menos que PAGE_SIZE, é a última
+  lastPage = rows.length < PAGE_SIZE;
+  document.getElementById('prevBtn').disabled = (page===0);
+  document.getElementById('nextBtn').disabled = lastPage;
+  setStatus('');
+}
+
+async function openModalDetalhes(sessionId, testKey){
+  const modal = document.getElementById('modal');
+  const detalhes = document.getElementById('detalhes');
+  const respostas = document.getElementById('respostas');
+  detalhes.innerHTML = 'Carregando…';
+  respostas.innerHTML = '';
+
+  modal.style.display = 'flex';
+
+  // busca sessão + respostas + perguntas para montar as labels
+  const { data:s } = await sb.from('test_sessions').select('*').eq('id', sessionId).single();
+  const { data:aRows } = await sb.from('test_answers').select('question_id, option_id, value, is_correct').eq('session_id', sessionId).order('question_id');
+
+  // pega prompts e opções
+  const qids = (aRows||[]).map(a=>a.question_id);
+  const { data:qRows } = await sb.from('test_questions').select('id, prompt').in('id', qids);
+  const { data:oRows } = await sb.from('test_question_options').select('id, label').in('id', (aRows||[]).map(a=>a.option_id));
+
+  const mapQ = new Map((qRows||[]).map(q=>[q.id, q.prompt]));
+  const mapO = new Map((oRows||[]).map(o=>[o.id, o.label]));
+
+  detalhes.innerHTML = `
+    <div>Data</div><div>${fmtDate(s.created_at)}</div>
+    <div>Teste</div><div>${s.test.toUpperCase()}</div>
+    <div>Itens</div><div>${s.items_qty||0}</div>
+    <div>Resultado</div><div>${s.test==='qi' ? (s.score_qi||0)+' / '+(s.items_qty||0) : (s.score_likert||0)+' / '+((s.items_qty||0)*2)}</div>
+  `;
+
+  (aRows||[]).forEach(a=>{
+    const dv = document.createElement('div');
+    dv.className='resposta';
+    dv.innerHTML = `
+      <div class="small" style="color:#6b7380">${a.question_id}</div>
+      <div style="font-weight:600;margin:.2rem 0">${mapQ.get(a.question_id) || 'Pergunta'}</div>
+      <div>Resposta: <b>${mapO.get(a.option_id) || (a.value ?? '-')}</b> ${a.is_correct ? '<span class="badge" style="margin-left:.25rem;background:#f2fff5;border-color:#cdebd4;color:#184d2b">Correta</span>':''}</div>
+    `;
+    respostas.appendChild(dv);
+  });
+}
+
+async function handleAcao(e){
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.dataset.act;
+  const test = btn.dataset.test;
+  if(act === 'open'){
+    location.href = premiumURL(test);
+  }else if(act === 'comprar'){
+    // tenta comprar por braincoins
+    const PRICE_CENTS = 1000;
+    const { data:{ user } } = await sb.auth.getUser();
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const balance = w?.balance_cents||0;
+    if(balance < PRICE_CENTS){
+      if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html';
+      return;
+    }
+    const { error } = await sb.rpc('wallet_buy',{ p_product:test, p_price_cents:PRICE_CENTS, p_description:`Relatório premium: ${test.toUpperCase()}` });
+    if(error){ alert('Não foi possível concluir a compra.'); return; }
+    alert('Relatório desbloqueado!');
+    fetchPage();
+  }else if(act === 'ver'){
+    const id = btn.dataset.id;
+    openModalDetalhes(id, test);
+  }
+}
+
+document.getElementById('tbody').addEventListener('click', handleAcao);
+document.getElementById('closeModal').addEventListener('click', ()=>{ document.getElementById('modal').style.display='none'; });
+document.getElementById('modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') e.currentTarget.style.display='none'; });
+
+document.getElementById('btnFiltrar').addEventListener('click', ()=>{ page=0; fetchPage(); });
+document.getElementById('btnLimpar').addEventListener('click', ()=>{
+  document.getElementById('fTeste').value='';
+  document.getElementById('fDe').value='';
+  document.getElementById('fAte').value='';
+  page=0; fetchPage();
+});
+
+document.getElementById('prevBtn').addEventListener('click', ()=>{ if(page>0){ page--; fetchPage(); }});
+document.getElementById('nextBtn').addEventListener('click', ()=>{ if(!lastPage){ page++; fetchPage(); }});
+
+document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });
+
 document.addEventListener('DOMContentLoaded', async ()=>{
   await waitForSupabaseSession();
+
+  // auth + saldo topo
   const { data:{ user } } = await sb.auth.getUser();
   const ui = document.getElementById('userInfo');
   const logoutBtn = document.getElementById('logoutBtn');
 
   if(!user){
-    ui.textContent = 'Visitante';
-    alert('Faça login para ver seu histórico.');
-    location.href = '/index.html';
+    ui.textContent='Visitante'; logoutBtn.style.display='none';
+    setStatus('<span style="color:#b00020">Você precisa estar logado para ver o histórico.</span>');
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="5" class="small">Faça login em <a href="/perfil.html">Perfil</a>.</td></tr>`;
     return;
+  }else{
+    userId = user.id;
+    const saldo = await loadSaldo(userId);
+    setUserTop(user.email || 'Usuário', saldo);
+    logoutBtn.style.display='inline-block';
   }
-  userId = user.id;
-  ui.textContent = user.email || 'Usuário';
-  logoutBtn.style.display = 'inline-block';
 
-  // saldo
-  await refreshSaldo();
-
-  // abas
-  document.getElementById('tabCompras').addEventListener('click', ()=>switchTab('compras'));
-  document.getElementById('tabExtrato').addEventListener('click', ()=>switchTab('extrato'));
-
-  // filtros
-  document.getElementById('selPeriodo').addEventListener('change', reloadCurrentTab);
-  document.getElementById('selKind').addEventListener('change', reloadCurrentTab);
-
-  // paginação
-  document.getElementById('comprasPrev').addEventListener('click', ()=>changePage('compras', -1));
-  document.getElementById('comprasNext').addEventListener('click', ()=>changePage('compras', +1));
-  document.getElementById('extratoPrev').addEventListener('click', ()=>changePage('extrato', -1));
-  document.getElementById('extratoNext').addEventListener('click', ()=>changePage('extrato', +1));
-
-  // carrega inicial
-  await loadCompras(0);
+  fetchPage();
 });
-
-document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-  await sb.auth.signOut();
-  location.href = '/index.html';
-});
-
-// saldo
-async function refreshSaldo(){
-  const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', userId).single();
-  document.getElementById('saldoNow').textContent = ((data?.balance_cents||0)/100).toFixed(2);
-}
-
-// abas
-async function switchTab(tab){
-  if(CURRENT_TAB === tab) return;
-  CURRENT_TAB = tab;
-
-  // UI
-  document.getElementById('tabCompras').classList.toggle('active', tab==='compras');
-  document.getElementById('tabExtrato').classList.toggle('active', tab==='extrato');
-  document.getElementById('boxCompras').style.display = tab==='compras' ? 'block' : 'none';
-  document.getElementById('boxExtrato').style.display = tab==='extrato' ? 'block' : 'none';
-  document.getElementById('filtroKind').style.display = tab==='extrato' ? 'inline-block' : 'none';
-
-  // load
-  if(tab==='compras') await loadCompras(0);
-  else await loadExtrato(0);
-}
-
-let comprasPage = 0, comprasHasMore = false;
-let extratoPage = 0, extratoHasMore = false;
-
-async function reloadCurrentTab(){
-  if(CURRENT_TAB==='compras') await loadCompras(0);
-  else await loadExtrato(0);
-}
-
-// COMPRAS
-async function loadCompras(page){
-  comprasPage = page;
-  const tbody = document.getElementById('bodyCompras');
-  tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Carregando…</td></tr>`;
-
-  const days = document.getElementById('selPeriodo').value;
-  const from = periodStart(days);
-
-  let q = sb.from('purchases')
-            .select('product, price_cents, created_at')
-            .eq('user_id', userId)
-            .order('created_at', { ascending:false })
-            .range(page*PAGE, page*PAGE + PAGE - 1);
-
-  if(from) q = q.gte('created_at', from);
-
-  const { data, error, count } = await q;
-  if(error){
-    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Erro ao carregar compras.</td></tr>`;
-    console.warn(error); return;
-  }
-
-  // hasMore: tenta pegar o próximo item (simples)
-  comprasHasMore = (data?.length||0) === PAGE;
-
-  if(!data || data.length===0){
-    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Você ainda não possui compras neste período.</td></tr>`;
-  }else{
-    tbody.innerHTML = data.map(row=>{
-      const price = (row.price_cents ?? 1000); // fallback 10 BC para compras antigas
-      const href = productLink(row.product);
-      return `<tr>
-        <td style="text-transform:capitalize">${row.product||'-'}</td>
-        <td>${(price/100).toFixed(2)}</td>
-        <td>${fmtDate(row.created_at)}</td>
-        <td>${href!=='#' ? `<a class="link" href="${href}">Abrir relatório</a>` : '-'}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  document.getElementById('comprasPrev').disabled = (page===0);
-  document.getElementById('comprasNext').disabled = !comprasHasMore;
-}
-
-// EXTRATO
-async function loadExtrato(page){
-  extratoPage = page;
-  const tbody = document.getElementById('bodyExtrato');
-  tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Carregando…</td></tr>`;
-
-  const days = document.getElementById('selPeriodo').value;
-  const kind = document.getElementById('selKind').value;
-  const from = periodStart(days);
-
-  let q = sb.from('wallet_transactions')
-            .select('kind, amount_cents, description, created_at')
-            .eq('user_id', userId)
-            .order('created_at', { ascending:false })
-            .range(page*PAGE, page*PAGE + PAGE - 1);
-
-  if(from) q = q.gte('created_at', from);
-  if(kind!=='all') q = q.eq('kind', kind);
-
-  const { data, error } = await q;
-  if(error){
-    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Erro ao carregar extrato.</td></tr>`;
-    console.warn(error); return;
-  }
-
-  extratoHasMore = (data?.length||0) === PAGE;
-
-  if(!data || data.length===0){
-    tbody.innerHTML = `<tr><td colspan="4" class="row-empty">Nenhuma movimentação neste período.</td></tr>`;
-  }else{
-    tbody.innerHTML = data.map(row=>{
-      const badge = row.kind==='credit'
-        ? `<span class="badge-kind badge-credit">Crédito</span>`
-        : `<span class="badge-kind badge-debit">Débito</span>`;
-      const val = (row.kind==='credit' ? '+' : '-') + fmtBC(row.amount_cents);
-      return `<tr>
-        <td>${badge}</td>
-        <td>${val}</td>
-        <td>${row.description||'-'}</td>
-        <td>${fmtDate(row.created_at)}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  document.getElementById('extratoPrev').disabled = (page===0);
-  document.getElementById('extratoNext').disabled = !extratoHasMore;
-}
-
-async function changePage(which, delta){
-  if(which==='compras'){
-    const next = Math.max(0, comprasPage + delta);
-    await loadCompras(next);
-  }else{
-    const next = Math.max(0, extratoPage + delta);
-    await loadExtrato(next);
-  }
-}
 </script>
 </body>
 </html>
