@@ -1,118 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Carteira — Braintest</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carteira | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-<script src="/assets/app.js" defer></script>
+<style>
+.wallet{max-width:600px;margin:2rem auto;padding:1.5rem;border:1px solid #ddd;border-radius:10px;background:#fff;}
+.balance{font-size:2rem;font-weight:700;color:#0066ff;margin-bottom:1rem;}
+.packages{display:grid;gap:1rem;}
+.pkg{border:1px solid #ccc;padding:1rem;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.pkg button{background:#0066ff;color:#fff;border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;}
+</style>
 </head>
 <body>
-<div class="shell">
-
-  <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
-    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
-    <div class="user-chip" id="userChip">Carregando…</div>
-    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
-  </header>
-
-  <div class="body">
-    <aside class="sidebar">
-      <nav class="nav">
-        <h6>Navegação</h6>
-        <a href="/index.html" data-current>🏠 Início</a>
-        <a href="/historico.html" data-current>🕘 Histórico</a>
-        <a href="/carteira.html" class="active" data-current>💳 Carteira</a>
-        <a href="/perfil.html" data-current>👤 Perfil</a>
-        <h6 style="margin-top:14px">Testes</h6>
-        <a href="/teste-tdah.html" data-current>⚡ TDAH</a>
-        <a href="/teste-burnout.html" data-current>🔥 Burnout</a>
-        <a href="/teste-qi.html" data-current>🧠 QI</a>
-      </nav>
-    </aside>
-
-    <main class="content">
-      <div class="container">
-        <div class="grid cols-2">
-          <div class="card">
-            <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Sua carteira</h2>
-            <div class="kpi" style="margin-top:8px">
-              <div>
-                <div class="title">Saldo atual</div>
-                <div class="value"><span id="saldoBC">0.00</span> BC</div>
-              </div>
-              <button class="btn alt" id="btnRefresh">Atualizar saldo</button>
-            </div>
-            <p class="small" style="margin-top:8px">Braincoin tem paridade 1:1 com R$ e é usada para desbloquear relatórios e assinaturas.</p>
-          </div>
-
-          <div class="card">
-            <h3 style="margin:0 0 8px">Adicionar Braincoins</h3>
-            <div class="grid cols-2">
-              <a class="btn" href="https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04" target="_blank">+10 BC</a>
-              <a class="btn" href="https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05" target="_blank">+30 BC</a>
-              <a class="btn" href="https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06" target="_blank">+50 BC</a>
-              <a class="btn" href="https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07" target="_blank">+100 BC</a>
-              <a class="btn" href="https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08" target="_blank">+500 BC</a>
-              <a class="btn" href="https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09" target="_blank">+1000 BC</a>
-              <a class="btn" href="https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a" target="_blank">+3000 BC</a>
-            </div>
-            <p class="small" style="margin-top:8px">Após o pagamento, volte e clique em “Atualizar saldo”.</p>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:16px">
-          <h3 style="margin:0 0 8px">Extrato</h3>
-          <table class="table" id="tbl">
-            <thead><tr><th>Data</th><th>Tipo</th><th>Valor (BC)</th><th>Descrição</th></tr></thead>
-            <tbody id="tbody"><tr><td colspan="4" class="small">Carregando…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </main>
+<header class="topbar">
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"><span>Braintest</span></a>
+</header>
+<main>
+  <div class="wallet" id="walletBox">
+    <h2>Carregando carteira...</h2>
   </div>
-
-  <nav class="mobilebar">
-    <a href="/index.html" data-current>🏠</a>
-    <a href="/teste-tdah.html" data-current>⚡</a>
-    <a href="/teste-burnout.html" data-current>🔥</a>
-    <a href="/teste-qi.html" data-current>🧠</a>
-    <a href="/perfil.html" data-current>👤</a>
-  </nav>
-</div>
+</main>
 
 <script>
-function fmt(iso){ const d=new Date(iso); return d.toLocaleString('pt-BR',{dateStyle:'short', timeStyle:'short'}); }
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await waitForSupabaseSession();
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ location.href='/perfil.html'; return; }
-  document.getElementById('userChip').textContent = user.email || 'Usuário';
+(async()=>{
+  const session=await waitForSupabaseSession();
+  if(!session){window.location='/login.html';return;}
+  const user=session.user;
+  const { data:wallet } = await sb.from('wallets').select('balance').eq('user_id',user.id).maybeSingle();
+  const saldo=(wallet&&wallet.balance)||0;
+  const box=document.getElementById('walletBox');
 
-  async function loadSaldo(){
-    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const bc=(w?.balance_cents||0)/100; 
-    setTopUser(user.email||'Usuário', bc);
-    document.getElementById('saldoBC').textContent=bc.toFixed(2);
-  }
-  async function loadExtrato(){
-    const { data:rows } = await sb.from('wallet_transactions').select('created_at, kind, amount_cents, description').eq('user_id', user.id).order('created_at',{ascending:false}).limit(50);
-    const tb=document.getElementById('tbody'); tb.innerHTML='';
-    (rows||[]).forEach(r=>{
-      const tr=document.createElement('tr');
-      const val=(r.amount_cents||0)/100;
-      tr.innerHTML=`<td>${fmt(r.created_at)}</td><td>${r.kind}</td><td>${val.toFixed(2)}</td><td>${r.description||'-'}</td>`;
-      tb.appendChild(tr);
-    });
-    if(!rows || rows.length===0){ tb.innerHTML='<tr><td colspan="4" class="small">Sem movimentações.</td></tr>'; }
-  }
+  const pacotes=[
+    {coins:10,link:'https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04'},
+    {coins:30,link:'https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05'},
+    {coins:50,link:'https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06'},
+    {coins:100,link:'https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07'},
+    {coins:500,link:'https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08'},
+    {coins:1000,link:'https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09'},
+    {coins:3000,link:'https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a'}
+  ];
 
-  await loadSaldo(); await loadExtrato();
-  document.getElementById('btnRefresh').addEventListener('click', async ()=>{ await loadSaldo(); await loadExtrato(); });
-});
+  box.innerHTML=`
+    <h2>Minha Carteira</h2>
+    <div class="balance">${saldo} Braincoins</div>
+    <div class="packages">
+      ${pacotes.map(p=>`
+        <div class="pkg">
+          <span>Adicionar ${p.coins} Braincoins</span>
+          <button onclick="window.open('${p.link}','_blank')">Comprar</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+})();
 </script>
 </body>
 </html>
