@@ -10,13 +10,10 @@
 <script src="/assets/app.js" defer></script>
 </head>
 <body>
+<div class="shell">
 
-<div class="app">
-  <!-- HEADER -->
-  <header class="app-header">
-    <a class="brand" href="/index.html">
-      <img src="/assets/logo.svg" alt="Braintest"><span>Braintest</span>
-    </a>
+  <header class="topbar">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
     <div class="search" style="flex:1; margin-left:8px">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-3.5-3.5" stroke="#8a93a5" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#8a93a5" stroke-width="2"/></svg>
       <input placeholder="Busque testes, temas, relatórios…">
@@ -25,134 +22,128 @@
     <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
   </header>
 
-  <!-- SIDEBAR (desktop) -->
-  <aside class="app-sidebar">
-    <nav class="nav">
-      <h6>Explorar</h6>
-      <a href="/index.html" data-current>🏠 Início</a>
-      <a href="/historico.html" data-current>🕘 Histórico</a>
-      <a href="/carteira.html" data-current>💳 Carteira</a>
-      <a href="/perfil.html" data-current>👤 Perfil</a>
+  <div class="body">
+    <aside class="sidebar">
+      <nav class="nav">
+        <h6>Navegação</h6>
+        <a href="/index.html" data-current class="active">🏠 Início</a>
+        <a href="/historico.html" data-current>🕘 Histórico</a>
+        <a href="/carteira.html" data-current>💳 Carteira</a>
+        <a href="/perfil.html" data-current>👤 Perfil</a>
 
-      <h6 style="margin-top:14px">Testes</h6>
-      <a href="/teste-tdah.html" data-current>⚡ TDAH <span class="badge">10 BC</span></a>
-      <a href="/teste-burnout.html" data-current>🔥 Burnout <span class="badge">10 BC</span></a>
-      <a href="/teste-qi.html" data-current>🧠 QI <span class="badge">10 BC</span></a>
+        <h6 style="margin-top:14px">Testes</h6>
+        <a href="/teste-tdah.html" data-current>⚡ TDAH <span class="badge">10 BC</span></a>
+        <a href="/teste-burnout.html" data-current>🔥 Burnout <span class="badge">10 BC</span></a>
+        <a href="/teste-qi.html" data-current>🧠 QI <span class="badge">10 BC</span></a>
+      </nav>
+    </aside>
 
-      <h6 style="margin-top:14px">Em breve</h6>
-      <a href="#" onclick="alert('Em breve');return false;">⏱️ Tempo de reação</a>
-      <a href="#" onclick="alert('Em breve');return false;">🧩 Jogos de lógica</a>
-    </nav>
-  </aside>
+    <main class="content">
+      <div class="container">
+        <div class="grid cols-3">
+          <div class="card kpi">
+            <div>
+              <div class="title">Seu saldo</div>
+              <div class="value"><span id="kpiSaldo">0.00</span> BC</div>
+            </div>
+            <a class="btn alt" href="/carteira.html">Adicionar BC</a>
+          </div>
 
-  <!-- MAIN -->
-  <main class="app-main">
-    <div class="grid cols-3">
-      <div class="card kpi">
-        <div>
-          <div class="title">Seu saldo</div>
-          <div class="value"><span id="kpiSaldo">0.00</span> BC</div>
-        </div>
-        <a class="btn alt" href="/carteira.html">Adicionar BC</a>
-      </div>
+          <div class="card kpi">
+            <div>
+              <div class="title">Triagens realizadas</div>
+              <div class="value" id="kpiTriagens">—</div>
+            </div>
+            <a class="btn alt" href="/historico.html">Ver histórico</a>
+          </div>
 
-      <div class="card kpi">
-        <div>
-          <div class="title">Triagens realizadas</div>
-          <div class="value" id="kpiTriagens">—</div>
-        </div>
-        <a class="btn alt" href="/historico.html">Ver histórico</a>
-      </div>
-
-      <div class="card kpi">
-        <div>
-          <div class="title">Relatórios premium</div>
-          <div class="value" id="kpiPremiums">—</div>
-        </div>
-        <a class="btn alt" href="/historico.html">Abrir relatórios</a>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <h3 style="margin:4px 0 12px;font-family:Poppins,Inter">Comece por aqui</h3>
-      <div class="grid cols-3">
-        <div class="card">
-          <h4 style="margin:0 0 6px">⚡ TDAH</h4>
-          <p style="color:var(--muted);margin:0 0 12px">Triagem rápida de sintomas com relatório premium por domínios.</p>
-          <div style="display:flex;gap:8px">
-            <a class="btn" href="/teste-tdah.html">Fazer triagem</a>
-            <a class="btn alt" href="/tdah-premium.html">Ver premium</a>
+          <div class="card kpi">
+            <div>
+              <div class="title">Relatórios premium</div>
+              <div class="value" id="kpiPremiums">—</div>
+            </div>
+            <a class="btn alt" href="/historico.html">Abrir relatórios</a>
           </div>
         </div>
 
-        <div class="card">
-          <h4 style="margin:0 0 6px">🔥 Burnout</h4>
-          <p style="color:var(--muted);margin:0 0 12px">Exaustão, cinismo e eficácia. Resultados claros, recomendações práticas.</p>
-          <div style="display:flex;gap:8px">
-            <a class="btn" href="/teste-burnout.html">Fazer triagem</a>
-            <a class="btn alt" href="/burnout-premium.html">Ver premium</a>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin:4px 0 12px;font-family:Poppins,Inter">Comece por aqui</h3>
+          <div class="grid cols-3">
+            <div class="card">
+              <h4 style="margin:0 0 6px">⚡ TDAH</h4>
+              <p class="small" style="margin:0 0 12px">Triagem de sintomas com relatório por domínios.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <a class="btn" href="/teste-tdah.html">Fazer triagem</a>
+                <a class="btn alt" href="/tdah-premium.html">Ver premium</a>
+              </div>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">🔥 Burnout</h4>
+              <p class="small" style="margin:0 0 12px">Exaustão, cinismo e eficácia, com plano prático.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <a class="btn" href="/teste-burnout.html">Fazer triagem</a>
+                <a class="btn alt" href="/burnout-premium.html">Ver premium</a>
+              </div>
+            </div>
+
+            <div class="card">
+              <h4 style="margin:0 0 6px">🧠 QI</h4>
+              <p class="small" style="margin:0 0 12px">Estimativa por domínios e percentil.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <a class="btn" href="/teste-qi.html">Fazer triagem</a>
+                <a class="btn alt" href="/qi-premium.html">Ver premium</a>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="card">
-          <h4 style="margin:0 0 6px">🧠 QI</h4>
-          <p style="color:var(--muted);margin:0 0 12px">Estimativa por domínios (numérico, lógico, espacial) e percentil.</p>
-          <div style="display:flex;gap:8px">
-            <a class="btn" href="/teste-qi.html">Fazer triagem</a>
-            <a class="btn alt" href="/qi-premium.html">Ver premium</a>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin:4px 0 12px;font-family:Poppins,Inter">Atualizações</h3>
+          <div class="table-wrap">
+            <div class="table-row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)">
+              <div><b>Novo layout</b> — navegação estável no desktop e mobile.</div>
+              <div class="badge">Hoje</div>
+            </div>
+            <div class="table-row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)">
+              <div><b>Histórico</b> — sessões salvas com filtro e detalhamento.</div>
+              <div class="badge">Novo</div>
+            </div>
+            <div class="table-row" style="display:flex;justify-content:space-between;padding:10px 0">
+              <div><b>Braincoins</b> — compras internas unificadas.</div>
+              <div class="badge">Estável</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
+  </div>
 
-    <div class="card" style="margin-top:16px">
-      <h3 style="margin:4px 0 12px;font-family:Poppins,Inter">Atualizações</h3>
-      <div class="list-row">
-        <div><b>Novo layout</b> – navegação mais limpa no desktop e mobile.</div>
-        <div class="badge">Hoje</div>
-      </div>
-      <div class="list-row">
-        <div><b>Histórico</b> – sessões salvas com filtro e detalhamento.</div>
-        <div class="badge">Novo</div>
-      </div>
-      <div class="list-row">
-        <div><b>Braincoins</b> – compras internas e assinatura unificadas.</div>
-        <div class="badge">Estável</div>
-      </div>
-    </div>
-  </main>
+  <nav class="mobilebar">
+    <a href="/index.html" data-current class="active">🏠</a>
+    <a href="/teste-tdah.html" data-current>⚡</a>
+    <a href="/teste-burnout.html" data-current>🔥</a>
+    <a href="/teste-qi.html" data-current>🧠</a>
+    <a href="/perfil.html" data-current>👤</a>
+  </nav>
 </div>
-
-<!-- Bottom bar (mobile) -->
-<nav class="bottom-bar">
-  <a href="/index.html" data-current>🏠 Início</a>
-  <a href="/teste-tdah.html" data-current>⚡ TDAH</a>
-  <a href="/teste-burnout.html" data-current>🔥 Burnout</a>
-  <a href="/teste-qi.html" data-current>🧠 QI</a>
-  <a href="/perfil.html" data-current>👤 Perfil</a>
-</nav>
 
 <script>
 (async ()=>{
   await waitForSupabaseSession();
   const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ document.getElementById('userChip').textContent='Entrar'; return; }
 
-  // chip + saldo topo
-  if(!user){
-    document.getElementById('userChip').textContent = 'Entrar';
-  }else{
-    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-    const saldo = ((w?.balance_cents||0)/100);
-    setTopUser(user.email || 'Usuário', saldo);
-    document.getElementById('kpiSaldo').textContent = saldo.toFixed(2);
+  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+  const saldo = ((w?.balance_cents||0)/100);
+  setTopUser(user.email || 'Usuário', saldo);
+  document.getElementById('kpiSaldo').textContent = saldo.toFixed(2);
 
-    // kpis rápidas
-    const { data:sCount } = await sb.from('test_sessions').select('id', { count:'exact', head:true }).eq('user_id', user.id);
-    document.getElementById('kpiTriagens').textContent = (sCount?.length===0 ? 0 : sCount) ?? '—';
+  const { count:sCount } = await sb.from('test_sessions').select('id', { count:'exact', head:true }).eq('user_id', user.id);
+  document.getElementById('kpiTriagens').textContent = sCount ?? 0;
 
-    const { data:pRows } = await sb.from('purchases').select('product').eq('user_id', user.id);
-    document.getElementById('kpiPremiums').textContent = (pRows?.length||0);
-  }
+  const { data:pRows } = await sb.from('purchases').select('product').eq('user_id', user.id);
+  document.getElementById('kpiPremiums').textContent = (pRows?.length||0);
 })();
 </script>
 </body>

@@ -1,6 +1,6 @@
 // /assets/app.js
 (function(){
-  // marca link ativo da sidebar/bottom bar conforme a página
+  // marca links ativos (sidebar e bottom)
   const path = location.pathname.replace(/\/+$/,'');
   document.querySelectorAll('[data-current]').forEach(el=>{
     const href = el.getAttribute('href') || '';
@@ -11,10 +11,10 @@
     }catch(_) {}
   });
 
-  // helper simples: copiar saldo para topo em páginas que já consultam a carteira
+  // helper para atualizar chip e saldo no topo
   window.setTopUser = function(email, saldoBC){
     const chip = document.getElementById('userChip');
-    if(chip) chip.innerHTML = `<span>${email||'Usuário'}</span>`;
+    if(chip) chip.textContent = email || 'Usuário';
     const saldo = document.getElementById('saldoTop');
     if(saldo) saldo.textContent = (saldoBC ?? 0).toFixed(2);
   };
