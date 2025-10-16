@@ -1,35 +1,41 @@
-/* /assets/supabase-init.js  */
-(() => {
-  // 🔧 SUBSTITUA APENAS A CHAVE ABAIXO PELA SUA ANON KEY DO SUPABASE
-  // URL do seu projeto (você já me passou): 
-  const SUPABASE_URL = 'https://gqwgyresqsuciikmymkd.supabase.co';
-  // Sua ANON KEY (pública) — copie do Supabase (Project Settings → API → anon public):
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ';
+// ================================================
+// Inicialização oficial do Supabase (Braintest)
+// ================================================
+// Este arquivo precisa existir em /assets/supabase-init.js
+// e ser incluído em todas as páginas HTML do projeto.
+//
+// Ele cria uma instância global `sb` que é usada
+// por todo o site para comunicação com o banco.
+//
+// ================================================
 
-  if (!window.supabase) {
-    console.error('Biblioteca supabase-js não carregou. Adicione <script src="https://unpkg.com/@supabase/supabase-js@2"></script> antes deste arquivo.');
-    return;
-  }
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('COLE_')) {
-    console.error('SUPABASE_URL/ANON_KEY ausentes. Edite /assets/supabase-init.js com seus valores.');
-  }
+// ⚙️ Substitua pelos dados reais do seu projeto Supabase
+const SUPABASE_URL = "https://gqwgyresqsuciikmymkd.supabase.co";   // ✅ URL do seu projeto
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxd2d5cmVzcXN1Y2lpa215bWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDQ5NTIsImV4cCI6MjA3NTkyMDk1Mn0.e9EfNqXvrujJm9jmG5SCJ2EShoq0PAbxTuv1kvs0FnQ";              // ✅ Cole aqui sua anon key completa
 
-  // Cliente global
-  window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+// ✅ Criação do cliente Supabase
+window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,         // mantém o login entre páginas
+    autoRefreshToken: true,       // renova token automaticamente
+    detectSessionInUrl: true      // permite login por callback
+  },
+  global: {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+    }
+  }
+});
+
+// Teste rápido (opcional — log no console se estiver tudo certo)
+sb.from("test_questions")
+  .select("id")
+  .limit(1)
+  .then(({ data, error }) => {
+    if (error) {
+      console.error("⚠️ Erro Supabase init:", error);
+    } else {
+      console.log("✅ Supabase conectado com sucesso!");
     }
   });
-
-  // Helper usado nas páginas para garantir sessão pronta
-  window.waitForSupabaseSession = async function waitForSupabaseSession(timeoutMs = 4000) {
-    const start = Date.now();
-    while (Date.now() - start < timeoutMs) {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session || session === null) return; // null = sem login; ok também.
-      await new Promise(r => setTimeout(r, 150));
-    }
-  };
-})();
