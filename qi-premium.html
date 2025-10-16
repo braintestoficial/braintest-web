@@ -3,107 +3,90 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QI — Relatório Premium | Braintest</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-init.js"></script>
-<style>
-:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1000px;margin:0 auto;padding:1rem}
-header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
-.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
-nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
-.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
-h3{color:#0e1d33;margin:.8rem 0 .4rem}
-p{line-height:1.7;color:#303540}
-.small{font-size:.92rem;color:#6b7380}
-.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-.notice{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem;margin-top:1rem}
-.warn{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem;margin-top:1rem}
-.hr{height:1px;background:var(--borda);margin:1rem 0}
-</style>
+<script src="/assets/supabase-init.js"></script>
+<script src="/assets/app.js" defer></script>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
-    <nav>
-      <a href="/index.html">Início</a>
-      <a href="/carteira.html">Carteira</a>
-      <a href="/historico.html">Histórico</a>
-      <a href="/perfil.html">Perfil</a>
-      <span id="userInfo" class="badge">Carregando…</span>
-    </nav>
+<div class="app">
+  <header class="app-header">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
+    <div class="search" style="flex:1;margin-left:8px"><input placeholder="Busque…"></div>
+    <div class="user-chip" id="userChip">Carregando…</div>
+    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
   </header>
 
-  <section id="bannerOk" class="notice" style="display:none">
-    <strong>Compra concluída!</strong>
-    <p class="small">Seu acesso a este relatório premium foi liberado.</p>
-  </section>
+  <aside class="app-sidebar">
+    <nav class="nav">
+      <h6>Relatórios</h6>
+      <a href="/tdah-premium.html" data-current>⚡ TDAH</a>
+      <a href="/burnout-premium.html" data-current>🔥 Burnout</a>
+      <a href="/qi-premium.html" data-current class="active">🧠 QI</a>
+      <h6 style="margin-top:14px">Explorar</h6>
+      <a href="/index.html" data-current>🏠 Início</a>
+      <a href="/historico.html" data-current>🕘 Histórico</a>
+      <a href="/carteira.html" data-current>💳 Carteira</a>
+      <a href="/perfil.html" data-current>👤 Perfil</a>
+    </nav>
+  </aside>
 
-  <section id="guard" class="warn" style="display:none">
-    <strong>Sem acesso ao relatório.</strong>
-    <p class="small">Você ainda não desbloqueou o relatório premium de QI. Faça a triagem e compre pelo botão de desbloqueio (10 Braincoins).</p>
-    <div style="margin-top:.6rem">
-      <button class="btn" onclick="location.href='/teste-qi.html'">Fazer triagem</button>
-      <button class="btn secondary" onclick="location.href='/carteira.html'">Adicionar Braincoins</button>
+  <main class="app-main">
+    <div class="card">
+      <h2 style="margin:0 0 8px;font-family:Poppins,Inter">Relatório Premium — QI</h2>
+      <div id="gate" class="small" style="margin-bottom:8px"></div>
+      <div id="content" style="display:none">
+        <div class="grid cols-3" id="dominios"></div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin:0 0 6px">Leitura do resultado</h3>
+          <p class="small" style="color:var(--muted)">Este relatório usa acertos em domínios (numérico, lógico, verbal/espacial simplificado) para estimar seu desempenho relativo (percentil). Trata-se de uma **estimativa indicativa**, não um teste psicométrico padronizado.</p>
+        </div>
+      </div>
     </div>
-  </section>
-
-  <section id="report" class="card" style="display:none">
-    <h2>QI — Relatório Premium</h2>
-    <p class="small">Estimativa numérica de QI e percentil com base na sua pontuação na triagem (indicativo; não é teste clínico padronizado).</p>
-    <div class="hr"></div>
-
-    <h3>Resultado</h3>
-    <p>Com base na pontuação, a estimativa situaria seu QI em torno de <strong>100 ± 15</strong> (escala padrão), com percentil correspondente ao desempenho obtido na prova curta.</p>
-
-    <h3>Interpretação</h3>
-    <ul class="small">
-      <li><strong>Lógico/numérico:</strong> práticas de sequências e problemas aritméticos elevam consistência.</li>
-      <li><strong>Padrões/visuoespacial:</strong> treino com matrizes e puzzles acelera detecção de regularidades.</li>
-      <li><strong>Verbal/curto:</strong> leitura diária e resumos concisos ajudam vocabulário e síntese.</li>
-    </ul>
-
-    <div class="hr"></div>
-    <p class="small">Para resultados formais, são necessários testes aplicados por profissionais com padronização e normas específicas.</p>
-  </section>
+  </main>
 </div>
 
+<nav class="bottom-bar">
+  <a href="/index.html" data-current>🏠</a>
+  <a href="/teste-tdah.html" data-current>⚡</a>
+  <a href="/teste-burnout.html" data-current>🔥</a>
+  <a href="/teste-qi.html" data-current>🧠</a>
+  <a href="/perfil.html" data-current>👤</a>
+</nav>
+
 <script>
+const PRODUCT='qi';
+function domCard(title,score,desc){ return `<div class="card"><div class="title" style="color:var(--muted);font-size:12px">${title}</div><div class="value" style="font-size:22px;font-weight:800">${score}</div><p class="small" style="margin-top:6px;color:var(--muted)">${desc}</p></div>`; }
 document.addEventListener('DOMContentLoaded', async ()=>{
   await waitForSupabaseSession();
-  const { data:{ user } } = await sb.auth.getUser();
-  const ui = document.getElementById('userInfo');
+  const g=document.getElementById('gate'); const c=document.getElementById('content');
+  const {data:{user}}=await sb.auth.getUser(); if(!user){ location.href='/perfil.html'; return; }
+  document.getElementById('userChip').textContent=user.email||'Usuário';
+  const {data:w}=await sb.from('wallets').select('balance_cents').eq('user_id',user.id).single();
+  document.getElementById('saldoTop').textContent=((w?.balance_cents||0)/100).toFixed(2);
 
-  if(!user){
-    ui.textContent = 'Visitante';
-    alert('Faça login para abrir seu relatório.');
-    location.href = '/index.html';
-    return;
+  const {data:have}=await sb.from('purchases').select('product').eq('user_id',user.id).eq('product',PRODUCT).maybeSingle();
+  if(!have){ g.innerHTML=`<div style="padding:.8rem;border:1px dashed var(--line);border-radius:12px;background:#fff">Relatório bloqueado. Desbloqueie na página do teste.</div>`; return; }
+
+  g.innerHTML=`<span class="badge" style="background:#f2fff5;border-color:#cdebd4;color:#184d2b">Acesso liberado</span>`;
+  c.style.display='block';
+
+  // últimas 3 sessões — acertos por domínio
+  const { data:sessions } = await sb.from('test_sessions').select('id').eq('user_id',user.id).eq('test','qi').order('created_at',{ascending:false}).limit(3);
+  let dom={ numerico:0, logico:0, espacial:0 }, tot={ numerico:0, logico:0, espacial:0 };
+  for(const s of (sessions||[])){
+    const { data:ans } = await sb.from('test_answers').select('question_id,is_correct').eq('session_id',s.id);
+    const qids=(ans||[]).map(a=>a.question_id);
+    const { data:qs } = await sb.from('test_questions').select('id,domain').in('id',qids);
+    const map=new Map((qs||[]).map(q=>[q.id,q.domain||'']));
+    (ans||[]).forEach(a=>{ const d=map.get(a.question_id); if(d){ tot[d]++; if(a.is_correct) dom[d]++; }});
   }
-  ui.textContent = user.email || 'Usuário';
-
-  const ok = new URLSearchParams(location.search).get('ok');
-  if(ok) document.getElementById('bannerOk').style.display = 'block';
-
-  const { data, error } = await sb
-    .from('purchases')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('product', 'qi')
-    .limit(1);
-
-  if(error || !data || data.length===0){
-    document.getElementById('guard').style.display = 'block';
-  }else{
-    document.getElementById('report').style.display = 'block';
-  }
+  const pct=(c,t)=> t? Math.round(c/t*100)+'%' : '—';
+  document.getElementById('dominios').innerHTML =
+    domCard('Numérico', pct(dom.numerico, tot.numerico), 'Aritmética e sequências.')+
+    domCard('Lógico', pct(dom.logico, tot.logico), 'Analogia e dedução.')+
+    domCard('Espacial (simplif.)', pct(dom.espacial, tot.espacial), 'Padrões e relações visuais.');
 });
 </script>
 </body>

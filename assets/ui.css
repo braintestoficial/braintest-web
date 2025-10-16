@@ -1,0 +1,117 @@
+:root{
+  --brand:#1d3557;      /* azul marinho */
+  --brand-2:#0e1d33;
+  --accent:#ff8a73;     /* salmão */
+  --accent-2:#ff7458;
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --line:#e9ecf2;
+  --ink:#1f2430;
+  --muted:#6b7380;
+  --success:#1b7f4e;
+  --radius:14px;
+  --sh:0 8px 24px rgba(16,24,40,.06);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:Inter,system-ui,Segoe UI,Arial; color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+a{color:var(--brand); text-decoration:none}
+a:hover{opacity:.9}
+
+.app{
+  display:grid; grid-template-columns:260px 1fr; min-height:100dvh;
+}
+.app-header{
+  position:sticky; top:0; z-index:20; height:64px; display:flex; align-items:center; gap:12px;
+  background:var(--card); border-bottom:1px solid var(--line); padding:0 16px;
+}
+.app-sidebar{
+  position:sticky; top:64px; align-self:start; height:calc(100dvh - 64px); overflow:auto;
+  background:var(--card); border-right:1px solid var(--line);
+}
+.app-main{
+  min-height:calc(100dvh - 64px); padding:16px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px; font-weight:700; color:var(--brand);
+}
+.brand img{width:28px; height:28px}
+.brand span{font-family:Poppins,Inter,sans-serif; font-size:18px}
+
+.search{
+  display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:#fbfcff; width:min(560px,50vw);
+}
+.search input{border:none; outline:0; background:transparent; flex:1}
+
+.user-chip{
+  display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:999px; padding:6px 10px; background:#fff; color:var(--muted);
+}
+
+.nav{
+  padding:12px;
+}
+.nav h6{
+  margin:8px 8px; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+}
+.nav a{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--brand-2);
+}
+.nav a.active, .nav a:hover{ background:#f4f7ff; }
+.nav .badge{
+  margin-left:auto; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:#fff;
+}
+
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--sh);
+}
+.grid{
+  display:grid; gap:16px;
+}
+.grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.grid.cols-3{grid-template-columns:repeat(3,1fr)}
+@media (max-width: 1024px){ .grid.cols-3{grid-template-columns:1fr 1fr} }
+@media (max-width: 720px){ .grid, .grid.cols-2, .grid.cols-3{grid-template-columns:1fr} }
+
+.btn{
+  background:var(--accent); color:#fff; border:none; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer;
+}
+.btn:hover{ background:var(--accent-2) }
+.btn.alt{ background:#fff; color:var(--brand-2); border:1px solid var(--line) }
+.btn.ghost{ background:transparent; color:var(--brand-2); border:1px dashed var(--line) }
+
+.kpi{display:flex; align-items:center; justify-content:space-between}
+.kpi .title{color:var(--muted); font-size:12px}
+.kpi .value{font-weight:800; font-size:22px}
+
+.list-row{
+  display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding:12px 0;
+}
+.badge{
+  display:inline-block; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--muted); font-size:12px;
+}
+
+/* Mobile bottom bar */
+.bottom-bar{
+  display:none;
+}
+@media (max-width: 960px){
+  .app{ grid-template-columns:1fr }
+  .app-sidebar{ display:none }
+  .app-main{ padding:12px }
+  .app-header{ position:sticky }
+  .bottom-bar{
+    position:sticky; bottom:0; z-index:20; display:flex; background:var(--card); border-top:1px solid var(--line);
+  }
+  .bottom-bar a{
+    flex:1; padding:10px 6px; display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center; color:var(--brand-2); font-size:12px;
+  }
+  .bottom-bar a.active{ color:var(--brand); }
+}
+
+/* tables */
+.table{ width:100%; border-collapse:collapse }
+.table th,.table td{ padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; font-size:14px }

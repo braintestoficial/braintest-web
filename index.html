@@ -2,208 +2,158 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Braintest — Autoconhecimento e desempenho cognitivo</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- Supabase centralizado -->
+<title>Braintest — Autoconhecimento, Cognitivo e Bem-estar</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-init.js"></script>
-
-<style>
-:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1100px;margin:0 auto;padding:1rem}
-header.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem;backdrop-filter:saturate(180%) blur(8px)}
-.brand{display:flex;align-items:center;gap:.6rem} .brand img{width:28px}
-.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
-nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
-.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--azul);border:1px solid var(--borda)}
-.btn.small{padding:.4rem .7rem}
-.btn:hover{background:var(--salmao-2)}
-.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-
-.hero{display:grid;gap:1rem;grid-template-columns:1.2fr .8fr;margin-top:1rem}
-@media(max-width:980px){.hero{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
-h3{color:#0e1d33;margin:.6rem 0 .3rem}
-p{line-height:1.7;color:#303540}
-.small{font-size:.92rem;color:#6b7380}
-.hr{height:1px;background:var(--borda);margin:1rem 0}
-
-.grid{display:grid;gap:1rem;grid-template-columns:repeat(3,1fr)}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
-.tile{border:1px solid var(--borda);border-radius:12px;background:#f9fbff;padding:1rem;display:flex;flex-direction:column;gap:.4rem}
-.tile h4{margin:0;color:#0e1d33}
-.tile p{font-size:.95rem}
-.tile .actions{margin-top:.4rem;display:flex;gap:.5rem;flex-wrap:wrap}
-
-.kpi{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.kpi .balance{display:flex;align-items:center;gap:.5rem}
-.kpi .val{font-size:1.5rem;font-weight:800;color:#0e1d33}
-.callout{background:#fff7f5;border:1px dashed #ffd5cb;border-radius:12px;padding:1rem}
-.success{background:#f2fff5;border:1px solid #cdebd4;border-radius:12px;padding:1rem}
-.center{text-align:center}
-</style>
+<script src="/assets/supabase-init.js"></script>
+<script src="/assets/app.js" defer></script>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand"><img src="assets/logo.svg" alt=""><h1>Braintest</h1></div>
-    <nav>
-      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoBC">0.00</span> BC</a>
-      <a href="/historico.html">Histórico</a>
-      <a href="/faq.html">FAQ</a>
-      <a href="/sobre.html">Sobre</a>
-      <span id="userInfo" class="badge">Carregando…</span>
-      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
-    </nav>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="app-header">
+    <a class="brand" href="/index.html">
+      <img src="/assets/logo.svg" alt="Braintest"><span>Braintest</span>
+    </a>
+    <div class="search" style="flex:1; margin-left:8px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-3.5-3.5" stroke="#8a93a5" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#8a93a5" stroke-width="2"/></svg>
+      <input placeholder="Busque testes, temas, relatórios…">
+    </div>
+    <div class="user-chip" id="userChip">Carregando…</div>
+    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
   </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <!-- Esquerda: mensagem principal -->
-    <div class="card">
-      <h2>Autoconhecimento e desempenho cognitivo, no seu tempo</h2>
-      <p>Faça triagens gratuitas (TDAH, Burnout, QI) e desbloqueie relatórios premium com <strong>Braincoins</strong> (1 BC = R$1). Tudo salvo na sua conta.</p>
+  <!-- SIDEBAR (desktop) -->
+  <aside class="app-sidebar">
+    <nav class="nav">
+      <h6>Explorar</h6>
+      <a href="/index.html" data-current>🏠 Início</a>
+      <a href="/historico.html" data-current>🕘 Histórico</a>
+      <a href="/carteira.html" data-current>💳 Carteira</a>
+      <a href="/perfil.html" data-current>👤 Perfil</a>
 
-      <div class="kpi" style="margin-top:.6rem">
-        <div class="balance">
-          <span class="small">Seu saldo</span>
-          <span class="val"><span id="saldoHero">0.00</span> BC</span>
+      <h6 style="margin-top:14px">Testes</h6>
+      <a href="/teste-tdah.html" data-current>⚡ TDAH <span class="badge">10 BC</span></a>
+      <a href="/teste-burnout.html" data-current>🔥 Burnout <span class="badge">10 BC</span></a>
+      <a href="/teste-qi.html" data-current>🧠 QI <span class="badge">10 BC</span></a>
+
+      <h6 style="margin-top:14px">Em breve</h6>
+      <a href="#" onclick="alert('Em breve');return false;">⏱️ Tempo de reação</a>
+      <a href="#" onclick="alert('Em breve');return false;">🧩 Jogos de lógica</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="grid cols-3">
+      <div class="card kpi">
+        <div>
+          <div class="title">Seu saldo</div>
+          <div class="value"><span id="kpiSaldo">0.00</span> BC</div>
         </div>
-        <button class="btn small" onclick="location.href='/carteira.html'">Adicionar Braincoins</button>
-        <button class="btn secondary small" onclick="location.href='/historico.html'">Abrir meus relatórios</button>
+        <a class="btn alt" href="/carteira.html">Adicionar BC</a>
       </div>
 
-      <div class="hr"></div>
+      <div class="card kpi">
+        <div>
+          <div class="title">Triagens realizadas</div>
+          <div class="value" id="kpiTriagens">—</div>
+        </div>
+        <a class="btn alt" href="/historico.html">Ver histórico</a>
+      </div>
 
-      <h3>Comece por aqui</h3>
-      <div class="grid" style="margin-top:.4rem">
-        <div class="tile">
-          <h4>TDAH</h4>
-          <p class="small">Triagem rápida para sinais de desatenção e hiperatividade/impulsividade.</p>
-          <div class="actions">
-            <a class="btn small" href="/teste-tdah.html">Fazer triagem</a>
-            <a class="btn secondary small" href="/tdah-premium.html">Abrir relatório (se comprado)</a>
+      <div class="card kpi">
+        <div>
+          <div class="title">Relatórios premium</div>
+          <div class="value" id="kpiPremiums">—</div>
+        </div>
+        <a class="btn alt" href="/historico.html">Abrir relatórios</a>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin:4px 0 12px;font-family:Poppins,Inter">Comece por aqui</h3>
+      <div class="grid cols-3">
+        <div class="card">
+          <h4 style="margin:0 0 6px">⚡ TDAH</h4>
+          <p style="color:var(--muted);margin:0 0 12px">Triagem rápida de sintomas com relatório premium por domínios.</p>
+          <div style="display:flex;gap:8px">
+            <a class="btn" href="/teste-tdah.html">Fazer triagem</a>
+            <a class="btn alt" href="/tdah-premium.html">Ver premium</a>
           </div>
         </div>
-        <div class="tile">
-          <h4>Burnout</h4>
-          <p class="small">Avalie exaustão, cinismo/distanciamento e eficácia no trabalho.</p>
-          <div class="actions">
-            <a class="btn small" href="/teste-burnout.html">Fazer triagem</a>
-            <a class="btn secondary small" href="/burnout-premium.html">Abrir relatório (se comprado)</a>
+
+        <div class="card">
+          <h4 style="margin:0 0 6px">🔥 Burnout</h4>
+          <p style="color:var(--muted);margin:0 0 12px">Exaustão, cinismo e eficácia. Resultados claros, recomendações práticas.</p>
+          <div style="display:flex;gap:8px">
+            <a class="btn" href="/teste-burnout.html">Fazer triagem</a>
+            <a class="btn alt" href="/burnout-premium.html">Ver premium</a>
           </div>
         </div>
-        <div class="tile">
-          <h4>QI</h4>
-          <p class="small">Raciocínio lógico, numérico e padrões. Estimativa de QI e percentil.</p>
-          <div class="actions">
-            <a class="btn small" href="/teste-qi.html">Fazer triagem</a>
-            <a class="btn secondary small" href="/qi-premium.html">Abrir relatório (se comprado)</a>
+
+        <div class="card">
+          <h4 style="margin:0 0 6px">🧠 QI</h4>
+          <p style="color:var(--muted);margin:0 0 12px">Estimativa por domínios (numérico, lógico, espacial) e percentil.</p>
+          <div style="display:flex;gap:8px">
+            <a class="btn" href="/teste-qi.html">Fazer triagem</a>
+            <a class="btn alt" href="/qi-premium.html">Ver premium</a>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Direita: login/conta -->
-    <aside class="card" id="authPanel">
-      <div id="loggedBox" style="display:none">
-        <h3>Bem-vindo(a)</h3>
-        <p class="small">Conectado como <strong id="emailSpan">—</strong>.</p>
-        <div class="success" style="margin-top:.6rem">
-          <strong>Pronto para começar!</strong>
-          <p class="small">Escolha uma triagem ao lado ou adicione Braincoins para desbloquear relatórios premium.</p>
-        </div>
-        <div class="hr"></div>
-        <button class="btn" onclick="location.href='/carteira.html'">Minha carteira</button>
-        <button class="btn secondary" style="margin-left:.4rem" onclick="location.href='/historico.html'">Meu histórico</button>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin:4px 0 12px;font-family:Poppins,Inter">Atualizações</h3>
+      <div class="list-row">
+        <div><b>Novo layout</b> – navegação mais limpa no desktop e mobile.</div>
+        <div class="badge">Hoje</div>
       </div>
-
-      <div id="loginBox" style="display:none">
-        <h3>Entrar na Braintest</h3>
-        <p class="small">Use sua conta Google para começar.</p>
-        <button id="googleBtn" class="btn" style="margin-top:.6rem">Continuar com Google</button>
-        <div class="callout" style="margin-top:1rem">
-          <strong>Privacidade</strong>
-          <p class="small">Usamos autenticação segura. Você pode encerrar a sessão a qualquer momento.</p>
-        </div>
+      <div class="list-row">
+        <div><b>Histórico</b> – sessões salvas com filtro e detalhamento.</div>
+        <div class="badge">Novo</div>
       </div>
-    </aside>
-  </section>
-
-  <!-- Rodapé leve -->
-  <section class="card" style="margin-top:1rem">
-    <div class="grid">
-      <div>
-        <h3>Como funciona</h3>
-        <p class="small">Triagens gratuitas → se quiser aprofundar, desbloqueie o <strong>relatório premium</strong> com 10 Braincoins. Seu acesso fica salvo em <em>Histórico</em>, podendo reabrir quando quiser.</p>
-      </div>
-      <div>
-        <h3>Em breve</h3>
-        <p class="small">Assinaturas para pessoas e empresas, testes de tempo de reação e memória de trabalho, além de jogos cognitivos.</p>
-      </div>
-      <div>
-        <h3>Suporte</h3>
-        <p class="small">Dúvidas? Consulte o <a href="/faq.html">FAQ</a> ou envie e-mail para <a href="mailto:contato@braintest.com.br">contato@braintest.com.br</a>.</p>
+      <div class="list-row">
+        <div><b>Braincoins</b> – compras internas e assinatura unificadas.</div>
+        <div class="badge">Estável</div>
       </div>
     </div>
-  </section>
+  </main>
 </div>
 
+<!-- Bottom bar (mobile) -->
+<nav class="bottom-bar">
+  <a href="/index.html" data-current>🏠 Início</a>
+  <a href="/teste-tdah.html" data-current>⚡ TDAH</a>
+  <a href="/teste-burnout.html" data-current>🔥 Burnout</a>
+  <a href="/teste-qi.html" data-current>🧠 QI</a>
+  <a href="/perfil.html" data-current>👤 Perfil</a>
+</nav>
+
 <script>
-  // Aguarda sessão, carrega UI e saldo
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    await waitForSupabaseSession();
+(async ()=>{
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
 
-    const { data:{ user } } = await sb.auth.getUser();
-    const ui = document.getElementById('userInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loginBox = document.getElementById('loginBox');
-    const loggedBox = document.getElementById('loggedBox');
+  // chip + saldo topo
+  if(!user){
+    document.getElementById('userChip').textContent = 'Entrar';
+  }else{
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const saldo = ((w?.balance_cents||0)/100);
+    setTopUser(user.email || 'Usuário', saldo);
+    document.getElementById('kpiSaldo').textContent = saldo.toFixed(2);
 
-    if(!user){
-      ui.textContent = 'Visitante';
-      logoutBtn.style.display = 'none';
-      loginBox.style.display = 'block';
-      loggedBox.style.display = 'none';
-      document.getElementById('saldoBC').textContent = '0.00';
-      document.getElementById('saldoHero').textContent = '0.00';
-    }else{
-      ui.textContent = user.email || 'Usuário';
-      logoutBtn.style.display = 'inline-block';
-      document.getElementById('emailSpan').textContent = user.email || '—';
-      loginBox.style.display = 'none';
-      loggedBox.style.display = 'block';
+    // kpis rápidas
+    const { data:sCount } = await sb.from('test_sessions').select('id', { count:'exact', head:true }).eq('user_id', user.id);
+    document.getElementById('kpiTriagens').textContent = (sCount?.length===0 ? 0 : sCount) ?? '—';
 
-      // saldo
-      const { data } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-      const cents = data?.balance_cents || 0;
-      const val = (cents/100).toFixed(2);
-      document.getElementById('saldoBC').textContent = val;
-      document.getElementById('saldoHero').textContent = val;
-    }
-  });
-
-  // Login com Google
-  document.getElementById('googleBtn')?.addEventListener('click', async ()=>{
-    const redirectTo = window.location.origin; // ex.: https://braintest.com.br
-    await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo }
-    });
-  });
-
-  // Logout
-  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-    await sb.auth.signOut();
-    document.getElementById('saldoBC').textContent = '0.00';
-    document.getElementById('saldoHero').textContent = '0.00';
-    location.reload();
-  });
+    const { data:pRows } = await sb.from('purchases').select('product').eq('user_id', user.id);
+    document.getElementById('kpiPremiums').textContent = (pRows?.length||0);
+  }
+})();
 </script>
 </body>
 </html>

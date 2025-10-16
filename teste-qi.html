@@ -3,187 +3,152 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QI — Triagem Aleatória | Braintest</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-
-<!-- libs e supabase -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-init.js"></script>
-
-<style>
-:root{--salmao:#ff8a73;--salmao-2:#ff7458;--azul:#1d3557;--bg:#f6f7fb;--card:#fff;--borda:#e9ecf2;--texto:#2b2b2b}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--texto)}
-.wrap{max-width:1000px;margin:0 auto;padding:1rem}
-header.top{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1rem;margin-top:1rem}
-.brand{display:flex;align-items:center;gap:.6rem}.brand img{width:28px}
-.brand h1{font-family:'Poppins',sans-serif;font-size:1.2rem;color:var(--azul)}
-nav a{margin-left:1rem;color:var(--azul);text-decoration:none}
-.btn{background:var(--salmao);color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;font-weight:700;cursor:pointer}
-.btn.secondary{background:#fff;color:#0e1d33;border:1px solid var(--borda)}
-.btn:hover{background:var(--salmao-2)}
-.badge{display:inline-block;border:1px solid var(--borda);border-radius:999px;padding:.2rem .6rem;background:#f7f9ff;font-size:.85rem;margin-left:.5rem}
-.badge.ok{background:#f2fff5;border-color:#cdebd4;color:#184d2b}
-.card{background:#fff;border:1px solid var(--borda);border-radius:14px;padding:1.2rem;margin-top:1rem}
-h2{font-family:'Poppins',sans-serif;color:var(--azul);margin:.3rem 0 .6rem}
-.small{font-size:.92rem;color:#6b7380}
-.hr{height:1px;background:var(--borda);margin:1rem 0}
-.resultBox{padding:.9rem;border:1px solid var(--borda);border-radius:12px;background:#f9fbff}
-.hide{display:none}
-.q label{font-weight:600;display:block;margin-bottom:.3rem}
-.q .opt{margin:.25rem 0}
-</style>
+<script src="/assets/app.js" defer></script>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand"><img src="/assets/logo.svg" alt=""><h1>Braintest</h1></div>
-    <nav>
-      <a href="/index.html">Início</a>
-      <a href="/carteira.html" class="btn secondary">Carteira: <span id="saldoTop">0.00</span> BC</a>
-      <a href="/historico.html">Histórico</a>
-      <a href="/perfil.html">Perfil</a>
-      <span id="userInfo" class="badge">Carregando…</span>
-      <button id="logoutBtn" class="btn secondary" style="display:none;margin-left:.5rem;">Sair</button>
-    </nav>
+<div class="app">
+  <header class="app-header">
+    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
+    <div class="search" style="flex:1; margin-left:8px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-3.5-3.5" stroke="#8a93a5" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#8a93a5" stroke-width="2"/></svg>
+      <input placeholder="Busque testes, temas, relatórios…">
+    </div>
+    <div class="user-chip" id="userChip">Carregando…</div>
+    <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
   </header>
 
-  <section class="card">
-    <h2>QI — Triagem Aleatória (15 itens)</h2>
-    <p class="small">Indicativa. O relatório premium traz análise por domínio e percentil.</p>
-    <div class="hr"></div>
+  <aside class="app-sidebar">
+    <nav class="nav">
+      <h6>Explorar</h6>
+      <a href="/index.html" data-current>🏠 Início</a>
+      <a href="/historico.html" data-current>🕘 Histórico</a>
+      <a href="/carteira.html" data-current>💳 Carteira</a>
+      <a href="/perfil.html" data-current>👤 Perfil</a>
+      <h6 style="margin-top:14px">Testes</h6>
+      <a href="/teste-tdah.html" data-current>⚡ TDAH <span class="badge">10 BC</span></a>
+      <a href="/teste-burnout.html" data-current>🔥 Burnout <span class="badge">10 BC</span></a>
+      <a href="/teste-qi.html" data-current class="active">🧠 QI <span class="badge">10 BC</span></a>
+    </nav>
+  </aside>
 
-    <div id="statusBox" class="small" style="margin-bottom:.6rem"></div>
-    <form id="formQi"></form>
-    <div id="resumo" class="resultBox" style="display:none;margin-top:1rem"></div>
-  </section>
+  <main class="app-main">
+    <div class="card">
+      <h2 style="font-family:Poppins,Inter;margin:0 0 8px">QI — Triagem Aleatória (15 itens)</h2>
+      <p class="small">Estimativa indicativa. Premium traz análise por domínio e percentil.</p>
+      <div class="hr" style="margin-top:12px"></div>
 
-  <section class="card" id="buyBox">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
-      <h3 style="margin:0">Relatório premium</h3>
-      <span id="ownedBadge" class="badge ok hide">Desbloqueado</span>
+      <div id="statusBox" class="small" style="margin:.6rem 0"></div>
+      <form id="formQi"></form>
+      <div id="resumo" class="card" style="display:none;margin-top:1rem"></div>
     </div>
-    <p class="small" id="premiumDesc">
-      Estimativa de QI e percentil. Custo: <strong>10 Braincoins</strong>. Saldo: <strong id="saldoAqui">—</strong>
-    </p>
-    <div style="margin-top:.6rem">
-      <button class="btn" id="btnBuy">Desbloquear relatório (10 BC)</button>
-      <button class="btn secondary" id="btnAdd" onclick="location.href='/carteira.html'" style="margin-left:.5rem">Adicionar Braincoins</button>
-      <button class="btn hide" id="btnOpen" onclick="location.href='/qi-premium.html'">Abrir relatório</button>
+
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+        <h3 style="margin:0">Relatório premium</h3>
+        <span id="ownedBadge" class="badge" style="display:none;background:#f2fff5;border-color:#cdebd4;color:#184d2b">Desbloqueado</span>
+      </div>
+      <p class="small" id="premiumDesc" style="margin-top:.25rem">
+        Estimativa de QI e percentil. Custo: <strong>10 Braincoins</strong>. Saldo: <strong id="saldoAqui">—</strong>
+      </p>
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn" id="btnBuy">Desbloquear relatório (10 BC)</button>
+        <a class="btn alt" id="btnAdd" href="/carteira.html">Adicionar Braincoins</a>
+        <a class="btn" id="btnOpen" href="/qi-premium.html" style="display:none">Abrir relatório</a>
+      </div>
     </div>
-  </section>
+  </main>
 </div>
 
-<script>
-const PRODUCT = 'qi';
-const PRICE_CENTS = 1000;
-const PREMIUM_URL = '/qi-premium.html';
+<nav class="bottom-bar">
+  <a href="/index.html" data-current>🏠</a>
+  <a href="/teste-tdah.html" data-current>⚡</a>
+  <a href="/teste-burnout.html" data-current>🔥</a>
+  <a href="/teste-qi.html" data-current class="active">🧠</a>
+  <a href="/perfil.html" data-current>👤</a>
+</nav>
 
-function setStatus(msg, type='info'){
-  const el = document.getElementById('statusBox');
-  if(!el) return;
-  el.innerHTML = `<div style="
-    padding:.75rem;border:1px solid ${type==='error'?'#f5b5ab':'#e9ecf2'};
-    background:${type==='error'?'#fff7f5':'#f9fbff'};border-radius:12px;
-    color:#303540;font-size:.92rem">${msg}</div>`;
+<script>
+const PRODUCT='qi', PRICE_CENTS=1000, PREMIUM_URL='/qi-premium.html';
+
+function setStatus(msg,type='info'){
+  const el=document.getElementById('statusBox'); if(!el) return;
+  el.innerHTML = msg ? `<div style="padding:.7rem;border:1px solid ${type==='error'?'#f5b5ab':'#e9ecf2'};background:${type==='error'?'#fff7f5':'#f9fbff'};border-radius:12px">${msg}</div>` : '';
 }
 
 function renderForm(questions){
-  const f = document.getElementById('formQi');
-  f.innerHTML = '';
-  questions.forEach((q, idx)=>{
-    const block = document.createElement('div');
-    block.className='q'; block.style.margin='.8rem 0';
-
-    const label = document.createElement('label');
-    label.style.fontWeight='600'; label.style.display='block'; label.style.marginBottom='.35rem';
-    label.textContent = `${idx+1}. ${q.prompt}`;
-    block.appendChild(label);
-
+  const f=document.getElementById('formQi'); f.innerHTML='';
+  questions.forEach((q,idx)=>{
+    const block=document.createElement('div'); block.style.margin='.8rem 0';
+    block.innerHTML = `<label style="font-weight:700;display:block;margin-bottom:.35rem">${idx+1}. ${q.prompt}</label>`;
     (q.options||[]).forEach(opt=>{
-      const wrap = document.createElement('div'); wrap.className='opt'; wrap.style.margin='.25rem 0';
-      wrap.innerHTML = `
-        <label>
-          <input type="radio" name="q_${q.question_id}" required data-correct="${opt.is_correct ? '1':'0'}">
-          ${opt.label}
-        </label>`;
-      block.appendChild(wrap);
+      const d=document.createElement('div'); d.className='opt'; d.style.margin='.25rem 0';
+      d.innerHTML = `<label><input type="radio" name="q_${q.question_id}" required data-correct="${opt.is_correct ? '1':'0'}"> ${opt.label}</label>`;
+      block.appendChild(d);
     });
-
     f.appendChild(block);
   });
-
   if(!f.querySelector('button[type=submit]')){
-    const btn = document.createElement('button'); btn.type='submit'; btn.className='btn';
-    btn.textContent='Ver resultado gratuito'; btn.style.marginTop='.8rem'; f.appendChild(btn);
+    const btn=document.createElement('button'); btn.type='submit'; btn.className='btn'; btn.textContent='Ver resultado gratuito'; btn.style.marginTop='.8rem'; f.appendChild(btn);
   }
-
-  f.onsubmit = (e)=>{
+  f.onsubmit=(e)=>{
     e.preventDefault();
-    let scoreQI=0, countQI=0;
+    let score=0,cnt=0;
     questions.forEach(q=>{
-      const sel = f.querySelector(`input[name="q_${q.question_id}"]:checked`);
-      if(sel){ if(sel.dataset.correct === '1') scoreQI++; countQI++; }
+      const sel=f.querySelector(`input[name="q_${q.question_id}"]:checked`);
+      if(sel){ if(sel.dataset.correct==='1') score++; cnt++; }
     });
-    const box = document.getElementById('resumo');
-    box.innerHTML = `<strong>Resultado gratuito:</strong> Corretas: <b>${scoreQI}/${countQI}</b> (estimativa ilustrativa).<br><span class="small">Para análise por domínio (numérico, lógico, espacial) e percentil, desbloqueie o premium.</span>`;
+    const box=document.getElementById('resumo');
     box.style.display='block';
+    box.innerHTML=`<b>Resultado gratuito</b><br>Corretas: <b>${score}/${cnt}</b> (estimativa ilustrativa).<br><span class="small">Para análise por domínio e percentil, desbloqueie o premium.</span>`;
   };
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  try{
-    await waitForSupabaseSession();
+  await waitForSupabaseSession();
+  const { data:{ user } } = await sb.auth.getUser();
 
-    const { data:{ user } } = await sb.auth.getUser();
-    const ui = document.getElementById('userInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
+  if(user){
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const bc=((w?.balance_cents||0)/100); document.getElementById('saldoTop').textContent=bc.toFixed(2);
+    document.getElementById('userChip').textContent=user.email||'Usuário';
+    document.getElementById('saldoAqui').textContent=`${bc.toFixed(2)} BC`;
 
-    if(!user){
-      ui.textContent='Visitante'; logoutBtn.style.display='none';
-      setStatus('Você precisa entrar para realizar esta triagem. <a href="/perfil.html">Entrar com Google</a>', 'error');
-      document.getElementById('formQi').innerHTML = '<p class="small" style="color:#6b7380">Sem perguntas para exibir.</p>';
-      return;
-    }else{
-      ui.textContent = user.email || 'Usuário';
-      logoutBtn.style.display='inline-block';
-
-      const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-      const bc = ((w?.balance_cents||0)/100).toFixed(2);
-      document.getElementById('saldoTop').textContent = bc;
-      document.getElementById('saldoAqui').textContent = `${bc} BC`;
-
-      const { data: have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
-      if(have){
-        document.getElementById('btnBuy').classList.add('hide');
-        document.getElementById('btnAdd').classList.add('hide');
-        document.getElementById('premiumDesc').textContent = 'Você já desbloqueou este relatório.';
-        document.getElementById('btnOpen').classList.remove('hide');
-        document.getElementById('ownedBadge').classList.remove('hide');
-      }
+    const { data:have } = await sb.from('purchases').select('product').eq('user_id', user.id).eq('product', PRODUCT).maybeSingle();
+    if(have){
+      document.getElementById('btnBuy').style.display='none';
+      document.getElementById('btnAdd').style.display='none';
+      document.getElementById('btnOpen').style.display='inline-block';
+      document.getElementById('premiumDesc').textContent='Você já desbloqueou este relatório.';
+      document.getElementById('ownedBadge').style.display='inline-block';
     }
-
-    setStatus('Carregando perguntas…');
-    const { data, error } = await sb.rpc('get_random_questions', { p_test:'qi', p_qty:15 });
-    if(error){ setStatus('Erro ao carregar perguntas: <code>'+ (error.message||'desconhecido') +'</code>', 'error'); return; }
-    if(!data || data.length===0){ setStatus('Não encontramos perguntas ativas para este teste.', 'error'); return; }
-
-    setStatus(''); renderForm(data);
-  }catch(e){
-    setStatus('Falha inesperada ao carregar o teste. <code>'+ (e.message||e.toString()) +'</code>', 'error');
+  }else{
+    document.getElementById('userChip').innerHTML='Visitante';
+    setStatus('Você precisa entrar para realizar esta triagem. <a href="/perfil.html">Entrar com Google</a>', 'error');
+    document.getElementById('formQi').innerHTML='<p class="small" style="color:#6b7380">Sem perguntas para exibir.</p>';
+    return;
   }
+
+  setStatus('Carregando perguntas…');
+  const { data, error } = await sb.rpc('get_random_questions',{ p_test:'qi', p_qty:15 });
+  if(error){ setStatus('Erro ao carregar: <code>'+error.message+'</code>','error'); return; }
+  if(!data||!data.length){ setStatus('Não encontramos perguntas ativas para este teste.','error'); return; }
+  setStatus(''); renderForm(data);
 });
 
-document.getElementById('logoutBtn')?.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.href='/index.html'; });
-
-document.getElementById('btnBuy').addEventListener('click', async ()=>{
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ alert('Faça login para continuar.'); location.href='/perfil.html'; return; }
-  const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
-  const balance = w?.balance_cents||0;
-  if(balance < PRICE_CENTS){ if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html'; return; }
-  const { error } = await sb.rpc('wallet_buy',{ p_product:PRODUCT, p_price_cents:PRICE_CENTS, p_description:'Relatório premium: QI' });
-  if(error){ alert('Não foi possível concluir a compra.'); return; }
-  location.href = PREMIUM_URL + '?ok=1';
+document.addEventListener('click', async (e)=>{
+  if(e.target && e.target.id==='btnBuy'){
+    e.preventDefault();
+    const { data:{ user } } = await sb.auth.getUser(); if(!user){ location.href='/perfil.html'; return; }
+    const { data:w } = await sb.from('wallets').select('balance_cents').eq('user_id', user.id).single();
+    const bal=w?.balance_cents||0; if(bal<PRICE_CENTS){ if(confirm('Saldo insuficiente. Adicionar Braincoins agora?')) location.href='/carteira.html'; return; }
+    const { error } = await sb.rpc('wallet_buy',{ p_product:PRODUCT, p_price_cents:PRICE_CENTS, p_description:'Relatório premium: QI' });
+    if(error){ alert('Não foi possível concluir a compra.'); return; }
+    location.href = PREMIUM_URL + '?ok=1';
+  }
 });
 </script>
 </body>
