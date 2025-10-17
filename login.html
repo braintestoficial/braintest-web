@@ -1,90 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BrainTest | Login</title>
-  <link rel="stylesheet" href="assets/ui.css">
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #f9fafb, #e0e7ff);
-      font-family: 'Inter', sans-serif;
-    }
-    .login-box {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      padding: 40px;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
-    }
-    .login-box h1 {
-      font-size: 1.6em;
-      color: #1e293b;
-      margin-bottom: 10px;
-    }
-    .login-box p {
-      color: #475569;
-      margin-bottom: 30px;
-    }
-    .login-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background-color: #2563eb;
-      color: white;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      cursor: pointer;
-      transition: background 0.3s;
-      width: 100%;
-    }
-    .login-btn:hover {
-      background-color: #1d4ed8;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/ui-login.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
+
 <body>
   <div class="login-box">
     <h1>Bem-vindo ao BrainTest 🧠</h1>
-    <p>Faça login para acessar sua conta e seus testes.</p>
+    <p>Acesse sua conta e descubra mais sobre você.</p>
     <button class="login-btn" id="googleLogin">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
       Entrar com Google
     </button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/supabase-init.js"></script>
   <script>
-    const btn = document.getElementById('googleLogin');
+    const btn = document.getElementById("googleLogin");
 
-    btn.addEventListener('click', async () => {
-      const { data, error } = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'https://braintest.com.br/index.html'
-        }
+    btn.addEventListener("click", async () => {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: "https://braintest.com.br/index.html" }
       });
-      if (error) {
-        alert('Erro ao entrar: ' + error.message);
-      }
+      if (error) alert("Erro ao entrar: " + error.message);
     });
 
-    // Redireciona automaticamente se já estiver logado
+    // Se já estiver logado, pula a tela de login
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        window.location.href = "index.html";
-      }
+      if (session) window.location.href = "index.html";
     })();
   </script>
 </body>

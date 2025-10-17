@@ -1,95 +1,137 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Teste de TDAH | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css" />
-<link rel="stylesheet" href="/assets/ui-dashboard.css" />
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-.question{margin:.8rem 0}
-.question p{margin-bottom:.4rem}
-.options label{display:block;margin:.3rem 0}
-#resultado{margin-top:1.5rem;padding:1rem;background:#f9fafb;border-radius:8px}
-#premiumBtn{margin-top:1rem}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste de TDAH | BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
+  <style>
+    body { margin:0; font-family:"Inter",sans-serif; display:flex; background-color:#f9fafb; color:#1e293b; }
+    main { margin-left:250px; padding:40px; width:100%; }
+    form { background:white; padding:25px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); max-width:800px; }
+    h1 { color:#2563eb; }
+    .pergunta { margin-bottom:20px; }
+    .pergunta label { display:block; margin-bottom:6px; font-weight:500; }
+    button { background-color:#2563eb; color:white; border:none; border-radius:8px; padding:12px 20px; font-weight:600; cursor:pointer; }
+    button:hover { background-color:#1d4ed8; }
+  </style>
 </head>
+
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
-  <div class="user-info">
-    <span id="userEmail" style="cursor:pointer"></span> —
-    💰 <span id="saldoTop" style="cursor:pointer"></span>
-  </div>
-</header>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="#" id="toggleTests">🧩 Testes</a>
+    <div class="submenu" id="testsSubmenu">
+      <a href="teste-tdah.html">TDAH</a>
+      <a href="teste-burnout.html">Burnout</a>
+      <a href="teste-qi.html">Q.I</a>
+    </div>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinatura.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">🕑 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <div class="logout-btn" id="logout">🚪 Sair</div>
+  </nav>
 
-<main class="content" style="max-width:700px;margin:auto;padding:2rem;">
-  <div class="card">
-    <h2>Triagem — TDAH</h2>
-    <p>Responda as perguntas abaixo e veja se há sinais de desatenção ou impulsividade.</p>
-    <div id="status" style="margin:.6rem 0;color:#6b7280">Carregando perguntas…</div>
-    <form id="quiz"></form>
-    <button class="btn" id="enviar" style="margin-top:1rem">Enviar respostas</button>
-  </div>
-  <div id="resultado" style="display:none"></div>
-</main>
+  <main>
+    <h1>Teste de TDAH</h1>
+    <p>Responda as perguntas abaixo com sinceridade.</p>
+    <form id="formTdah"></form>
+    <div id="resultado"></div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-window.addEventListener("braintest-ready", async()=>{
-  const {data:{session}} = await sb.auth.getSession();
-  if(!session){location.href="/";return;}
-  const {data:{user}} = await sb.auth.getUser();
-  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  const saldo = wallet?.balance ?? 0;
-  document.getElementById("userEmail").textContent=user.email.split("@")[0];
-  document.getElementById("userEmail").onclick=()=>location.href="/perfil.html";
-  const saldoEl=document.getElementById("saldoTop");
-  saldoEl.textContent=`${saldo} 🧠`;
-  saldoEl.onclick=()=>location.href="/carteira.html";
+    <div id="premiumSection" style="display:none;margin-top:30px;">
+      <button id="buyPremiumBtn" onclick="liberarPremium('TDAH','tdah-premium.html')">🔓 Liberar Relatório Premium (10 🧠)</button>
+      <p id="buyMessage" style="margin-top:10px;color:#475569;"></p>
+    </div>
+  </main>
 
-  const TEST="tdah";
-  const status=document.getElementById("status");
-  let perguntas=[];
-  try{const {data}=await sb.rpc("get_random_questions",{p_test_key:TEST,p_limit:15});if(data?.length)perguntas=data;}catch{}
-  if(!perguntas.length){
-    const {data}=await sb.from("test_questions").select("id,prompt").eq("test_key",TEST).order("random()").limit(15);
-    perguntas=data||[];
-  }
-  const {data:opts}=await sb.from("test_question_options").select("question_id,label,value").in("question_id",perguntas.map(q=>q.id));
-  const byQ={};(opts||[]).forEach(o=>{(byQ[o.question_id] ||= []).push(o);});
-  perguntas=perguntas.map(q=>({...q,options:byQ[q.id]||[]}));
-  const quiz=document.getElementById("quiz");
-  quiz.innerHTML=perguntas.map((q,i)=>`
-  <div class="question fade-in">
-    <p><b>${i+1}.</b> ${q.prompt}</p>
-    <div class="options">
-      ${(q.options||[]).map(o=>`
-      <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>`).join("")}
-    </div></div>`).join("");
-  document.getElementById("enviar").onclick=async(ev)=>{
-    ev.preventDefault();
-    const respostas=perguntas.map(q=>{
-      const v=document.querySelector(`input[name="q${q.id}"]:checked`);
-      return Number(v?.value||0);
-    });
-    const score=respostas.reduce((a,b)=>a+b,0);
-    await sb.from("test_sessions").insert({user_id:user.id,test_key:TEST,items_qty:respostas.length,score_likert:score});
-    const resBox=document.getElementById("resultado");
-    resBox.style.display="block";
-    resBox.innerHTML=`
-      <h3>Sua pontuação: ${score}</h3>
-      <p>${score<10?"Baixa probabilidade de TDAH.":"Sinais compatíveis com sintomas de TDAH."}</p>
-      <button class="btn" id="premiumBtn">Liberar Relatório Premium (10 🧠)</button>`;
-    document.getElementById("premiumBtn").onclick=async()=>{
-      if(saldo<10){alert("Saldo insuficiente! Vá à Carteira.");return;}
-      const {error:e}=await sb.rpc("wallet_buy",{p_user:user.id,p_amount:10,p_desc:"Relatório Premium: TDAH"});
-      if(e){alert("Erro ao debitar: "+(e.message||"verifique sua carteira."));return;}
-      location.href="/tdah-premium.html";
+  <script>
+    // segurança de login
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) window.location.href = "login.html";
+    })();
+
+    // submenu
+    document.getElementById("toggleTests").onclick = (e)=>{
+      e.preventDefault();
+      const s=document.getElementById("testsSubmenu");
+      s.style.display=s.style.display==="flex"?"none":"flex";
     };
-  };
-});
-</script>
+
+    // logout
+    document.getElementById("logout").onclick = async ()=>{
+      await sb.auth.signOut(); window.location.href="login.html";
+    };
+
+    // carregar perguntas
+    async function carregarPerguntas() {
+      const { data, error } = await sb.from("test_questions")
+        .select("id,prompt")
+        .eq("test_key","tdah")
+        .limit(15);
+      const form = document.getElementById("formTdah");
+      form.innerHTML = "";
+      data.forEach(q=>{
+        const div=document.createElement("div");
+        div.className="pergunta";
+        div.innerHTML=`
+          <label>${q.prompt}</label>
+          <select name="q${q.id}">
+            <option value="0">Raramente</option>
+            <option value="1">Às vezes</option>
+            <option value="2">Frequentemente</option>
+          </select>
+        `;
+        form.appendChild(div);
+      });
+      const btn=document.createElement("button");
+      btn.type="button";
+      btn.textContent="Enviar respostas";
+      btn.onclick=avaliar;
+      form.appendChild(btn);
+    }
+
+    async function avaliar(){
+      const form=document.getElementById("formTdah");
+      const values=[...form.querySelectorAll("select")].map(s=>parseInt(s.value));
+      const score=values.reduce((a,b)=>a+b,0);
+      const resultado=document.getElementById("resultado");
+      resultado.innerHTML=`<h3>Sua pontuação: ${score}</h3>`;
+      mostrarBotaoPremium();
+    }
+
+    // botão premium
+    function mostrarBotaoPremium(){
+      document.getElementById("premiumSection").style.display="block";
+    }
+
+    async function liberarPremium(produto,destino){
+      const msg=document.getElementById("buyMessage");
+      msg.textContent="Processando...";
+      const { data:{session} }=await sb.auth.getSession();
+      const { error } = await sb.rpc("wallet_buy",{
+        p_user:session.user.id,p_amount:10,p_desc:"Relatório Premium: "+produto
+      });
+      if(error){msg.style.color="#ef4444";msg.textContent="Erro: "+error.message;return;}
+      const saldoSpan=parent.document.getElementById("userBalance");
+      if(saldoSpan){
+        const {data}=await sb.from("wallets").select("balance").eq("user_id",session.user.id).single();
+        saldoSpan.textContent=`${data.balance} 🧠`;
+      }
+      msg.style.color="#16a34a";
+      msg.textContent="Compra concluída! Redirecionando...";
+      setTimeout(()=>window.location.href=destino,1500);
+    }
+
+    carregarPerguntas();
+  </script>
 </body>
 </html>

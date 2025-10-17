@@ -1,155 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Teste de Q.I. | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css" />
-<link rel="stylesheet" href="/assets/ui-dashboard.css" />
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-  .question{margin:.8rem 0}
-  .question p{margin-bottom:.4rem}
-  .options label{display:block;margin:.3rem 0}
-  #resultado{margin-top:1.5rem;padding:1rem;background:#f9fafb;border-radius:8px}
-  #premiumBtn{margin-top:1rem}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste de QI | BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<div class="layout">
   <nav class="sidebar">
-    <div>
-      <h1>🧠 Braintest</h1>
-      <a href="/index.html">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html">💰 Carteira</a>
-      <a href="#" id="testsToggle">🧩 Testes</a>
-      <div class="submenu" id="testsMenu" style="display:none">
-        <a href="/teste-qi.html" class="active">Cognitivos</a>
-        <a href="/teste-tdah.html">Psicológicos</a>
-        <a href="#">Jogos</a>
-        <a href="#">Diversos</a>
-      </div>
-      <a href="#">🎮 Jogos</a>
-      <a href="#">⭐ Assinaturas</a>
-      <a href="/faq.html">❓ FAQ</a>
-      <a href="/sobre.html">ℹ️ Sobre</a>
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="#" id="toggleTests">🧩 Testes</a>
+    <div class="submenu" id="testsSubmenu">
+      <a href="teste-tdah.html">TDAH</a>
+      <a href="teste-burnout.html">Burnout</a>
+      <a href="teste-qi.html">Q.I</a>
     </div>
-    <div>
-      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
-      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
-    </div>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <div class="logout-btn" id="logout">🚪 Sair</div>
   </nav>
 
-  <main class="content" style="max-width:700px;margin:auto;padding:2rem;">
-    <div class="card">
-      <h2>Triagem — Q.I.</h2>
-      <p>Responda 15 perguntas para estimar seu quociente de inteligência.</p>
-      <div id="status" style="margin:.6rem 0;color:#6b7280">Carregando perguntas…</div>
-      <form id="quiz"></form>
-      <button class="btn" id="enviar" style="margin-top:1rem">Enviar respostas</button>
+  <main style="margin-left:250px;padding:40px;">
+    <h1>Teste de QI</h1>
+    <form id="formQi"></form>
+    <div id="resultado"></div>
+    <div id="premiumSection" style="display:none;margin-top:30px;">
+      <button onclick="liberarPremium('QI','qi-premium.html')">🔓 Liberar Relatório Premium (10 🧠)</button>
+      <p id="buyMessage"></p>
     </div>
-    <div id="resultado" style="display:none"></div>
   </main>
-</div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-function setupSidebar(session){
-  const t=document.getElementById("testsToggle"), m=document.getElementById("testsMenu");
-  t.addEventListener("click",(e)=>{e.preventDefault(); m.style.display=(m.style.display==="block"?"none":"block");});
-  const btn=document.getElementById("authBtn");
-  if(session){btn.textContent="Logout";btn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
-  else{btn.textContent="Entrar com Google";btn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
-}
+  <script>
+    (async()=>{const {data:{session}}=await sb.auth.getSession();if(!session)window.location.href="login.html";})();
+    document.getElementById("toggleTests").onclick=(e)=>{e.preventDefault();const s=document.getElementById("testsSubmenu");s.style.display=s.style.display==="flex"?"none":"flex";};
+    document.getElementById("logout").onclick=async()=>{await sb.auth.signOut();window.location.href="login.html";};
 
-async function fetchQiQuestionsEnsure15(){
-  const TEST="qi";
-  let perguntas=[];
-  try{ const {data}=await sb.rpc("get_random_questions",{p_test_key:TEST,p_limit:15}); perguntas = data||[]; }catch{}
-  if((perguntas?.length||0) < 15){
-    // força pegar apenas questões que têm opções
-    const { data:qs } = await sb
-      .from("test_questions")
-      .select("id,prompt")
-      .eq("test_key", TEST)
-      .order("random()")
-      .limit(50);
-    const qIds = (qs||[]).map(q=>q.id);
-    const { data:opt } = await sb
-      .from("test_question_options")
-      .select("question_id,label,is_correct")
-      .in("question_id", qIds);
-    const withOpts = new Map();
-    (opt||[]).forEach(o => {
-      if(!withOpts.has(o.question_id)) withOpts.set(o.question_id, []);
-      withOpts.get(o.question_id).push(o);
-    });
-    const good = (qs||[]).filter(q => (withOpts.get(q.id)||[]).length >= 2).slice(0,15);
-    perguntas = good.map(q=>({ ...q, options: withOpts.get(q.id) }));
-  } else {
-    // já tem 15 da RPC; carrega opções
-    const qIds = perguntas.map(q=>q.id);
-    const { data:opt } = await sb.from("test_question_options")
-      .select("question_id,label,is_correct").in("question_id", qIds);
-    const byQ={};(opt||[]).forEach(o=>{(byQ[o.question_id] ||= []).push(o);});
-    perguntas = perguntas.map(q=>({...q, options: byQ[q.id]||[]}));
-  }
-  return perguntas;
-}
+    async function carregar(){const {data}=await sb.from("test_questions").select("id,prompt").eq("test_key","qi").limit(15);
+      const f=document.getElementById("formQi");f.innerHTML="";data.forEach(q=>{
+        f.innerHTML+=`<div class='pergunta'><label>${q.prompt}</label>
+        <select><option value="0">Errada</option><option value="2">Certa</option></select></div>`;});
+      f.innerHTML+=`<button type='button' onclick='avaliar()'>Enviar</button>`;
+    }
 
-window.addEventListener("braintest-ready", async()=>{
-  const {data:{session}} = await sb.auth.getSession();
-  setupSidebar(session);
-  if(!session){location.href="/";return;}
-  const {data:{user}} = await sb.auth.getUser();
+    function avaliar(){const vals=[...document.querySelectorAll("select")].map(s=>parseInt(s.value));
+      const score=vals.reduce((a,b)=>a+b,0);
+      document.getElementById("resultado").innerHTML=`<h3>Sua pontuação: ${score}</h3>`;
+      document.getElementById("premiumSection").style.display="block";
+    }
 
-  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
-
-  const status=document.getElementById("status");
-  let perguntas=await fetchQiQuestionsEnsure15();
-
-  if(!perguntas?.length){ status.textContent="Erro ao carregar perguntas."; return; }
-  if(perguntas.length<15){ status.textContent=`Carregadas ${perguntas.length} perguntas. (faltam itens no banco)`; }
-  const quiz=document.getElementById("quiz");
-  quiz.innerHTML=perguntas.map((q,i)=>`
-    <div class="question fade-in">
-      <p><b>${i+1}.</b> ${q.prompt}</p>
-      <div class="options">
-        ${(q.options||[]).map(o=>`
-          <label><input type="radio" name="q${q.id}" value="${o.is_correct?1:0}"> ${o.label}</label>
-        `).join("")}
-      </div>
-    </div>`).join("");
-
-  document.getElementById("enviar").onclick=async(ev)=>{
-    ev.preventDefault();
-    const respostas=perguntas.map(q=>{
-      const v=document.querySelector(`input[name="q${q.id}"]:checked`);
-      return Number(v?.value||0);
-    });
-    const corretas=respostas.filter(v=>v===1).length;
-    const score=Math.round((corretas/perguntas.length)*120);
-    await sb.from("test_sessions").insert({ user_id:user.id, test_key:"qi", items_qty:respostas.length, score_qi:score });
-
-    const resBox=document.getElementById("resultado");
-    resBox.style.display="block";
-    resBox.innerHTML=`
-      <h3>Seu Q.I. estimado: ${score}</h3>
-      <p>${ score<80 ? "Abaixo da média." : score<110 ? "Na média." : score<130 ? "Acima da média." : "Muito acima da média." }</p>
-      <button class="btn" id="premiumBtn">Liberar Relatório Premium (10 🧠)</button>
-    `;
-    document.getElementById("premiumBtn").onclick=async()=>{
-      const { data:wallet2 } = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-      const saldo = wallet2?.balance ?? 0;
-      if(saldo<10){ alert("Saldo insuficiente! Vá à Carteira para adicionar Braincoins."); return; }
-      const { error:errWallet } = await sb.rpc("wallet_buy", { p_user:user.id, p_amount:10, p_desc:"Relatório Premium: QI" });
-      if (errWallet) { console.error(errWallet); alert("Erro ao debitar: " + (errWallet.message || "verifique sua carteira.")); return; }
-      location.href="/qi-premium.html";
-    };
-  };
-});
-</script>
+    async function liberarPremium(produto,destino){const msg=document.getElementById("buyMessage");
+      const {data:{session}}=await sb.auth.getSession();
+      const {error}=await sb.rpc("wallet_buy",{p_user:session.user.id,p_amount:10,p_desc:"Relatório Premium: "+produto});
+      if(error){msg.textContent="Erro: "+error.message;msg.style.color="#ef4444";return;}
+      const saldoSpan=parent.document.getElementById("userBalance");
+      if(saldoSpan){const {data}=await sb.from("wallets").select("balance").eq("user_id",session.user.id).single();
+        saldoSpan.textContent=`${data.balance} 🧠`;}
+      msg.style.color="#16a34a";msg.textContent="Compra concluída!";setTimeout(()=>window.location.href=destino,1500);
+    }
+    carregar();
+  </script>
 </body>
 </html>
