@@ -1,29 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sobre | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <link rel="stylesheet" href="/assets/ui-dashboard.css">
+<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-  .layout{display:flex;min-height:100vh;}
-  .sidebar{
-    width:240px;background:#fff;border-right:1px solid #e5e7eb;
-    padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
-  }
-  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827;}
-  .sidebar a{display:block;margin:.6rem 0;color:#374151;font-weight:500;}
-  .sidebar a:hover{color:#6366f1;}
-  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto;}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-  @media(max-width:900px){.grid{grid-template-columns:1fr}}
-  @media(max-width:800px){
-    .sidebar{width:70px;padding:.5rem}
-    .sidebar a{font-size:0}
-    .sidebar a::before{font-size:1.2rem;content:"•"}
-  }
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
+.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
+.submenu{margin:.4rem 0 .2rem 1rem;display:none}
+.main{flex:1;padding:2rem;max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
 </style>
 </head>
 <body>
@@ -34,56 +23,61 @@
       <a href="/index.html">🏠 Início</a>
       <a href="/perfil.html">👤 Perfil</a>
       <a href="/carteira.html">💰 Carteira</a>
+      <a href="#" id="testsToggle">🧩 Testes</a>
+      <div class="submenu" id="testsMenu">
+        <a href="/teste-qi.html">Cognitivos</a>
+        <a href="/teste-tdah.html">Psicológicos</a>
+        <a href="/teste-burnout.html">Diversos</a>
+      </div>
+      <a href="#">🎮 Jogos</a>
+      <a href="#">⭐ Assinaturas</a>
       <a href="/faq.html">❓ FAQ</a>
-      <a href="/sobre.html">ℹ️ Sobre</a>
+      <a href="/sobre.html" class="active">ℹ️ Sobre</a>
     </div>
-    <div style="color:#6b7280">Versão 1.0</div>
+    <div>
+      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
+      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
+    </div>
   </nav>
 
   <main class="main">
+    <h2>Sobre a Braintest</h2>
     <div class="card">
-      <h2>Quem Somos</h2>
-      <p>A Braintest é uma plataforma brasileira focada em autoconhecimento, inteligência cognitiva e bem-estar emocional. Unimos ciência, design e tecnologia para oferecer testes de alta qualidade com relatórios claros e úteis.</p>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Missão</h3>
-        <p>Democratizar o acesso a ferramentas de autoconhecimento, ajudando pessoas e equipes a tomarem melhores decisões sobre bem-estar, foco e performance.</p>
-      </div>
-      <div class="card">
-        <h3>Visão</h3>
-        <p>Ser referência no Brasil em testes cognitivos e emocionais online, com transparência, segurança de dados e alta usabilidade.</p>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Metodologia</h3>
-        <p>Triagens de 15 perguntas, escolhidas aleatoriamente de um banco maior, para reduzir vieses. Os relatórios premium oferecem interpretações por faixa de resultado, com linguagem acessível e recomendações práticas.</p>
-      </div>
-      <div class="card">
-        <h3>Ética & Privacidade</h3>
-        <p>Resultados não substituem diagnósticos médicos. Tratamos dados de forma segura e minimizada. Você pode solicitar a exclusão dos seus dados a qualquer momento.</p>
-      </div>
+      <p>A <b>Braintest</b> nasceu da ideia de tornar o autoconhecimento acessível e divertido. Nosso objetivo é unir ciência, psicologia e tecnologia para ajudar pessoas a compreender melhor suas emoções, decisões e padrões de comportamento.</p>
+      <p>Além dos testes psicológicos e cognitivos, estamos construindo um ecossistema completo de jogos mentais e planos corporativos, onde inteligência emocional e lógica caminham juntas.</p>
+      <p>Nosso compromisso é com a ética, a privacidade e o bem-estar dos nossos usuários.</p>
     </div>
 
     <div class="card">
-      <h3>Contato</h3>
-      <p>Precisa de suporte ou quer falar sobre parcerias (ex.: RH, treinamentos, saúde corporativa)?</p>
-      <p><b>E-mail:</b> suporte@braintest.com.br</p>
+      <h3>🚀 Nossa Missão</h3>
+      <p>Desenvolver ferramentas digitais que promovam o equilíbrio entre mente, emoção e desempenho humano.</p>
     </div>
 
     <div class="card">
-      <h3>Roadmap</h3>
-      <ul style="margin-left:1rem;line-height:1.7">
-        <li>Mais testes cognitivos: tempo de reação, memória de trabalho, atenção sustentada.</li>
-        <li>Jogos cerebrais (entretenimento inteligente) com ranking e desafios.</li>
-        <li>Assinatura com benefícios (relatórios ilimitados, comparativos, trilhas).</li>
-        <li>Dashboard para empresas (RH) com gestão de times e métricas agregadas.</li>
-      </ul>
+      <h3>🤝 Parceiros e Colaboradores</h3>
+      <p>Psicólogos, neurocientistas, desenvolvedores e artistas fazem parte da nossa comunidade, contribuindo para experiências mais humanas e imersivas.</p>
     </div>
   </main>
 </div>
+
+<script src="/assets/supabase-init.js"></script>
+<script>
+function setupSidebar(session){
+  const toggle=document.getElementById("testsToggle");
+  const menu=document.getElementById("testsMenu");
+  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
+  const authBtn=document.getElementById("authBtn");
+  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
+  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
+}
+window.addEventListener("braintest-ready", async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  setupSidebar(session);
+  if(!session){return;}
+  const {data:{user}}=await sb.auth.getUser();
+  const {data:wallet}=await sb.from("wallets").select("balance").eq("user_id",user.id).single();
+  document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
+});
+</script>
 </body>
 </html>

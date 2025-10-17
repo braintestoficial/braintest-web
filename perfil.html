@@ -1,29 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meu Perfil | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <link rel="stylesheet" href="/assets/ui-dashboard.css">
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-.layout{display:flex;min-height:100vh;}
-.sidebar{
-  width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
-}
-.sidebar h1{font-size:1.2rem;color:#111827;margin-bottom:1rem;}
-.sidebar a{display:block;margin:.6rem 0;color:#374151;font-weight:500;}
-.sidebar a:hover{color:#6366f1;}
-.main{flex:1;padding:2rem;}
-.profile-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem;}
-.widget{background:#f9fafb;border-radius:10px;padding:1rem;margin:.5rem 0;}
-.widget h3{margin-bottom:.3rem;}
-@media(max-width:800px){
-  .sidebar{width:70px;padding:.5rem;}
-  .sidebar a{font-size:0;}
-  .sidebar a::before{font-size:1.2rem;content:"•";}
-}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
+.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
+.submenu{margin:.4rem 0 .2rem 1rem;display:none}
+.main{flex:1;padding:2rem}
+.profile-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.widget{background:#f9fafb;border-radius:10px;padding:1rem;margin:.5rem 0}
+label input[type=text]{width:100%;padding:.55rem;border:1px solid #e5e7eb;border-radius:8px}
 </style>
 </head>
 <body>
@@ -32,19 +23,34 @@
     <div>
       <h1>🧠 Braintest</h1>
       <a href="/index.html">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
+      <a href="/perfil.html" class="active">👤 Perfil</a>
       <a href="/carteira.html">💰 Carteira</a>
+      <a href="#" id="testsToggle">🧩 Testes</a>
+      <div class="submenu" id="testsMenu">
+        <a href="/teste-qi.html">Cognitivos</a>
+        <a href="/teste-tdah.html">Psicológicos</a>
+        <a href="#">Jogos</a>
+        <a href="#">Diversos</a>
+      </div>
+      <a href="#">🎮 Jogos</a>
+      <a href="#">⭐ Assinaturas</a>
       <a href="/faq.html">❓ FAQ</a>
       <a href="/sobre.html">ℹ️ Sobre</a>
     </div>
-    <div id="saldoBox">Saldo: -- 🧠</div>
+    <div>
+      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
+      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
+    </div>
   </nav>
 
   <main class="main">
     <div class="profile-card">
-      <h2 id="userName">Carregando...</h2>
+      <h2>Meu Perfil</h2>
       <p id="userEmail"></p>
-      <button class="btn" id="logout">Sair</button>
+      <label>Nome de exibição
+        <input type="text" id="displayName" placeholder="Seu nome" />
+      </label>
+      <button class="btn" id="saveName" style="margin-top:.6rem">Salvar</button>
     </div>
 
     <div class="widget">
@@ -62,25 +68,47 @@
 
 <script src="/assets/supabase-init.js"></script>
 <script>
+function setupSidebar(session){
+  const toggle=document.getElementById("testsToggle");
+  const menu=document.getElementById("testsMenu");
+  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
+  const authBtn=document.getElementById("authBtn");
+  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
+  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
+}
+
 window.addEventListener("braintest-ready", async()=>{
   const {data:{session}}=await sb.auth.getSession();
+  setupSidebar(session);
   if(!session){location.href="/";return;}
   const {data:{user}}=await sb.auth.getUser();
-  document.getElementById("userName").textContent=user.email.split("@")[0];
   document.getElementById("userEmail").textContent=user.email;
   const {data:wallet}=await sb.from("wallets").select("balance").eq("user_id",user.id).single();
   document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
 
+  // Nome de exibição (profiles.name)
+  const {data:prof}=await sb.from("profiles").select("name").eq("id",user.id).single();
+  const nameInput=document.getElementById("displayName");
+  nameInput.value=prof?.name ?? user.email.split("@")[0];
+
+  document.getElementById("saveName").onclick=async()=>{
+    const newName=nameInput.value.trim();
+    if(!newName) return;
+    await sb.from("profiles").upsert({id:user.id,name:newName});
+    alert("Nome atualizado!");
+  };
+
+  // Histórico
   const {data:hist}=await sb.from("test_sessions")
     .select("test_key,score_likert,score_qi,created_at")
-    .eq("user_id",user.id).order("created_at",{ascending:false}).limit(5);
+    .eq("user_id",user.id).order("created_at",{ascending:false}).limit(8);
   const hEl=document.getElementById("historico");
   if(!hist?.length){hEl.textContent="Nenhum teste realizado ainda.";return;}
   hEl.innerHTML=hist.map(t=>{
-    const score=t.score_likert??t.score_qi;
-    return `<p>🧩 ${t.test_key.toUpperCase()} — ${score ?? 0} pts — ${new Date(t.created_at).toLocaleDateString()}</p>`;
+    const score=t.score_likert??t.score_qi??0;
+    const link = t.test_key==="tdah"?"/tdah-premium.html":t.test_key==="burnout"?"/burnout-premium.html":"/qi-premium.html";
+    return `<p>🧩 <b>${t.test_key.toUpperCase()}</b> — ${score} — ${new Date(t.created_at).toLocaleString()} — <a href="${link}">ver relatório</a></p>`;
   }).join("");
-  document.getElementById("logout").onclick=async()=>{await sb.auth.signOut();location.href="/";};
 });
 </script>
 </body>

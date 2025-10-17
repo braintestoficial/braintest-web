@@ -1,32 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FAQ | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <link rel="stylesheet" href="/assets/ui-dashboard.css">
+<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-  .layout{display:flex;min-height:100vh;}
-  .sidebar{
-    width:240px;background:#fff;border-right:1px solid #e5e7eb;
-    padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
-  }
-  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827;}
-  .sidebar a{display:block;margin:.6rem 0;color:#374151;font-weight:500;}
-  .sidebar a:hover{color:#6366f1;}
-  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto;}
-  .faq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.2rem}
-  .card h3{margin-bottom:.4rem}
-  .q{margin:.5rem 0}
-  .q b{color:#111827}
-  @media(max-width:900px){.faq-grid{grid-template-columns:1fr}}
-  @media(max-width:800px){
-    .sidebar{width:70px;padding:.5rem}
-    .sidebar a{font-size:0}
-    .sidebar a::before{font-size:1.2rem;content:"•"}
-  }
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
+.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
+.submenu{margin:.4rem 0 .2rem 1rem;display:none}
+.main{flex:1;padding:2rem;max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.card h3{margin-bottom:.5rem}
 </style>
 </head>
 <body>
@@ -37,45 +24,70 @@
       <a href="/index.html">🏠 Início</a>
       <a href="/perfil.html">👤 Perfil</a>
       <a href="/carteira.html">💰 Carteira</a>
-      <a href="/faq.html">❓ FAQ</a>
+      <a href="#" id="testsToggle">🧩 Testes</a>
+      <div class="submenu" id="testsMenu">
+        <a href="/teste-qi.html">Cognitivos</a>
+        <a href="/teste-tdah.html">Psicológicos</a>
+        <a href="/teste-burnout.html">Diversos</a>
+      </div>
+      <a href="#">🎮 Jogos</a>
+      <a href="#">⭐ Assinaturas</a>
+      <a href="/faq.html" class="active">❓ FAQ</a>
       <a href="/sobre.html">ℹ️ Sobre</a>
     </div>
-    <div style="color:#6b7280">Atualizado: 2025</div>
+    <div>
+      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
+      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
+    </div>
   </nav>
 
   <main class="main">
-    <h2 style="margin-bottom:1rem">Perguntas Frequentes</h2>
+    <h2>Perguntas Frequentes</h2>
+    <div class="card">
+      <h3>🧠 O que é a Braintest?</h3>
+      <p>A Braintest é uma plataforma de autoconhecimento e aprimoramento cognitivo, oferecendo testes psicológicos e lógicos que ajudam a compreender melhor como você pensa e reage ao mundo.</p>
+    </div>
 
-    <div class="faq-grid">
-      <div class="card">
-        <h3>Testes & Resultados</h3>
-        <div class="q"><b>Os testes dão diagnóstico?</b><br>Não. Nossos testes são triagens e ferramentas de autoconhecimento. Eles não substituem avaliação de profissionais de saúde.</div>
-        <div class="q"><b>Posso refazer um teste?</b><br>Sim. Refazer ajuda a acompanhar evolução. Seus resultados ficam no seu histórico.</div>
-        <div class="q"><b>Como são calculadas as perguntas?</b><br>Cada triagem puxa 15 perguntas aleatórias de um banco maior, reduzindo viés e memorização de respostas.</div>
-      </div>
+    <div class="card">
+      <h3>💰 O que são Braincoins?</h3>
+      <p>As Braincoins são a moeda interna da plataforma. Com elas, você pode desbloquear relatórios premium, realizar novos testes ou assinar planos mensais.</p>
+    </div>
 
-      <div class="card">
-        <h3>Braincoins & Assinaturas</h3>
-        <div class="q"><b>O que são Braincoins?</b><br>Moeda interna da Braintest (1 BC = R$ 1). Usadas para liberar relatórios premium, testes avançados e, futuramente, jogos.</div>
-        <div class="q"><b>Como comprar Braincoins?</b><br>Pela página Carteira. O pagamento é via Stripe e o crédito cai automaticamente após confirmação.</div>
-        <div class="q"><b>Haverá assinatura mensal?</b><br>Sim. Teremos planos com acesso ilimitado a relatórios e recursos extras. Novidades em breve.</div>
-      </div>
+    <div class="card">
+      <h3>🔐 Meus dados estão seguros?</h3>
+      <p>Sim. Todos os dados são armazenados com segurança no Supabase e não são compartilhados com terceiros. Você tem total controle sobre o que mantém salvo na plataforma.</p>
+    </div>
 
-      <div class="card">
-        <h3>Conta & Privacidade</h3>
-        <div class="q"><b>Como entro na minha conta?</b><br>Login via Google (OAuth), com sessão persistente. Você pode sair a qualquer momento no perfil.</div>
-        <div class="q"><b>Meus dados são privados?</b><br>Sim. Coletamos apenas o essencial para funcionamento. Você pode solicitar exclusão dos dados.</div>
-        <div class="q"><b>Posso alterar meu e-mail?</b><br>No momento não. Em breve teremos edição de perfil e mais opções de gerenciamento de conta.</div>
-      </div>
+    <div class="card">
+      <h3>📊 Os resultados substituem um diagnóstico médico?</h3>
+      <p>Não. Os relatórios da Braintest têm caráter informativo e educacional. Eles não substituem consultas com profissionais de saúde mental.</p>
+    </div>
 
-      <div class="card">
-        <h3>Ajuda & Suporte</h3>
-        <div class="q"><b>Relatório premium não carregou.</b><br>Verifique sua conexão/log-in. Se persistir, refaça o teste e nos envie o horário aproximado do erro.</div>
-        <div class="q"><b>Minhas Braincoins não caíram.</b><br>Pagamentos podem levar alguns minutos. Se demorar, fale conosco com o comprovante do Stripe.</div>
-        <div class="q"><b>Como falar com o suporte?</b><br>Em breve disponibilizaremos um portal de suporte. Por enquanto, use o e-mail indicado na página Sobre.</div>
-      </div>
+    <div class="card">
+      <h3>🧾 Posso usar a Braintest na minha empresa?</h3>
+      <p>Sim. Estamos desenvolvendo módulos corporativos para avaliação e mapeamento de equipes. Em breve, o modo “empresa” estará disponível.</p>
     </div>
   </main>
 </div>
+
+<script src="/assets/supabase-init.js"></script>
+<script>
+function setupSidebar(session){
+  const toggle=document.getElementById("testsToggle");
+  const menu=document.getElementById("testsMenu");
+  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
+  const authBtn=document.getElementById("authBtn");
+  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
+  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
+}
+window.addEventListener("braintest-ready", async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  setupSidebar(session);
+  if(!session){return;}
+  const {data:{user}}=await sb.auth.getUser();
+  const {data:wallet}=await sb.from("wallets").select("balance").eq("user_id",user.id).single();
+  document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
+});
+</script>
 </body>
 </html>

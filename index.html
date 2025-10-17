@@ -9,29 +9,19 @@
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
   .layout{display:flex;min-height:100vh;}
-  .sidebar{
-    width:240px;background:#fff;border-right:1px solid #e5e7eb;
-    padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
-  }
-  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827;}
-  .sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500;}
-  .sidebar a:hover{color:#6366f1;}
-  .submenu{margin-left:1rem;font-size:.9rem;color:#6b7280;}
-  .submenu a{color:#6b7280;}
-  .submenu a:hover{color:#4f46e5;}
-  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto;}
-  .headerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
-  .headerTop h2{margin:0;font-size:1.5rem;}
-  .user-info{display:flex;align-items:center;gap:1rem;}
-  .user-info span{cursor:pointer;font-weight:500;color:#4f46e5;}
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
-  .card{text-align:center;}
-  .card h3{margin-top:.5rem;font-size:1.1rem;}
-  @media(max-width:800px){
-    .sidebar{width:70px;padding:.5rem}
-    .sidebar a{font-size:0}
-    .sidebar a::before{font-size:1.2rem;content:"•"}
-  }
+  .sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
+  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827}
+  .sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
+  .sidebar a:hover{color:#6366f1}
+  .submenu{margin:.4rem 0 .2rem 1rem;display:none}
+  .submenu a{display:block;margin:.25rem 0;color:#6b7280}
+  .submenu a:hover{color:#4f46e5}
+  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto}
+  .headerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .user-info{display:flex;gap:1rem;align-items:center}
+  .user-info span{cursor:pointer;color:#4f46e5;font-weight:500}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+  @media(max-width:800px){.sidebar{width:70px;padding:.5rem}.sidebar a{font-size:0}.sidebar a::before{font-size:1.2rem;content:"•"}}
 </style>
 </head>
 <body>
@@ -42,19 +32,22 @@
       <a href="/index.html" class="active">🏠 Início</a>
       <a href="/perfil.html">👤 Perfil</a>
       <a href="/carteira.html">💰 Carteira</a>
-      <a href="#">🧩 Testes</a>
-        <div class="submenu">
-          <a href="/teste-qi.html">Cognitivos</a><br>
-          <a href="/teste-tdah.html">Psicológicos</a><br>
-          <a href="#">Jogos</a><br>
-          <a href="#">Diversos</a>
-        </div>
+      <a href="#" id="testsToggle">🧩 Testes</a>
+      <div class="submenu" id="testsMenu">
+        <a href="/teste-qi.html">Cognitivos</a>
+        <a href="/teste-tdah.html">Psicológicos</a>
+        <a href="#">Jogos</a>
+        <a href="#">Diversos</a>
+      </div>
       <a href="#">🎮 Jogos</a>
       <a href="#">⭐ Assinaturas</a>
       <a href="/faq.html">❓ FAQ</a>
       <a href="/sobre.html">ℹ️ Sobre</a>
     </div>
-    <div style="color:#6b7280">Versão 1.0</div>
+    <div>
+      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
+      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
+    </div>
   </nav>
 
   <main class="main">
@@ -69,7 +62,7 @@
     <div class="card-grid">
       <div class="card">
         <h3>Teste de TDAH</h3>
-        <p>Avalie seus níveis de atenção e impulsividade em poucos minutos.</p>
+        <p>Avalie níveis de atenção e impulsividade.</p>
         <a href="/teste-tdah.html" class="btn">Fazer teste</a>
       </div>
       <div class="card">
@@ -79,37 +72,50 @@
       </div>
       <div class="card">
         <h3>Teste de QI</h3>
-        <p>Descubra seu quociente de inteligência com base em raciocínio lógico.</p>
+        <p>Descubra seu quociente de inteligência.</p>
         <a href="/teste-qi.html" class="btn">Fazer teste</a>
       </div>
     </div>
 
     <div class="card" style="margin-top:2rem;">
       <h3>🎮 Jogos Cognitivos (em breve)</h3>
-      <p>Treine sua mente com desafios divertidos e mensure seu progresso.</p>
+      <p>Desafios divertidos para treinar a mente.</p>
     </div>
 
     <div class="card">
       <h3>⭐ Planos e Assinaturas</h3>
-      <p>Assinaturas premium trarão acesso ilimitado a relatórios e novas funcionalidades.</p>
+      <p>Acesso ilimitado a relatórios e recursos extras (em breve).</p>
     </div>
   </main>
 </div>
 
 <script src="/assets/supabase-init.js"></script>
 <script>
+function setupSidebar(session){
+  const toggle = document.getElementById("testsToggle");
+  const menu = document.getElementById("testsMenu");
+  toggle.addEventListener("click",(e)=>{e.preventDefault(); menu.style.display = (menu.style.display==="block"?"none":"block");});
+  const authBtn = document.getElementById("authBtn");
+  if(session){ authBtn.textContent="Logout"; authBtn.onclick = async()=>{ await sb.auth.signOut(); location.href="/"; }; }
+  else{ authBtn.textContent="Entrar com Google"; authBtn.onclick = ()=> sb.auth.signInWithOAuth({provider:"google", options:{redirectTo: location.origin}}); }
+}
+
 window.addEventListener("braintest-ready", async()=>{
   const {data:{session}} = await sb.auth.getSession();
-  if(!session){location.href="/";return;}
+  setupSidebar(session);
+  if(!session){ location.href="/"; return; }
   const {data:{user}} = await sb.auth.getUser();
   document.getElementById("userName").textContent = user.email.split("@")[0];
-  document.getElementById("userEmail").textContent = user.email;
-  document.getElementById("userEmail").onclick = ()=>location.href="/perfil.html";
+  const emailEl = document.getElementById("userEmail");
+  emailEl.textContent = user.email;
+  emailEl.onclick = ()=> location.href="/perfil.html";
+
   const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
   const saldo = wallet?.balance ?? 0;
   const saldoEl = document.getElementById("saldoTop");
   saldoEl.textContent = `${saldo} 🧠`;
-  saldoEl.onclick = ()=>location.href="/carteira.html";
+  saldoEl.onclick = ()=> location.href="/carteira.html";
+  document.getElementById("saldoBox").textContent = `Saldo: ${saldo} 🧠`;
 });
 </script>
 </body>

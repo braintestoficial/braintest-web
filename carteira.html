@@ -1,46 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Carteira | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<link rel="stylesheet" href="/assets/ui-dashboard.css">
+<link rel="stylesheet" href="/assets/ui.css" />
+<link rel="stylesheet" href="/assets/ui-dashboard.css" />
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-  .layout{display:flex;min-height:100vh;}
-  .sidebar{
-    width:240px;background:#fff;border-right:1px solid #e5e7eb;
-    padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
-  }
-  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827;}
-  .sidebar a{display:block;margin:.6rem 0;color:#374151;font-weight:500;}
-  .sidebar a:hover{color:#6366f1;}
-  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto;}
-  .card{
-    background:#fff;border:1px solid #e5e7eb;border-radius:12px;
-    padding:1.5rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.04);
-  }
-  .saldo{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-  .saldo .valor{font-size:1.8rem;font-weight:700;color:#111827}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-  .grid .card{height:100%}
-  .packs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem}
-  .pack{display:flex;align-items:center;justify-content:space-between;border:1px solid #e5e7eb;border-radius:10px;padding:.8rem 1rem;background:#fafafa}
-  .pack .btn{padding:.45rem .8rem}
-  table{width:100%;border-collapse:collapse;font-size:.95rem}
-  th,td{border-bottom:1px solid #e5e7eb;padding:.55rem .4rem;text-align:left}
-  th{color:#111827}
-  td{color:#374151}
-  .tag{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
-  .tag.credit{background:#ecfdf5;color:#065f46}
-  .tag.debit{background:#fef2f2;color:#991b1b}
-  @media(max-width:900px){.grid{grid-template-columns:1fr}}
-  @media(max-width:800px){
-    .sidebar{width:70px;padding:.5rem}
-    .sidebar a{font-size:0}
-    .sidebar a::before{font-size:1.2rem;content:"•"}
-  }
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
+.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
+.submenu{margin:.4rem 0 .2rem 1rem;display:none}
+.main{flex:1;padding:2rem;max-width:1000px;margin:0 auto}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.saldo{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.saldo .valor{font-size:1.8rem;font-weight:700;color:#111827}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.packs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem}
+.pack{display:flex;align-items:center;justify-content:space-between;border:1px solid #e5e7eb;border-radius:10px;padding:.8rem 1rem;background:#fafafa}
+.pack .btn{padding:.45rem .8rem}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{border-bottom:1px solid #e5e7eb;padding:.55rem .4rem;text-align:left}
+.tag{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
+.tag.credit{background:#ecfdf5;color:#065f46}.tag.debit{background:#fef2f2;color:#991b1b}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -50,11 +33,23 @@
       <h1>🧠 Braintest</h1>
       <a href="/index.html">🏠 Início</a>
       <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html">💰 Carteira</a>
+      <a href="/carteira.html" class="active">💰 Carteira</a>
+      <a href="#" id="testsToggle">🧩 Testes</a>
+      <div class="submenu" id="testsMenu">
+        <a href="/teste-qi.html">Cognitivos</a>
+        <a href="/teste-tdah.html">Psicológicos</a>
+        <a href="#">Jogos</a>
+        <a href="#">Diversos</a>
+      </div>
+      <a href="#">🎮 Jogos</a>
+      <a href="#">⭐ Assinaturas</a>
       <a href="/faq.html">❓ FAQ</a>
       <a href="/sobre.html">ℹ️ Sobre</a>
     </div>
-    <div id="saldoBox">Saldo: -- 🧠</div>
+    <div>
+      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
+      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
+    </div>
   </nav>
 
   <main class="main">
@@ -73,37 +68,39 @@
         <h3 style="margin-bottom:.6rem">Adicionar Braincoins</h3>
         <div class="packs" id="packs"></div>
         <p style="margin-top:.6rem;color:#6b7280;font-size:.9rem">
-          * O pagamento é processado pelo Stripe. As moedas entram automaticamente após a confirmação.
+          * Pagamento via Stripe. As moedas entram automaticamente após confirmação.
         </p>
       </div>
-
       <div class="card">
         <h3 style="margin-bottom:.6rem">Transações recentes</h3>
         <div id="txBox">Carregando…</div>
       </div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:.6rem">Como funcionam as Braincoins?</h3>
-      <p>As Braincoins são a moeda interna da Braintest (1 BC = R$ 1) e podem ser usadas para liberar relatórios premium, fazer testes avançados e, futuramente, jogar nossos jogos cognitivos. As moedas são pessoais, intransferíveis e não expiram.</p>
     </div>
   </main>
 </div>
 
 <script src="/assets/supabase-init.js"></script>
 <script>
+function setupSidebar(session){
+  const toggle=document.getElementById("testsToggle");
+  const menu=document.getElementById("testsMenu");
+  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
+  const authBtn=document.getElementById("authBtn");
+  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
+  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
+}
+
 window.addEventListener("braintest-ready", async ()=>{
   const {data:{session}} = await sb.auth.getSession();
+  setupSidebar(session);
   if(!session){ location.href="/"; return; }
   const {data:{user}} = await sb.auth.getUser();
 
-  // saldo
   const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
   const saldo = wallet?.balance ?? 0;
   document.getElementById("saldo").textContent = saldo;
   document.getElementById("saldoBox").textContent = `Saldo: ${saldo} 🧠`;
 
-  // pacotes
   const pacotes = [
     {q:10, link:"https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04"},
     {q:30, link:"https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05"},
@@ -114,52 +111,36 @@ window.addEventListener("braintest-ready", async ()=>{
     {q:3000, link:"https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a"},
   ];
   document.getElementById("packs").innerHTML = pacotes.map(p=>`
-    <div class="pack">
-      <div><b>${p.q}</b> Braincoins</div>
-      <a class="btn" href="${p.link}" target="_blank" rel="noopener">Comprar</a>
-    </div>
+    <div class="pack"><div><b>${p.q}</b> Braincoins</div><a class="btn" href="${p.link}" target="_blank" rel="noopener">Comprar</a></div>
   `).join("");
 
-  // transações recentes (tenta wallet_transactions; se não houver, usa wallet_logs)
   async function loadTx(){
-    let html="";
     try{
-      const {data:txs, error} = await sb.from("wallet_transactions")
-        .select("kind,amount,description,created_at")
-        .eq("user_id", user.id)
-        .order("created_at",{ascending:false})
-        .limit(8);
+      const {data:txs,error} = await sb.from("wallet_transactions")
+        .select("kind,amount,description,created_at").eq("user_id",user.id)
+        .order("created_at",{ascending:false}).limit(8);
       if(error) throw error;
-      if(!txs?.length){ html = "<p>Sem transações ainda.</p>"; }
-      else{
-        html = `<table><thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>` +
-          txs.map(t=>{
-            const tag = t.kind === "credit" ? "credit" : "debit";
-            const val = (t.amount>0?"+":"") + t.amount + " BC";
-            return `<tr>
-              <td>${new Date(t.created_at).toLocaleString()}</td>
-              <td><span class="tag ${tag}">${t.kind}</span></td>
-              <td>${val}</td>
-              <td>${t.description||"-"}</td>
-            </tr>`;
-          }).join("") + `</tbody></table>`;
-      }
-      document.getElementById("txBox").innerHTML = html;
+      if(!txs?.length){document.getElementById("txBox").innerHTML="<p>Sem transações ainda.</p>";return;}
+      document.getElementById("txBox").innerHTML =
+        `<table><thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>` +
+        txs.map(t=>`<tr>
+            <td>${new Date(t.created_at).toLocaleString()}</td>
+            <td><span class="tag ${t.kind}">${t.kind}</span></td>
+            <td>${(t.amount>0?"+":"") + t.amount} BC</td>
+            <td>${t.description||"-"}</td>
+          </tr>`).join("") + `</tbody></table>`;
     }catch(_){
-      // fallback wallet_logs
-      const {data:logs} = await sb.from("wallet_logs")
-        .select("description,amount,created_at")
-        .eq("user_id", user.id).order("created_at",{ascending:false}).limit(8);
-      if(!logs?.length) document.getElementById("txBox").innerHTML="<p>Sem transações ainda.</p>";
-      else{
-        const html = `<table><thead><tr><th>Data</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>` +
-          logs.map(t=>`<tr>
+      const {data:logs}=await sb.from("wallet_logs")
+        .select("description,amount,created_at").eq("user_id",user.id)
+        .order("created_at",{ascending:false}).limit(8);
+      if(!logs?.length){document.getElementById("txBox").innerHTML="<p>Sem transações ainda.</p>";return;}
+      document.getElementById("txBox").innerHTML =
+        `<table><thead><tr><th>Data</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>` +
+        logs.map(t=>`<tr>
             <td>${new Date(t.created_at).toLocaleString()}</td>
             <td>${(t.amount>0?"+":"") + t.amount} BC</td>
             <td>${t.description||"-"}</td>
           </tr>`).join("") + `</tbody></table>`;
-        document.getElementById("txBox").innerHTML = html;
-      }
     }
   }
   loadTx();
