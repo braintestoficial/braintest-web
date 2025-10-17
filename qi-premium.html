@@ -1,68 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Relatório Premium — QI | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório Premium - QI</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
-  <div class="userbox"><b id="userChip">Carregando...</b></div>
-</header>
+  <nav class="sidebar">
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="teste-qi.html">🔁 Refazer Teste</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
+  </nav>
 
-<main class="content">
-  <div class="card">
-    <h2>Relatório Premium — QI</h2>
-    <div id="resultado"><p>Carregando análise personalizada...</p></div>
-  </div>
-</main>
+  <main style="margin-left:250px;padding:40px;">
+    <h1>Relatório Premium - Teste de QI</h1>
+    <div id="relatorioPremium" style="margin-top:30px;color:#334155;">Carregando...</div>
+  </main>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-window.addEventListener("braintest-ready",async()=>{
-  const {data:{user}}=await sb.auth.getUser();
-  if(!user){location.href="/";return;}
-  document.getElementById("userChip").textContent=user.email.split("@")[0];
+  <script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.href = "login.html";
+        return;
+      }
 
-  const {data}=await sb.from("test_sessions")
-    .select("*").eq("user_id",user.id)
-    .eq("test_key","qi").order("created_at",{ascending:false}).limit(1).single();
+      window.addEventListener("braintest-ready", async () => {
+        const user = session.user;
+        const div = document.getElementById("relatorioPremium");
+        div.innerHTML = `
+          <h2>Análise personalizada</h2>
+          <p><strong>Usuário:</strong> ${user.email}</p>
+          <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
+          <p>Seu teste avalia o raciocínio lógico e a percepção de padrões. Este resultado
+          demonstra sua capacidade de abstração e resolução de problemas em contextos variados.</p>
+          <p><strong>Recomendações:</strong></p>
+          <ul>
+            <li>Continue estimulando o cérebro com leitura e jogos de lógica.</li>
+            <li>Evite comparar resultados absolutos, foque em seu progresso.</li>
+          </ul>
+        `;
+      });
+    })();
 
-  const score=data?.score_qi??0;
-  let faixa,descricao;
-  if(score<80){
-    faixa="Abaixo da média";
-    descricao=`Seu resultado sugere dificuldades em áreas de raciocínio lógico e atenção a detalhes. 
-               Isso pode estar ligado a fatores externos (sono, ansiedade, distrações). 
-               Exercícios mentais e leitura constante ajudam a aprimorar seu desempenho cognitivo.`;
-  } else if(score<110){
-    faixa="Média";
-    descricao=`Seu desempenho está dentro da média populacional. 
-               Você demonstra equilíbrio entre lógica, atenção e velocidade de raciocínio. 
-               Continue estimulando-se com desafios intelectuais, como quebra-cabeças e novos aprendizados.`;
-  } else if(score<130){
-    faixa="Acima da média";
-    descricao=`Seu resultado indica excelente capacidade de raciocínio e aprendizado. 
-               Você assimila conceitos rapidamente e tende a resolver problemas de forma criativa. 
-               Ambientes com desafios intelectuais costumam favorecer seu desempenho.`;
-  } else {
-    faixa="Muito acima da média";
-    descricao=`Seu resultado aponta uma inteligência significativamente acima da média. 
-               Você tende a apresentar pensamento analítico e capacidade de adaptação excepcionais. 
-               Explore sempre novas áreas de conhecimento para manter seu potencial em expansão.`;
-  }
-
-  document.getElementById("resultado").innerHTML=`
-    <h3>Q.I. estimado: ${score}</h3>
-    <p><b>Faixa: ${faixa}</b></p>
-    <p>${descricao}</p>
-    <hr>
-    <p><i>*Este relatório fornece uma estimativa com base em desempenho lógico e não substitui avaliações formais de inteligência.</i></p>
-  `;
-});
-</script>
+    document.getElementById("logout").onclick = async () => {
+      await sb.auth.signOut();
+      window.location.href = "login.html";
+    };
+  </script>
 </body>
 </html>

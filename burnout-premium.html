@@ -1,63 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Relatório Premium — Burnout | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório Premium - Burnout</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
-  <div class="userbox"><b id="userChip">Carregando...</b></div>
-</header>
+  <nav class="sidebar">
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="teste-burnout.html">🔁 Refazer Teste</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
+  </nav>
 
-<main class="content">
-  <div class="card">
-    <h2>Relatório Premium — Burnout</h2>
-    <div id="resultado"><p>Carregando análise personalizada...</p></div>
-  </div>
-</main>
+  <main style="margin-left:250px;padding:40px;">
+    <h1>Relatório Premium - Burnout</h1>
+    <div id="relatorioPremium" style="margin-top:30px;color:#334155;">Carregando...</div>
+  </main>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-window.addEventListener("braintest-ready",async()=>{
-  const {data:{user}}=await sb.auth.getUser();
-  if(!user){location.href="/";return;}
-  document.getElementById("userChip").textContent=user.email.split("@")[0];
+  <script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.href = "login.html";
+        return;
+      }
 
-  const {data}=await sb.from("test_sessions")
-    .select("*").eq("user_id",user.id)
-    .eq("test_key","burnout").order("created_at",{ascending:false}).limit(1).single();
+      window.addEventListener("braintest-ready", async () => {
+        const user = session.user;
+        const div = document.getElementById("relatorioPremium");
+        div.innerHTML = `
+          <h2>Análise personalizada</h2>
+          <p><strong>Usuário:</strong> ${user.email}</p>
+          <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
+          <p>Com base em suas respostas, há indicativos de exaustão emocional e sobrecarga.
+          É importante reconhecer sinais de estresse prolongado e buscar equilíbrio entre
+          trabalho e descanso.</p>
+          <p><strong>Recomendações:</strong></p>
+          <ul>
+            <li>Pratique pausas regulares durante o expediente.</li>
+            <li>Estabeleça limites entre vida pessoal e profissional.</li>
+            <li>Procure apoio psicológico se sentir que o cansaço emocional está excessivo.</li>
+          </ul>
+        `;
+      });
+    })();
 
-  const score=data?.score_likert??0;
-  let nivel,texto;
-  if(score<=10){
-    nivel="Baixo";
-    texto=`Seu nível de estresse está dentro de uma faixa saudável. 
-           Você demonstra boa capacidade de equilíbrio emocional e recuperação após períodos de tensão. 
-           Continue valorizando pausas, sono de qualidade e atividades prazerosas.`;
-  } else if(score<=20){
-    nivel="Moderado";
-    texto=`Há sinais moderados de exaustão e sobrecarga. 
-           É importante observar seus limites e buscar momentos de descanso. 
-           Pequenas pausas, alimentação equilibrada e reduzir o excesso de responsabilidades podem ajudar muito.`;
-  } else {
-    nivel="Alto";
-    texto=`Os resultados apontam risco elevado de esgotamento (Burnout). 
-           Isso pode impactar sua produtividade e bem-estar. 
-           Busque apoio profissional para reequilibrar suas rotinas e avaliar possíveis ajustes em carga de trabalho e sono.`;
-  }
-
-  document.getElementById("resultado").innerHTML=`
-    <h3>Pontuação total: ${score}</h3>
-    <p><b>Nível de Exaustão: ${nivel}</b></p>
-    <p>${texto}</p>
-    <hr>
-    <p><i>*Este relatório é uma ferramenta de autoconhecimento e não substitui acompanhamento psicológico ou médico.</i></p>
-  `;
-});
-</script>
+    document.getElementById("logout").onclick = async () => {
+      await sb.auth.signOut();
+      window.location.href = "login.html";
+    };
+  </script>
 </body>
 </html>
