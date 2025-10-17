@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Relatório Premium — TDAH | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -15,38 +16,47 @@
 <main class="content">
   <div class="card">
     <h2>Relatório Premium — TDAH</h2>
-    <p>Resultado personalizado com base em suas respostas:</p>
-    <div id="resultado">
-      <p>Carregando dados…</p>
-    </div>
+    <div id="resultado"><p>Carregando análise personalizada...</p></div>
   </div>
 </main>
 
 <script src="/assets/supabase-init.js"></script>
 <script>
 window.addEventListener("braintest-ready", async()=>{
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ location.href="/"; return; }
-  document.getElementById("userChip").textContent = user.email.split("@")[0];
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user){location.href="/";return;}
+  document.getElementById("userChip").textContent=user.email.split("@")[0];
 
-  const { data } = await sb.from("test_sessions")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("test_key", "tdah")
-    .order("created_at",{ascending:false})
-    .limit(1)
-    .single();
+  const {data}=await sb.from("test_sessions")
+    .select("*").eq("user_id",user.id)
+    .eq("test_key","tdah").order("created_at",{ascending:false}).limit(1).single();
 
-  const score = data?.score_likert ?? 0;
-  let texto="";
-  if(score<=10) texto="Baixa probabilidade de TDAH. Seus resultados indicam boa capacidade de foco, planejamento e controle atencional.";
-  else if(score<=20) texto="Sinais moderados de desatenção e impulsividade. Há indícios de dificuldades de foco em ambientes com múltiplas demandas.";
-  else texto="Alta probabilidade de TDAH. O padrão de respostas indica forte tendência à desorganização e impulsividade. Procure orientação profissional.";
+  const score=data?.score_likert??0;
+  let nivel,texto;
+  if(score<=10){
+    nivel="Baixo";
+    texto=`Seus resultados indicam boa capacidade de foco e controle atencional. 
+           Pequenas distrações podem ocorrer em situações comuns, mas não representam um padrão consistente de TDAH. 
+           Continue aplicando rotinas e organização para manter sua produtividade.`;
+  } else if(score<=20){
+    nivel="Moderado";
+    texto=`Os resultados sugerem presença de alguns sintomas de desatenção e impulsividade, 
+           especialmente quando há sobrecarga de tarefas ou ambientes muito estimulantes. 
+           Estratégias de gerenciamento de tempo e pausas planejadas podem ajudar a reduzir o impacto dessas dificuldades.`;
+  } else {
+    nivel="Alto";
+    texto=`A pontuação indica um padrão de atenção e impulsividade característico de TDAH. 
+           Isso não é um diagnóstico, mas um forte indicativo de que buscar um especialista pode trazer benefícios significativos. 
+           Intervenções comportamentais e acompanhamento médico costumam apresentar excelentes resultados.`;
+  }
+
   document.getElementById("resultado").innerHTML=`
-    <h3>Pontuação: ${score}</h3>
+    <h3>Pontuação total: ${score}</h3>
+    <p><b>Nível de Indícios: ${nivel}</b></p>
     <p>${texto}</p>
     <hr>
-    <p><i>*Este relatório não substitui avaliação médica ou psicológica. É uma análise indicativa baseada em padrões de atenção e comportamento.</i></p>`;
+    <p><i>*Este relatório é uma análise orientativa e não substitui diagnóstico médico ou psicológico.</i></p>
+  `;
 });
 </script>
 </body>

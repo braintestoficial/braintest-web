@@ -10,14 +10,13 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
-  <div class="search"><input placeholder="Buscar…" id="searchBox"></div>
   <div class="userbox"><b id="userChip"></b> — 💰 <b id="saldoTop">0</b> BC</div>
 </header>
 
 <main class="content">
   <div class="card">
     <h2>Triagem — TDAH</h2>
-    <p>Responda 15 perguntas para uma estimativa inicial. O relatório premium aprofunda seu perfil.</p>
+    <p>Responda 15 perguntas. O resultado gratuito é uma estimativa; o relatório premium aprofunda sua análise.</p>
     <div id="status" style="margin:.6rem 0;color:#a6b3cc">Carregando perguntas…</div>
     <div id="quiz"></div>
     <div style="margin-top:1rem"><button class="btn" id="enviar">Gerar resultado</button></div>
@@ -26,67 +25,50 @@
 
 <script src="/assets/supabase-init.js"></script>
 <script>
-window.addEventListener("braintest-ready", async () => {
-  const session = (await sb.auth.getSession()).data.session;
-  if(!session){ location.href="/"; return; }
-  const { data:{ user } } = await sb.auth.getUser();
-  const TEST = "tdah";
-  const status = document.getElementById("status");
-  const quizEl = document.getElementById("quiz");
-  let perguntas = [];
+window.addEventListener("braintest-ready", async()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){location.href="/";return;}
+  const {data:{user}} = await sb.auth.getUser();
+  document.getElementById("userChip").textContent = user.email.split("@")[0];
+  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
+  document.getElementById("saldoTop").textContent = wallet?.balance ?? 0;
 
-  try {
-    const { data } = await sb.rpc("get_random_questions",{p_test_key:TEST,p_limit:15});
-    if(data?.length) perguntas = data;
-  } catch(e){console.warn("RPC falhou", e);}
+  const TEST="tdah";
+  const status=document.getElementById("status");
+  let perguntas=[];
 
+  try{
+    const {data}=await sb.rpc("get_random_questions",{p_test_key:TEST,p_limit:15});
+    if(data?.length) perguntas=data;
+  }catch(e){console.warn("RPC falhou",e);}
   if(!perguntas.length){
-    const { data } = await sb.from("test_questions")
-      .select("id,prompt,kind,domain")
-      .eq("test_key", TEST)
-      .order("random()")
-      .limit(15);
-    perguntas = data || [];
+    const {data}=await sb.from("test_questions").select("id,prompt").eq("test_key",TEST).order("random()").limit(15);
+    perguntas=data||[];
   }
+  if(!perguntas.length){status.textContent="Erro ao carregar perguntas.";return;}
 
-  if(!perguntas.length){ status.textContent="Não foi possível carregar perguntas."; return; }
-  status.textContent = `Foram carregadas ${perguntas.length} perguntas.`;
+  const {data:opts}=await sb.from("test_question_options").select("question_id,label,value").in("question_id",perguntas.map(q=>q.id));
+  const byQ={};(opts||[]).forEach(o=>{(byQ[o.question_id] ||= []).push(o);});
+  perguntas=perguntas.map(q=>({...q,options:byQ[q.id]||[]}));
 
-  const ids = perguntas.map(q=>q.id);
-  const { data:opts } = await sb.from("test_question_options")
-    .select("question_id,label,value")
-    .in("question_id", ids);
-  const byQ = {};
-  (opts||[]).forEach(o=>{(byQ[o.question_id] ||= []).push(o);});
-  perguntas = perguntas.map(q=>({...q, options:byQ[q.id]||[]}));
+  document.getElementById("quiz").innerHTML=perguntas.map((q,i)=>`
+  <div class="question">
+  <p><b>${i+1}.</b> ${q.prompt}</p>
+  ${(q.options||[]).map(o=>`
+    <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>
+  `).join("")}</div>`).join("");
+  status.textContent=`${perguntas.length} perguntas carregadas.`;
 
-  quizEl.innerHTML = perguntas.map((q,i)=>`
-    <div class="question">
-      <p><b>${i+1}.</b> ${q.prompt}</p>
-      ${(q.options||[]).map(o=>`
-        <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>
-      `).join("")}
-    </div>`).join("");
-
-  document.getElementById("enviar").onclick = async() => {
-    const respostas = perguntas.map(q=>{
-      const v = document.querySelector(`input[name="q${q.id}"]:checked`);
-      return {question_id:q.id,value:v?Number(v.value):0};
+  document.getElementById("enviar").onclick=async()=>{
+    const respostas=perguntas.map(q=>{
+      const v=document.querySelector(`input[name="q${q.id}"]:checked`);
+      return Number(v?.value||0);
     });
-    const score = respostas.reduce((s,r)=>s+r.value,0);
-    await sb.from("test_sessions").insert({
-      user_id:user.id,test_key:TEST,items_qty:respostas.length,score_likert:score
-    });
+    const score=respostas.reduce((a,b)=>a+b,0);
+    console.log("Pontuação:",score);
+    await sb.from("test_sessions").insert({user_id:user.id,test_key:TEST,items_qty:respostas.length,score_likert:score});
     location.href="/tdah-premium.html";
   };
-
-  document.getElementById("searchBox").addEventListener("keypress",e=>{
-    if(e.key==="Enter"){
-      const t=e.target.value.toLowerCase();
-      if(t.includes("burn")) location.href="/teste-burnout.html";
-      else if(t.includes("qi")) location.href="/teste-qi.html";
-    }
-  });
 });
 </script>
 </body>

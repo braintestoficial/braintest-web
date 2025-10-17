@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Relatório Premium — Burnout | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -15,36 +16,47 @@
 <main class="content">
   <div class="card">
     <h2>Relatório Premium — Burnout</h2>
-    <p>Resultado personalizado com base em suas respostas:</p>
-    <div id="resultado"><p>Carregando dados…</p></div>
+    <div id="resultado"><p>Carregando análise personalizada...</p></div>
   </div>
 </main>
 
 <script src="/assets/supabase-init.js"></script>
 <script>
-window.addEventListener("braintest-ready", async()=>{
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ location.href="/"; return; }
-  document.getElementById("userChip").textContent = user.email.split("@")[0];
+window.addEventListener("braintest-ready",async()=>{
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user){location.href="/";return;}
+  document.getElementById("userChip").textContent=user.email.split("@")[0];
 
-  const { data } = await sb.from("test_sessions")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("test_key", "burnout")
-    .order("created_at",{ascending:false})
-    .limit(1)
-    .single();
+  const {data}=await sb.from("test_sessions")
+    .select("*").eq("user_id",user.id)
+    .eq("test_key","burnout").order("created_at",{ascending:false}).limit(1).single();
 
-  const score = data?.score_likert ?? 0;
-  let texto="";
-  if(score<=10) texto="Níveis saudáveis de estresse. Indica boa capacidade de recuperação e equilíbrio entre vida pessoal e profissional.";
-  else if(score<=20) texto="Sinais moderados de exaustão. É importante observar pausas regulares e reforçar hábitos de autocuidado.";
-  else texto="Alto risco de Burnout. Seus resultados sugerem sobrecarga emocional e física. Considere procurar apoio psicológico.";
+  const score=data?.score_likert??0;
+  let nivel,texto;
+  if(score<=10){
+    nivel="Baixo";
+    texto=`Seu nível de estresse está dentro de uma faixa saudável. 
+           Você demonstra boa capacidade de equilíbrio emocional e recuperação após períodos de tensão. 
+           Continue valorizando pausas, sono de qualidade e atividades prazerosas.`;
+  } else if(score<=20){
+    nivel="Moderado";
+    texto=`Há sinais moderados de exaustão e sobrecarga. 
+           É importante observar seus limites e buscar momentos de descanso. 
+           Pequenas pausas, alimentação equilibrada e reduzir o excesso de responsabilidades podem ajudar muito.`;
+  } else {
+    nivel="Alto";
+    texto=`Os resultados apontam risco elevado de esgotamento (Burnout). 
+           Isso pode impactar sua produtividade e bem-estar. 
+           Busque apoio profissional para reequilibrar suas rotinas e avaliar possíveis ajustes em carga de trabalho e sono.`;
+  }
+
   document.getElementById("resultado").innerHTML=`
-    <h3>Pontuação: ${score}</h3>
+    <h3>Pontuação total: ${score}</h3>
+    <p><b>Nível de Exaustão: ${nivel}</b></p>
     <p>${texto}</p>
     <hr>
-    <p><i>*Este relatório é um indicativo de estresse ocupacional e não substitui diagnóstico médico.</i></p>`;
+    <p><i>*Este relatório é uma ferramenta de autoconhecimento e não substitui acompanhamento psicológico ou médico.</i></p>
+  `;
 });
 </script>
 </body>

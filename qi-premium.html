@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Relatório Premium — QI | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -15,38 +16,52 @@
 <main class="content">
   <div class="card">
     <h2>Relatório Premium — QI</h2>
-    <p>Resultado personalizado com base em suas respostas:</p>
-    <div id="resultado"><p>Carregando dados…</p></div>
+    <div id="resultado"><p>Carregando análise personalizada...</p></div>
   </div>
 </main>
 
 <script src="/assets/supabase-init.js"></script>
 <script>
-window.addEventListener("braintest-ready", async()=>{
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ location.href="/"; return; }
-  document.getElementById("userChip").textContent = user.email.split("@")[0];
+window.addEventListener("braintest-ready",async()=>{
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user){location.href="/";return;}
+  document.getElementById("userChip").textContent=user.email.split("@")[0];
 
-  const { data } = await sb.from("test_sessions")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("test_key", "qi")
-    .order("created_at",{ascending:false})
-    .limit(1)
-    .single();
+  const {data}=await sb.from("test_sessions")
+    .select("*").eq("user_id",user.id)
+    .eq("test_key","qi").order("created_at",{ascending:false}).limit(1).single();
 
-  const score = data?.score_qi ?? 0;
-  let faixa="",descricao="";
-  if(score<80){faixa="Abaixo da média";descricao="Seu desempenho indica dificuldades pontuais em raciocínio lógico e atenção a detalhes. Praticar exercícios mentais pode ajudar.";}
-  else if(score<110){faixa="Média";descricao="Seu resultado indica bom equilíbrio entre lógica e velocidade de raciocínio. Continue estimulando sua mente com desafios variados.";}
-  else if(score<130){faixa="Acima da média";descricao="Excelente desempenho. Demonstra facilidade em resolver problemas e boa percepção analítica.";}
-  else{faixa="Muito acima da média";descricao="Seu resultado indica alta capacidade de raciocínio e aprendizagem rápida. Continue desafiando-se com novos conhecimentos.";}
+  const score=data?.score_qi??0;
+  let faixa,descricao;
+  if(score<80){
+    faixa="Abaixo da média";
+    descricao=`Seu resultado sugere dificuldades em áreas de raciocínio lógico e atenção a detalhes. 
+               Isso pode estar ligado a fatores externos (sono, ansiedade, distrações). 
+               Exercícios mentais e leitura constante ajudam a aprimorar seu desempenho cognitivo.`;
+  } else if(score<110){
+    faixa="Média";
+    descricao=`Seu desempenho está dentro da média populacional. 
+               Você demonstra equilíbrio entre lógica, atenção e velocidade de raciocínio. 
+               Continue estimulando-se com desafios intelectuais, como quebra-cabeças e novos aprendizados.`;
+  } else if(score<130){
+    faixa="Acima da média";
+    descricao=`Seu resultado indica excelente capacidade de raciocínio e aprendizado. 
+               Você assimila conceitos rapidamente e tende a resolver problemas de forma criativa. 
+               Ambientes com desafios intelectuais costumam favorecer seu desempenho.`;
+  } else {
+    faixa="Muito acima da média";
+    descricao=`Seu resultado aponta uma inteligência significativamente acima da média. 
+               Você tende a apresentar pensamento analítico e capacidade de adaptação excepcionais. 
+               Explore sempre novas áreas de conhecimento para manter seu potencial em expansão.`;
+  }
+
   document.getElementById("resultado").innerHTML=`
     <h3>Q.I. estimado: ${score}</h3>
-    <p><b>${faixa}</b></p>
+    <p><b>Faixa: ${faixa}</b></p>
     <p>${descricao}</p>
     <hr>
-    <p><i>*O teste é uma estimativa e não substitui avaliações profissionais de inteligência cognitiva.</i></p>`;
+    <p><i>*Este relatório fornece uma estimativa com base em desempenho lógico e não substitui avaliações formais de inteligência.</i></p>
+  `;
 });
 </script>
 </body>

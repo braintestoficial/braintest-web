@@ -1,23 +1,89 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sobre a Braintest</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sobre | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
+<link rel="stylesheet" href="/assets/ui-dashboard.css">
+<style>
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{
+    width:240px;background:#fff;border-right:1px solid #e5e7eb;
+    padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827;}
+  .sidebar a{display:block;margin:.6rem 0;color:#374151;font-weight:500;}
+  .sidebar a:hover{color:#6366f1;}
+  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto;}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  @media(max-width:800px){
+    .sidebar{width:70px;padding:.5rem}
+    .sidebar a{font-size:0}
+    .sidebar a::before{font-size:1.2rem;content:"•"}
+  }
+</style>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
-</header>
+<div class="layout">
+  <nav class="sidebar">
+    <div>
+      <h1>🧠 Braintest</h1>
+      <a href="/index.html">🏠 Início</a>
+      <a href="/perfil.html">👤 Perfil</a>
+      <a href="/carteira.html">💰 Carteira</a>
+      <a href="/faq.html">❓ FAQ</a>
+      <a href="/sobre.html">ℹ️ Sobre</a>
+    </div>
+    <div style="color:#6b7280">Versão 1.0</div>
+  </nav>
 
-<main class="content">
-  <div class="card">
-    <h2>Sobre Nós</h2>
-    <p>A Braintest é uma plataforma de autoconhecimento e inteligência cognitiva que une ciência, tecnologia e acessibilidade. Nosso objetivo é tornar a análise comportamental acessível a todos.</p>
-    <p><b>Missão:</b> democratizar o acesso a ferramentas de autoconhecimento.</p>
-    <p><b>Visão:</b> ser referência em inteligência emocional e cognitiva no Brasil.</p>
-  </div>
-</main>
+  <main class="main">
+    <div class="card">
+      <h2>Quem Somos</h2>
+      <p>A Braintest é uma plataforma brasileira focada em autoconhecimento, inteligência cognitiva e bem-estar emocional. Unimos ciência, design e tecnologia para oferecer testes de alta qualidade com relatórios claros e úteis.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Missão</h3>
+        <p>Democratizar o acesso a ferramentas de autoconhecimento, ajudando pessoas e equipes a tomarem melhores decisões sobre bem-estar, foco e performance.</p>
+      </div>
+      <div class="card">
+        <h3>Visão</h3>
+        <p>Ser referência no Brasil em testes cognitivos e emocionais online, com transparência, segurança de dados e alta usabilidade.</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Metodologia</h3>
+        <p>Triagens de 15 perguntas, escolhidas aleatoriamente de um banco maior, para reduzir vieses. Os relatórios premium oferecem interpretações por faixa de resultado, com linguagem acessível e recomendações práticas.</p>
+      </div>
+      <div class="card">
+        <h3>Ética & Privacidade</h3>
+        <p>Resultados não substituem diagnósticos médicos. Tratamos dados de forma segura e minimizada. Você pode solicitar a exclusão dos seus dados a qualquer momento.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contato</h3>
+      <p>Precisa de suporte ou quer falar sobre parcerias (ex.: RH, treinamentos, saúde corporativa)?</p>
+      <p><b>E-mail:</b> suporte@braintest.com.br</p>
+    </div>
+
+    <div class="card">
+      <h3>Roadmap</h3>
+      <ul style="margin-left:1rem;line-height:1.7">
+        <li>Mais testes cognitivos: tempo de reação, memória de trabalho, atenção sustentada.</li>
+        <li>Jogos cerebrais (entretenimento inteligente) com ranking e desafios.</li>
+        <li>Assinatura com benefícios (relatórios ilimitados, comparativos, trilhas).</li>
+        <li>Dashboard para empresas (RH) com gestão de times e métricas agregadas.</li>
+      </ul>
+    </div>
+  </main>
+</div>
 </body>
 </html>
