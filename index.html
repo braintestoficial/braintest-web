@@ -1,122 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Braintest — Início</title>
-<link rel="stylesheet" href="/assets/ui.css" />
-<link rel="stylesheet" href="/assets/ui-dashboard.css" />
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-  .layout{display:flex;min-height:100vh;}
-  .sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
-  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827}
-  .sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
-  .sidebar a:hover{color:#6366f1}
-  .submenu{margin:.4rem 0 .2rem 1rem;display:none}
-  .submenu a{display:block;margin:.25rem 0;color:#6b7280}
-  .submenu a:hover{color:#4f46e5}
-  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto}
-  .headerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-  .user-info{display:flex;gap:1rem;align-items:center}
-  .user-info span{cursor:pointer;color:#4f46e5;font-weight:500}
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
-  @media(max-width:800px){.sidebar{width:70px;padding:.5rem}.sidebar a{font-size:0}.sidebar a::before{font-size:1.2rem;content:"•"}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrainTest | Início</title>
+  <link rel="stylesheet" href="assets/ui.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      color: #1e293b;
+      background-color: #f9fafb;
+    }
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background-color: #1e293b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      display: block;
+      transition: background 0.3s;
+    }
+    .sidebar a:hover {
+      background-color: #334155;
+    }
+    .sidebar .submenu {
+      display: none;
+      flex-direction: column;
+      margin-left: 15px;
+    }
+    .sidebar a.expand + .submenu {
+      display: flex;
+    }
+    header {
+      position: fixed;
+      left: 250px;
+      right: 0;
+      top: 0;
+      height: 60px;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+    main {
+      margin-left: 250px;
+      margin-top: 80px;
+      padding: 20px;
+      width: 100%;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 1.2em;
+      color: #2563eb;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-weight: 500;
+      color: #475569;
+    }
+    .user-info span {
+      cursor: pointer;
+    }
+    .user-info span:hover {
+      color: #2563eb;
+    }
+    .logout-btn {
+      color: #f43f5e;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
-<div class="layout">
   <nav class="sidebar">
-    <div>
-      <h1>🧠 Braintest</h1>
-      <a href="/index.html" class="active">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html">💰 Carteira</a>
-      <a href="#" id="testsToggle">🧩 Testes</a>
-      <div class="submenu" id="testsMenu">
-        <a href="/teste-qi.html">Cognitivos</a>
-        <a href="/teste-tdah.html">Psicológicos</a>
-        <a href="#">Jogos</a>
-        <a href="#">Diversos</a>
-      </div>
-      <a href="#">🎮 Jogos</a>
-      <a href="#">⭐ Assinaturas</a>
-      <a href="/faq.html">❓ FAQ</a>
-      <a href="/sobre.html">ℹ️ Sobre</a>
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+
+    <a href="#" id="toggleTests" class="expand">🧩 Testes</a>
+    <div class="submenu" id="testsSubmenu">
+      <a href="teste-tdah.html">TDAH</a>
+      <a href="teste-burnout.html">Burnout</a>
+      <a href="teste-qi.html">Q.I</a>
     </div>
-    <div>
-      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
-      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
-    </div>
+
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinatura.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">🕑 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a class="logout-btn" id="logout">🚪 Sair</a>
   </nav>
 
-  <main class="main">
-    <div class="headerTop">
-      <h2>Bem-vindo à sua central, <span id="userName">usuário</span></h2>
-      <div class="user-info">
-        <span id="userEmail">carregando...</span>
-        <span id="saldoTop">-- 🧠</span>
-      </div>
+  <header>
+    <div class="logo">Dashboard</div>
+    <div class="user-info">
+      <span id="userEmail">carregando...</span>
+      <span id="userBalance">-- 🧠</span>
     </div>
+  </header>
 
-    <div class="card-grid">
-      <div class="card">
-        <h3>Teste de TDAH</h3>
-        <p>Avalie níveis de atenção e impulsividade.</p>
-        <a href="/teste-tdah.html" class="btn">Fazer teste</a>
-      </div>
-      <div class="card">
-        <h3>Teste de Burnout</h3>
-        <p>Entenda se o estresse está impactando seu bem-estar.</p>
-        <a href="/teste-burnout.html" class="btn">Fazer teste</a>
-      </div>
-      <div class="card">
-        <h3>Teste de QI</h3>
-        <p>Descubra seu quociente de inteligência.</p>
-        <a href="/teste-qi.html" class="btn">Fazer teste</a>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:2rem;">
-      <h3>🎮 Jogos Cognitivos (em breve)</h3>
-      <p>Desafios divertidos para treinar a mente.</p>
-    </div>
-
-    <div class="card">
-      <h3>⭐ Planos e Assinaturas</h3>
-      <p>Acesso ilimitado a relatórios e recursos extras (em breve).</p>
-    </div>
+  <main>
+    <h1>Bem-vindo de volta!</h1>
+    <p>Explore nossos testes psicológicos, cognitivos e de entretenimento.</p>
   </main>
-</div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-function setupSidebar(session){
-  const toggle = document.getElementById("testsToggle");
-  const menu = document.getElementById("testsMenu");
-  toggle.addEventListener("click",(e)=>{e.preventDefault(); menu.style.display = (menu.style.display==="block"?"none":"block");});
-  const authBtn = document.getElementById("authBtn");
-  if(session){ authBtn.textContent="Logout"; authBtn.onclick = async()=>{ await sb.auth.signOut(); location.href="/"; }; }
-  else{ authBtn.textContent="Entrar com Google"; authBtn.onclick = ()=> sb.auth.signInWithOAuth({provider:"google", options:{redirectTo: location.origin}}); }
-}
+  <script>
+    // bloqueia acesso se não estiver logado
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) window.location.href = "login.html";
+    })();
 
-window.addEventListener("braintest-ready", async()=>{
-  const {data:{session}} = await sb.auth.getSession();
-  setupSidebar(session);
-  if(!session){ location.href="/"; return; }
-  const {data:{user}} = await sb.auth.getUser();
-  document.getElementById("userName").textContent = user.email.split("@")[0];
-  const emailEl = document.getElementById("userEmail");
-  emailEl.textContent = user.email;
-  emailEl.onclick = ()=> location.href="/perfil.html";
+    // mostra submenu de testes
+    document.getElementById('toggleTests').addEventListener('click', (e) => {
+      e.preventDefault();
+      const submenu = document.getElementById('testsSubmenu');
+      submenu.style.display = submenu.style.display === 'flex' ? 'none' : 'flex';
+    });
 
-  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  const saldo = wallet?.balance ?? 0;
-  const saldoEl = document.getElementById("saldoTop");
-  saldoEl.textContent = `${saldo} 🧠`;
-  saldoEl.onclick = ()=> location.href="/carteira.html";
-  document.getElementById("saldoBox").textContent = `Saldo: ${saldo} 🧠`;
-});
-</script>
+    // carregar email e saldo
+    async function carregarPerfil() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
+      const emailSpan = document.getElementById('userEmail');
+      const saldoSpan = document.getElementById('userBalance');
+      emailSpan.textContent = session.user.email;
+      emailSpan.onclick = () => window.location.href = "perfil.html";
+      saldoSpan.onclick = () => window.location.href = "carteira.html";
+      const { data, error } = await sb.from('wallets').select('balance').eq('user_id', session.user.id).single();
+      saldoSpan.textContent = error ? "-- 🧠" : `${data.balance} 🧠`;
+    }
+    carregarPerfil();
+
+    // logout
+    document.getElementById('logout').addEventListener('click', async () => {
+      await sb.auth.signOut();
+      window.location.href = "login.html";
+    });
+  </script>
 </body>
 </html>
