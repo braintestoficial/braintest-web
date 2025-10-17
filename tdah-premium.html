@@ -1,271 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TDAH — Relatório Premium | Braintest</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@700&display=swap" rel="stylesheet">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relatório Premium — TDAH | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="/assets/supabase-init.js"></script>
-<script src="/assets/app.js" defer></script>
-<script src="/assets/print.js" defer></script>
-<style>
-.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.kpi .card{padding:12px}
-.sparks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.spark{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
-.spark h4{margin:0 0 6px;font-size:14px;color:#334}
-svg.sparkline{width:100%;height:48px;display:block}
-@media(max-width:920px){.sparks{grid-template-columns:1fr}}
-@media(max-width:720px){.kpi{grid-template-columns:1fr}}
-.badge-sev{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px}
-</style>
+<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div class="shell">
-  <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg" alt=""><span>Braintest</span></a>
-    <div class="search"><input placeholder="Busque…"></div>
-    <div class="top-actions">
-      <div class="user-chip" id="userChip">Carregando…</div>
-      <a class="btn alt" href="/carteira.html">Saldo: <span id="saldoTop">0.00</span> BC</a>
+<header class="topbar">
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
+  <div class="userbox"><b id="userChip">Carregando...</b></div>
+</header>
+
+<main class="content">
+  <div class="card">
+    <h2>Relatório Premium — TDAH</h2>
+    <p>Resultado personalizado com base em suas respostas:</p>
+    <div id="resultado">
+      <p>Carregando dados…</p>
     </div>
-  </header>
-
-  <div class="body">
-    <aside class="sidebar">
-      <nav class="nav">
-        <h6>Relatórios</h6>
-        <a href="/tdah-premium.html" class="active" data-current>⚡ TDAH</a>
-        <a href="/burnout-premium.html" data-current>🔥 Burnout</a>
-        <a href="/qi-premium.html" data-current>🧠 QI</a>
-        <h6 style="margin-top:14px">Navegação</h6>
-        <a href="/index.html" data-current>🏠 Início</a>
-        <a href="/historico.html" data-current>🕘 Histórico</a>
-        <a href="/carteira.html" data-current>💳 Carteira</a>
-        <a href="/perfil.html" data-current>👤 Perfil</a>
-      </nav>
-    </aside>
-
-    <main class="content">
-      <div class="container">
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-            <h2 style="margin:0;font-family:Poppins,Inter">Relatório Premium — TDAH</h2>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-              <button class="btn alt small" onclick="exportPDF('Relatorio-Premium-TDAH','#content')">Exportar PDF</button>
-            </div>
-          </div>
-
-          <div id="gate" class="small" style="margin:8px 0 12px"></div>
-
-          <div id="content" style="display:none">
-            <p class="small">Baseado nas suas sessões recentes (até 8). Este material é educativo e não substitui avaliação clínica.</p>
-
-            <div class="card" style="margin-top:8px">
-              <h3 style="margin:0 0 6px">Resumo executivo</h3>
-              <div id="resumo"></div>
-            </div>
-
-            <div class="kpi" style="margin-top:12px">
-              <div class="card">
-                <div class="title small">Inatenção</div>
-                <div class="value" id="v_inatencao" style="font-size:24px;font-weight:800">—</div>
-                <div class="small" id="t_inatencao"></div>
-              </div>
-              <div class="card">
-                <div class="title small">Hiperatividade/Impulsividade</div>
-                <div class="value" id="v_hiper" style="font-size:24px;font-weight:800">—</div>
-                <div class="small" id="t_hiper"></div>
-              </div>
-              <div class="card">
-                <div class="title small">Organização/Planejamento</div>
-                <div class="value" id="v_org" style="font-size:24px;font-weight:800">—</div>
-                <div class="small" id="t_org"></div>
-              </div>
-            </div>
-
-            <div class="grid cols-2" style="margin-top:12px">
-              <div class="card">
-                <h3 style="margin:0 0 6px">Interpretação personalizada</h3>
-                <div id="interp"></div>
-              </div>
-              <div class="card">
-                <h3 style="margin:0 0 6px">Plano prático — 7 dias</h3>
-                <ol class="small" id="plano" style="margin-left:18px;line-height:1.7"></ol>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-              <h3 style="margin:0 0 6px">Evolução recente</h3>
-              <div class="sparks" id="evolucao">
-                <!-- charts injetados via JS -->
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-              <h3 style="margin:0 0 6px">Próximos passos e recursos</h3>
-              <ul class="small" style="margin:0 0 0 18px;line-height:1.7" id="next"></ul>
-            </div>
-
-            <p class="small" style="margin-top:12px;color:#5b6478">Aviso: este relatório não é diagnóstico. Se os desafios impactam sua vida acadêmica, profissional ou social, procure avaliação com profissional de saúde.</p>
-          </div>
-        </div>
-      </div>
-    </main>
   </div>
+</main>
 
-  <nav class="mobilebar">
-    <a href="/index.html" data-current>🏠</a>
-    <a href="/teste-tdah.html" data-current>⚡</a>
-    <a href="/teste-burnout.html" data-current>🔥</a>
-    <a href="/teste-qi.html" data-current>🧠</a>
-    <a href="/perfil.html" data-current>👤</a>
-  </nav>
-</div>
-
+<script src="/assets/supabase-init.js"></script>
 <script>
-const PRODUCT='tdah';
+window.addEventListener("braintest-ready", async()=>{
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ location.href="/"; return; }
+  document.getElementById("userChip").textContent = user.email.split("@")[0];
 
-function sevBadge(pct){
-  let lbl='Baixo', color='#eef7ff', border='#cfe5ff', ink='#0e3a75';
-  if(pct>=33 && pct<66){ lbl='Moderado'; color='#fff8e6'; border='#ffe2a9'; ink='#7a4b00'; }
-  if(pct>=66){ lbl='Elevado'; color='#ffefef'; border='#ffc9c9'; ink='#7a0000'; }
-  return `<span class="badge-sev" style="background:${color};border-color:${border};color:${ink}">${lbl}</span>`;
-}
-function pctFmt(v){ return isFinite(v)? Math.round(v)+'%' : '—'; }
-function sparkline(points){
-  // points: [0..100], 1..8 itens. renderiza inline SVG 100% largura x 48px
-  if(!points || !points.length) return '';
-  const w=200,h=48,pad=2;
-  const n=points.length;
-  const step=(w-2*pad)/Math.max(1,n-1);
-  const ys=points.map(p=>{ const y=h-pad-(p/100)*(h-2*pad); return Math.max(pad,Math.min(h-pad,y)); });
-  const xs=Array.from({length:n},(_,i)=>pad+i*step);
-  const d=xs.map((x,i)=>`${i===0?'M':'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
-  const last=points[n-1]; const color= last>=66?'#ff7458': last>=33?'#f5b500':'#1d3557';
-  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-    <rect x="0" y="0" width="${w}" height="${h}" fill="white" rx="8" ry="8"></rect>
-    <polyline fill="none" stroke="${color}" stroke-width="2" points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}"/>
-  </svg>`;
-}
-function interpTdah(pcts){
-  const parts=[];
-  const push = (k,t)=>parts.push(`<li><b>${k}:</b> ${t}</li>`);
-  if(pcts.inatencao<33) push('Inatenção','dificuldades pontuais de foco; mantenha rotinas leves e bloco de tarefas curtas.');
-  else if(pcts.inatencao<66) push('Inatenção','sinais consistentes de distração; use listas com 3–5 itens e leitura ativa (sublinhar, resumo).');
-  else push('Inatenção','alto impacto na manutenção do foco; priorize ambientes sem distrações e técnicas Pomodoro 20–25 min.');
-  if(pcts.hiperatividade<33) push('Hiperatividade/Impulsividade','agitação situacional; pausas breves já ajudam.');
-  else if(pcts.hiperatividade<66) push('Hiperatividade/Impulsividade','tendência a agir antes de pensar; pratique “pausa de 3 respirações”.');
-  else push('Hiperatividade/Impulsividade','impulsos frequentes; combine descarga física e checklists de decisão.');
-  if(pcts.organizacao<33) push('Organização/Planejamento','estrutura suficiente; refine agenda semanal com 1 revisão rápida.');
-  else if(pcts.organizacao<66) push('Organização/Planejamento','dificuldade em finalizar; quebre tarefas e feche o dia com “próximo passo único”.');
-  else push('Organização/Planejamento','atrito elevado para iniciar/finalizar; use “2 minutos para começar” + limites visuais.');
-  return `<ul class="small" style="margin:0 0 0 18px;line-height:1.7">${parts.join('')}</ul>`;
-}
-function plano7dias(pcts){
-  const plan=[
-    'Defina 3 metas simples para a semana (cada uma com 1º passo claro).',
-    'Use cronômetro de 20–25 min para iniciar a tarefa mais difícil.',
-    'Ambiente de foco: fones/ruído branco e celular fora do alcance por 40 min.',
-    'Lista de 5 itens máx. para o dia. Reordene por impacto.',
-    'Pausa ativa de 5 min a cada ciclo (andar, água, alongar).',
-    'Revisão diária de 3 min: o que avancei? qual 1º passo de amanhã?',
-    'Domingo: revisar semana e ajustar metas.'
-  ];
-  if(pcts.organizacao>=66) plan[0]='Monte um kanban simples (A Fazer/ Fazendo/ Feito) com 3 metas.';
-  if(pcts.inatencao>=66) plan[2]='Ambiente de foco reforçado: notificações off e estímulos mínimos por 40 min.';
-  if(pcts.hiperatividade>=66) plan[4]='Pausa ativa com descarga física (caminhada rápida/alongamento).';
-  return plan.map(s=>`<li>${s}</li>`).join('');
-}
-function nextSteps(pcts){
-  const items=[];
-  if(pcts.inatencao>=66 || pcts.organizacao>=66) items.push('Teste Lógico — QI: entenda como seu raciocínio compensa distrações. <a href="/teste-qi.html">Fazer agora</a>');
-  items.push('Burnout: se produtividade cai por exaustão, verifique sinais em <a href="/teste-burnout.html">triagem de Burnout</a>.');
-  items.push('Assinatura (em breve): relatórios ilimitados e evolução por domínio.');
-  return items.map(i=>`<li>${i}</li>`).join('');
-}
+  const { data } = await sb.from("test_sessions")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("test_key", "tdah")
+    .order("created_at",{ascending:false})
+    .limit(1)
+    .single();
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  const user = await requireAuth('/tdah-premium.html'); if(!user) return;
-  await ensureTopbarUser();
-
-  // Gate
-  const g=document.getElementById('gate'); const c=document.getElementById('content');
-  const {data:have}=await sb.from('purchases').select('product').eq('user_id',user.id).eq('product',PRODUCT).maybeSingle();
-  if(!have){ g.innerHTML=`<div style="padding:.8rem;border:1px dashed var(--line);border-radius:12px;background:#fff">
-    Relatório bloqueado. <a class="btn small" href="/teste-tdah.html" style="margin-left:6px">Desbloquear (10 BC)</a></div>`; return; }
-  g.innerHTML=`<span class="badge" style="background:#f2fff5;border-color:#cdebd4;color:#184d2b">Acesso liberado</span>`;
-  c.style.display='block';
-
-  // Até 8 sessões mais recentes
-  const { data:sessions } = await sb.from('test_sessions').select('id,created_at,items_qty,score_likert').eq('user_id',user.id).eq('test','tdah').order('created_at',{ascending:false}).limit(8);
-
-  let sum={inatencao:0, hiperatividade:0, organizacao:0}, count={inatencao:0, hiperatividade:0, organizacao:0}, totalLikert=0, totalItems=0;
-
-  // séries para gráficos
-  const seriesGlobal=[], sInat=[], sHiper=[], sOrg=[];
-  for(const s of (sessions||[]).reverse()){ // do mais antigo ao mais novo para desenhar
-    const { data:ans } = await sb.from('test_answers').select('question_id,value').eq('session_id', s.id);
-    const qids=(ans||[]).map(a=>a.question_id);
-    const { data:qs } = await sb.from('test_questions').select('id,domain').in('id', qids);
-    const map = new Map((qs||[]).map(q=>[q.id, q.domain||'']));
-    // acumuladores por sessão
-    let sess={inatencao:{sum:0,c:0}, hiperatividade:{sum:0,c:0}, organizacao:{sum:0,c:0}};
-    (ans||[]).forEach(a=>{
-      if(a.value===null || a.value===undefined) return;
-      const d = map.get(a.question_id); if(!d) return;
-      sess[d].sum+=Number(a.value); sess[d].c++;
-      sum[d]+=Number(a.value); count[d]++; totalLikert+=Number(a.value); totalItems++;
-    });
-    const pctIn = sess.inatencao.c? (sess.inatencao.sum/(sess.inatencao.c*2))*100 : 0;
-    const pctHi = sess.hiperatividade.c? (sess.hiperatividade.sum/(sess.hiperatividade.c*2))*100 : 0;
-    const pctOr = sess.organizacao.c? (sess.organizacao.sum/(sess.organizacao.c*2))*100 : 0;
-    const pctGl = (pctIn+pctHi+pctOr)/3;
-    sInat.push(pctIn); sHiper.push(pctHi); sOrg.push(pctOr); seriesGlobal.push(pctGl);
-  }
-
-  const pcts={
-    inatencao: count.inatencao? (sum.inatencao/(count.inatencao*2))*100 : 0,
-    hiperatividade: count.hiperatividade? (sum.hiperatividade/(count.hiperatividade*2))*100 : 0,
-    organizacao: count.organizacao? (sum.organizacao/(count.organizacao*2))*100 : 0
-  };
-  const geral = totalItems? (totalLikert/(totalItems*2))*100 : 0;
-
-  // KPIs
-  document.getElementById('v_inatencao').innerHTML = `${pctFmt(pcts.inatencao)} ${sevBadge(pcts.inatencao)}`;
-  document.getElementById('v_hiper').innerHTML     = `${pctFmt(pcts.hiperatividade)} ${sevBadge(pcts.hiperatividade)}`;
-  document.getElementById('v_org').innerHTML       = `${pctFmt(pcts.organizacao)} ${sevBadge(pcts.organizacao)}`;
-  document.getElementById('t_inatencao').textContent = 'Atenção sustentada, distrações, memória operacional.';
-  document.getElementById('t_hiper').textContent     = 'Agitação motora, impulso para interromper/iniciar.';
-  document.getElementById('t_org').textContent       = 'Início/término de tarefas, gestão de tempo, planejamento.';
-
-  // Resumo
-  const focoMaior = Object.entries(pcts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-';
-  document.getElementById('resumo').innerHTML =
-    `<div class="grid cols-2">
-      <div><b>Índice global de sintomas:</b> ${pctFmt(geral)} ${sevBadge(geral)}</div>
-      <div><b>Domínio mais saliente:</b> ${focoMaior.charAt(0).toUpperCase()+focoMaior.slice(1)}</div>
-    </div>`;
-
-  // Interpretação, plano e próximos passos
-  document.getElementById('interp').innerHTML = interpTdah(pcts);
-  document.getElementById('plano').innerHTML = plano7dias(pcts);
-  document.getElementById('next').innerHTML = nextSteps(pcts);
-
-  // Evolução (sparklines)
-  const evo=document.getElementById('evolucao');
-  const blocks=[
-    ['Índice global', seriesGlobal],
-    ['Inatenção', sInat],
-    ['Hiperatividade/Impulsividade', sHiper],
-    ['Organização/Planejamento', sOrg]
-  ];
-  blocks.forEach(([title, serie])=>{
-    const div=document.createElement('div'); div.className='spark';
-    div.innerHTML = `<h4>${title}</h4>${sparkline(serie)}`;
-    evo.appendChild(div);
-  });
+  const score = data?.score_likert ?? 0;
+  let texto="";
+  if(score<=10) texto="Baixa probabilidade de TDAH. Seus resultados indicam boa capacidade de foco, planejamento e controle atencional.";
+  else if(score<=20) texto="Sinais moderados de desatenção e impulsividade. Há indícios de dificuldades de foco em ambientes com múltiplas demandas.";
+  else texto="Alta probabilidade de TDAH. O padrão de respostas indica forte tendência à desorganização e impulsividade. Procure orientação profissional.";
+  document.getElementById("resultado").innerHTML=`
+    <h3>Pontuação: ${score}</h3>
+    <p>${texto}</p>
+    <hr>
+    <p><i>*Este relatório não substitui avaliação médica ou psicológica. É uma análise indicativa baseada em padrões de atenção e comportamento.</i></p>`;
 });
 </script>
 </body>

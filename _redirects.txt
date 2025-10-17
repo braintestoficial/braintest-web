@@ -1,32 +1,16 @@
+/*   /index.html   200
+
+# 🔁 Redirecionamentos para domínio principal (sem www e com HTTPS)
 https://www.braintest.com.br/*   https://braintest.com.br/:splat   301!
 http://braintest.com.br/*        https://braintest.com.br/:splat   301!
 http://www.braintest.com.br/*    https://braintest.com.br/:splat   301!
 
-/teste-tdah.html      /teste-tdah.html      200
-/tdah-premium.html    /tdah-premium.html    200
-/teste-burnout.html   /teste-burnout.html   200
-/burnout-premium.html /burnout-premium.html 200
-/teste-qi.html        /teste-qi.html        200
-/qi-premium.html      /qi-premium.html      200
-
-/teste-tdah       /teste-tdah.html       200
-/tdah-premium     /tdah-premium.html     200
-/teste-burnout    /teste-burnout.html    200
-/burnout-premium  /burnout-premium.html  200
-/teste-qi         /teste-qi.html         200
-/qi-premium       /qi-premium.html       200
-
-/__tdah      /teste-tdah.html       200
-/__burnout   /teste-burnout.html    200
-/__qi        /teste-qi.html         200
-
-# converte nomes antigos com underline para hífen (301 = permanente)
- /teste_tdah.html        /teste-tdah.html        301
- /tdah_premium.html      /tdah-premium.html      301
- /teste_burnout.html     /teste-burnout.html     301
- /burnout_premium.html   /burnout-premium.html   301
- /teste_qi.html          /teste-qi.html          301
- /qi_premium.html        /qi-premium.html        301
-
-
-/*   /404.html   404
+# 🔎 Garante funcionamento de páginas internas (SPA-like)
+#/teste-tdah.html    /teste-tdah.html   200
+#/teste-burnout.html /teste-burnout.html 200
+#/teste-qi.html      /teste-qi.html      200
+#/perfil.html        /perfil.html        200
+#/carteira.html      /carteira.html      200
+#/faq.html           /faq.html           200
+#/termos.html        /termos.html        200
+#/sobre.html         /sobre.html         200

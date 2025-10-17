@@ -1,7 +1,18 @@
 User-agent: *
+Allow: /
+Sitemap: https://braintest.com.br/sitemap.xml
+Host: https://braintest.com.br
+
+# 🔒 Bloqueia páginas técnicas que não devem ser indexadas
+Disallow: /404.html
 Disallow: /netlify/
 Disallow: /assets/
-Disallow: /404.html
-Allow: /
+Disallow: /carteira.html
+Disallow: /perfil.html
 
-Sitemap: https://braintest.com.br/sitemap.xml
+# 📈 Instruções adicionais de SEO
+User-agent: Googlebot
+Crawl-delay: 5
+
+User-agent: Bingbot
+Crawl-delay: 5

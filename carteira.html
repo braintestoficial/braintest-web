@@ -5,58 +5,52 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Carteira | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="/assets/supabase-init.js"></script>
-<style>
-.wallet{max-width:600px;margin:2rem auto;padding:1.5rem;border:1px solid #ddd;border-radius:10px;background:#fff;}
-.balance{font-size:2rem;font-weight:700;color:#0066ff;margin-bottom:1rem;}
-.packages{display:grid;gap:1rem;}
-.pkg{border:1px solid #ccc;padding:1rem;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
-.pkg button{background:#0066ff;color:#fff;border:none;padding:.5rem 1rem;border-radius:8px;cursor:pointer;}
-</style>
+<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="32"><span>Braintest</span></a>
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
+  <div class="userbox"><b id="userChip">Carregando...</b> — 💰 <b id="saldoTop">0</b> BC</div>
 </header>
-<main>
-  <div class="wallet" id="walletBox">
-    <h2>Carregando carteira...</h2>
+
+<main class="content">
+  <div class="card">
+    <h2>Minha Carteira</h2>
+    <p>Gerencie seus créditos (Braincoins) para realizar novos testes e desbloquear relatórios premium.</p>
+    <h3>Saldo Atual: <span id="saldo">0</span> 🧠</h3>
+    <div id="pacotes"></div>
   </div>
 </main>
 
+<script src="/assets/supabase-init.js"></script>
 <script>
-(async()=>{
-  const session=await waitForSupabaseSession();
-  if(!session){window.location='/login.html';return;}
-  const user=session.user;
-  const { data:wallet } = await sb.from('wallets').select('balance').eq('user_id',user.id).maybeSingle();
-  const saldo=(wallet&&wallet.balance)||0;
-  const box=document.getElementById('walletBox');
+window.addEventListener("braintest-ready", async ()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){ location.href="/"; return; }
+  const {data:{user}} = await sb.auth.getUser();
+  document.getElementById("userChip").textContent = user.email.split("@")[0];
+  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
+  const saldo = wallet?.balance ?? 0;
+  document.getElementById("saldo").textContent = saldo;
+  document.getElementById("saldoTop").textContent = saldo;
 
-  const pacotes=[
-    {coins:10,link:'https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04'},
-    {coins:30,link:'https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05'},
-    {coins:50,link:'https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06'},
-    {coins:100,link:'https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07'},
-    {coins:500,link:'https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08'},
-    {coins:1000,link:'https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09'},
-    {coins:3000,link:'https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a'}
+  const pacotes = [
+    {q:10,link:"https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04"},
+    {q:30,link:"https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05"},
+    {q:50,link:"https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06"},
+    {q:100,link:"https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07"},
+    {q:500,link:"https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08"},
+    {q:1000,link:"https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09"},
+    {q:3000,link:"https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a"},
   ];
 
-  box.innerHTML=`
-    <h2>Minha Carteira</h2>
-    <div class="balance">${saldo} Braincoins</div>
-    <div class="packages">
-      ${pacotes.map(p=>`
-        <div class="pkg">
-          <span>Adicionar ${p.coins} Braincoins</span>
-          <button onclick="window.open('${p.link}','_blank')">Comprar</button>
-        </div>
-      `).join('')}
+  document.getElementById("pacotes").innerHTML = pacotes.map(p=>`
+    <div class="pacote">
+      <span>${p.q} Braincoins</span>
+      <a class="btn" href="${p.link}" target="_blank">Comprar</a>
     </div>
-  `;
-})();
+  `).join("");
+});
 </script>
 </body>
 </html>

@@ -3,95 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Teste de QI | Braintest</title>
+<title>Teste de Q.I. | Braintest</title>
 <link rel="stylesheet" href="/assets/ui.css">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="/assets/supabase-init.js"></script>
-<style>
-.question{margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);}
-.question p{margin:0 0 .25rem;font-weight:500;}
-.question label{display:block;margin-left:1rem;font-size:.95rem;color:#334;}
-</style>
+<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div class="shell">
-  <header class="topbar">
-    <a class="brand" href="/index.html"><img src="/assets/logo.svg"><span>Braintest</span></a>
-    <div class="search"><input placeholder="Busque... (Ex: TDAH, Burnout, QI)"></div>
-  </header>
-  <main class="content">
-    <div class="container">
-      <div class="card">
-        <h2>Teste de QI (estimativa)</h2>
-        <p class="small">Responda às <b>15</b> perguntas abaixo. O relatório completo é premium e não substitui avaliação profissional.</p>
-        <div id="quiz">Carregando perguntas...</div>
-        <button class="btn" id="enviar">Gerar resultado</button>
-      </div>
-    </div>
-  </main>
-</div>
+<header class="topbar">
+  <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
+  <div class="search"><input placeholder="Buscar…" id="searchBox"></div>
+  <div class="userbox"><b id="userChip"></b> — 💰 <b id="saldoTop">0</b> BC</div>
+</header>
 
+<main class="content">
+  <div class="card">
+    <h2>Triagem — Q.I.</h2>
+    <p>Responda 15 perguntas para obter uma estimativa do seu Quociente de Inteligência.</p>
+    <div id="status" style="margin:.6rem 0;color:#a6b3cc">Carregando perguntas…</div>
+    <div id="quiz"></div>
+    <div style="margin-top:1rem"><button class="btn" id="enviar">Gerar resultado</button></div>
+  </div>
+</main>
+
+<script src="/assets/supabase-init.js"></script>
 <script>
-(async()=>{
-  const session=await waitForSupabaseSession();
-  if(!session){window.location='/login.html';return;}
-  const user=session.user;
+window.addEventListener("braintest-ready", async () => {
+  const session = (await sb.auth.getSession()).data.session;
+  if(!session){ location.href="/"; return; }
+  const { data:{ user } } = await sb.auth.getUser();
+  const TEST = "qi";
+  const status = document.getElementById("status");
+  const quizEl = document.getElementById("quiz");
+  let perguntas = [];
 
-  const searchInput=document.querySelector('.search input');
-  if(searchInput){
-    searchInput.addEventListener('keypress',e=>{
-      if(e.key==='Enter'){
-        const term=searchInput.value.toLowerCase();
-        if(term.includes('tdah'))location.href='/teste-tdah.html';
-        else if(term.includes('burn'))location.href='/teste-burnout.html';
-        else if(term.includes('qi'))location.href='/teste-qi.html';
-        else location.href='/index.html';
-      }
-    });
+  try {
+    const { data } = await sb.rpc("get_random_questions",{p_test_key:TEST,p_limit:15});
+    if(data?.length) perguntas = data;
+  } catch(e){console.warn("RPC falhou", e);}
+
+  if(!perguntas.length){
+    const { data } = await sb.from("test_questions")
+      .select("id,prompt,kind,domain")
+      .eq("test_key", TEST)
+      .order("random()")
+      .limit(15);
+    perguntas = data || [];
   }
 
-  const TEST='qi';
-  const quizEl=document.getElementById('quiz');
-  let perguntas=[];
-  try{
-    const { data:qs,error,status }=await sb.from('test_questions')
-      .select('id,prompt,kind,domain,test_question_options(label,value,is_correct)')
-      .eq('test',TEST).order('random()').limit(15);
-    if(error||!qs||status>=400)throw error;
-    perguntas=qs;
-  }catch(err){
-    console.warn('Fallback offline por erro',err);
-    perguntas=Array.from({length:15},(_,i)=>({
-      id:i+1000,
-      prompt:`Questão temporária ${i+1} (modo offline).`,
-      test_question_options:[
-        {label:'Opção A',value:1,is_correct:false},
-        {label:'Opção B',value:2,is_correct:true},
-        {label:'Opção C',value:3,is_correct:false}
-      ]
-    }));
-  }
+  if(!perguntas.length){ status.textContent="Não foi possível carregar perguntas."; return; }
+  status.textContent = `Foram carregadas ${perguntas.length} perguntas.`;
 
-  quizEl.innerHTML=perguntas.map((q,i)=>`
+  const ids = perguntas.map(q=>q.id);
+  const { data:opts } = await sb.from("test_question_options")
+    .select("question_id,label,value,is_correct")
+    .in("question_id", ids);
+  const byQ = {};
+  (opts||[]).forEach(o=>{(byQ[o.question_id] ||= []).push(o);});
+  perguntas = perguntas.map(q=>({...q, options:byQ[q.id]||[]}));
+
+  quizEl.innerHTML = perguntas.map((q,i)=>`
     <div class="question">
       <p><b>${i+1}.</b> ${q.prompt}</p>
-      ${q.test_question_options.map(o=>`
-        <label><input type="radio" name="q${q.id}" value="${o.value}" data-correct="${o.is_correct}"> ${o.label}</label>
-      `).join('')}
-    </div>`).join('');
+      ${(q.options||[]).map(o=>`
+        <label><input type="radio" name="q${q.id}" value="${o.is_correct?1:0}"> ${o.label}</label>
+      `).join("")}
+    </div>`).join("");
 
-  document.getElementById('enviar').onclick=async()=>{
-    const respostas=perguntas.map(q=>{
-      const v=document.querySelector(`input[name="q${q.id}"]:checked`);
-      return{question_id:q.id,is_correct:v?.dataset.correct==='true'};
+  document.getElementById("enviar").onclick = async() => {
+    const respostas = perguntas.map(q=>{
+      const v = document.querySelector(`input[name="q${q.id}"]:checked`);
+      return {question_id:q.id,value:v?Number(v.value):0};
     });
-    let acertos=respostas.filter(r=>r.is_correct).length;
-    await sb.from('test_sessions').insert({
-      user_id:user.id,test:TEST,items_qty:respostas.length,score_qi:(acertos/respostas.length)*100
+    const corretas = respostas.filter(r=>r.value===1).length;
+    const score = Math.round((corretas/perguntas.length)*100);
+    await sb.from("test_sessions").insert({
+      user_id:user.id,test_key:TEST,items_qty:respostas.length,score_qi:score
     });
-    window.location='/qi-premium.html';
+    location.href="/qi-premium.html";
   };
-})();
+
+  document.getElementById("searchBox").addEventListener("keypress",e=>{
+    if(e.key==="Enter"){
+      const t=e.target.value.toLowerCase();
+      if(t.includes("tdah")) location.href="/teste-tdah.html";
+      else if(t.includes("burn")) location.href="/teste-burnout.html";
+    }
+  });
+});
 </script>
 </body>
 </html>
