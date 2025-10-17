@@ -1,26 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Teste de TDAH | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
+<link rel="stylesheet" href="/assets/ui.css" />
+<link rel="stylesheet" href="/assets/ui-dashboard.css" />
 <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+  .question{margin:.8rem 0}
+  .question p{margin-bottom:.4rem}
+  .options label{display:block;margin:.3rem 0}
+  #resultado{margin-top:1.5rem;padding:1rem;background:#f9fafb;border-radius:8px}
+  #premiumBtn{margin-top:1rem}
+</style>
 </head>
 <body>
 <header class="topbar">
   <a class="brand" href="/index.html"><img src="/assets/logo.svg" height="28"> Braintest</a>
-  <div class="userbox"><b id="userChip"></b> — 💰 <b id="saldoTop">0</b> BC</div>
+  <div class="user-info">
+    <span id="userEmail" style="cursor:pointer"></span> — 
+    💰 <span id="saldoTop" style="cursor:pointer"></span>
+  </div>
 </header>
 
-<main class="content">
+<main class="content" style="max-width:700px;margin:auto;padding:2rem;">
   <div class="card">
     <h2>Triagem — TDAH</h2>
-    <p>Responda 15 perguntas. O resultado gratuito é uma estimativa; o relatório premium aprofunda sua análise.</p>
-    <div id="status" style="margin:.6rem 0;color:#a6b3cc">Carregando perguntas…</div>
-    <div id="quiz"></div>
-    <div style="margin-top:1rem"><button class="btn" id="enviar">Gerar resultado</button></div>
+    <p>Responda 15 perguntas sobre seu comportamento e atenção diária.</p>
+    <div id="status" style="margin:.6rem 0;color:#6b7280">Carregando perguntas…</div>
+    <form id="quiz"></form>
+    <button class="btn" id="enviar" style="margin-top:1rem">Enviar respostas</button>
   </div>
+
+  <div id="resultado" style="display:none"></div>
 </main>
 
 <script src="/assets/supabase-init.js"></script>
@@ -29,9 +43,13 @@ window.addEventListener("braintest-ready", async()=>{
   const {data:{session}} = await sb.auth.getSession();
   if(!session){location.href="/";return;}
   const {data:{user}} = await sb.auth.getUser();
-  document.getElementById("userChip").textContent = user.email.split("@")[0];
   const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  document.getElementById("saldoTop").textContent = wallet?.balance ?? 0;
+  const saldo = wallet?.balance ?? 0;
+  document.getElementById("userEmail").textContent = user.email.split("@")[0];
+  document.getElementById("userEmail").onclick = ()=>location.href="/perfil.html";
+  const saldoEl = document.getElementById("saldoTop");
+  saldoEl.textContent = `${saldo} 🧠`;
+  saldoEl.onclick = ()=>location.href="/carteira.html";
 
   const TEST="tdah";
   const status=document.getElementById("status");
@@ -40,34 +58,60 @@ window.addEventListener("braintest-ready", async()=>{
   try{
     const {data}=await sb.rpc("get_random_questions",{p_test_key:TEST,p_limit:15});
     if(data?.length) perguntas=data;
-  }catch(e){console.warn("RPC falhou",e);}
+  }catch(e){console.warn("Erro RPC",e);}
+
   if(!perguntas.length){
-    const {data}=await sb.from("test_questions").select("id,prompt").eq("test_key",TEST).order("random()").limit(15);
+    const {data}=await sb.from("test_questions")
+      .select("id,prompt").eq("test_key",TEST).order("random()").limit(15);
     perguntas=data||[];
   }
   if(!perguntas.length){status.textContent="Erro ao carregar perguntas.";return;}
 
-  const {data:opts}=await sb.from("test_question_options").select("question_id,label,value").in("question_id",perguntas.map(q=>q.id));
+  const {data:opts}=await sb.from("test_question_options")
+    .select("question_id,label,value").in("question_id",perguntas.map(q=>q.id));
   const byQ={};(opts||[]).forEach(o=>{(byQ[o.question_id] ||= []).push(o);});
   perguntas=perguntas.map(q=>({...q,options:byQ[q.id]||[]}));
 
-  document.getElementById("quiz").innerHTML=perguntas.map((q,i)=>`
-  <div class="question">
-  <p><b>${i+1}.</b> ${q.prompt}</p>
-  ${(q.options||[]).map(o=>`
-    <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>
-  `).join("")}</div>`).join("");
+  const quiz=document.getElementById("quiz");
+  quiz.innerHTML=perguntas.map((q,i)=>`
+    <div class="question fade-in">
+      <p><b>${i+1}.</b> ${q.prompt}</p>
+      <div class="options">
+      ${(q.options||[]).map(o=>`
+        <label><input type="radio" name="q${q.id}" value="${o.value}"> ${o.label}</label>`).join("")}
+      </div>
+    </div>`).join("");
   status.textContent=`${perguntas.length} perguntas carregadas.`;
 
-  document.getElementById("enviar").onclick=async()=>{
+  document.getElementById("enviar").onclick=async(ev)=>{
+    ev.preventDefault();
     const respostas=perguntas.map(q=>{
       const v=document.querySelector(`input[name="q${q.id}"]:checked`);
       return Number(v?.value||0);
     });
     const score=respostas.reduce((a,b)=>a+b,0);
-    console.log("Pontuação:",score);
     await sb.from("test_sessions").insert({user_id:user.id,test_key:TEST,items_qty:respostas.length,score_likert:score});
-    location.href="/tdah-premium.html";
+
+    const resBox=document.getElementById("resultado");
+    resBox.style.display="block";
+    resBox.innerHTML=`
+      <h3>Sua pontuação de triagem: ${score}</h3>
+      <p>${
+        score < 10 ? "Baixo nível de distração. Nenhum indicativo significativo de TDAH."
+      : score < 20 ? "Alguns sinais de desatenção e impulsividade, sugerindo atenção a hábitos e rotinas."
+      : "Nível elevado de sintomas compatíveis com TDAH. Avaliação profissional é recomendada."
+      }</p>
+      <button class="btn" id="premiumBtn">Liberar Relatório Premium (10 🧠)</button>
+    `;
+
+    document.getElementById("premiumBtn").onclick=async()=>{
+      // Debita 10 Braincoins
+      const preco=10;
+      if(saldo<preco){alert("Saldo insuficiente! Vá à Carteira para adicionar Braincoins.");return;}
+      const {error:errWallet}=await sb.rpc("wallet_buy",{p_user:user.id,p_amount:preco,p_desc:"Relatório Premium: TDAH"});
+      if(errWallet){console.error(errWallet);alert("Erro ao debitar.");return;}
+      location.href="/tdah-premium.html";
+    };
   };
 });
 </script>

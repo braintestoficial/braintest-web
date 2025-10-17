@@ -1,110 +1,116 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Braintest — Plataforma de testes cognitivos, emocionais e de autoconhecimento. Descubra seu potencial.">
-<meta name="keywords" content="tdah, burnout, teste de qi, autoconhecimento, inteligência, cognitivo, emocional">
-<meta name="theme-color" content="#6366f1">
-<link rel="preconnect" href="https://gqwgyresqsuciikmymkd.supabase.co">
-<link rel="dns-prefetch" href="https://gqwgyresqsuciikmymkd.supabase.co">
-  <title>Braintest — Inteligência e Autoconhecimento</title>
-  <link rel="stylesheet" href="/assets/ui.css" />
-  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
-
-  <!-- Importa biblioteca Supabase de forma assíncrona -->
-  <script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Braintest — Início</title>
+<link rel="stylesheet" href="/assets/ui.css" />
+<link rel="stylesheet" href="/assets/ui-dashboard.css" />
+<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{
+    width:240px;background:#fff;border-right:1px solid #e5e7eb;
+    padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .sidebar h1{font-size:1.2rem;margin-bottom:1rem;color:#111827;}
+  .sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500;}
+  .sidebar a:hover{color:#6366f1;}
+  .submenu{margin-left:1rem;font-size:.9rem;color:#6b7280;}
+  .submenu a{color:#6b7280;}
+  .submenu a:hover{color:#4f46e5;}
+  .main{flex:1;padding:2rem;max-width:1000px;margin:0 auto;}
+  .headerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+  .headerTop h2{margin:0;font-size:1.5rem;}
+  .user-info{display:flex;align-items:center;gap:1rem;}
+  .user-info span{cursor:pointer;font-weight:500;color:#4f46e5;}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
+  .card{text-align:center;}
+  .card h3{margin-top:.5rem;font-size:1.1rem;}
+  @media(max-width:800px){
+    .sidebar{width:70px;padding:.5rem}
+    .sidebar a{font-size:0}
+    .sidebar a::before{font-size:1.2rem;content:"•"}
+  }
+</style>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="topbar-left">
-      <img src="/assets/logo.svg" alt="Braintest" class="logo" />
+<div class="layout">
+  <nav class="sidebar">
+    <div>
+      <h1>🧠 Braintest</h1>
+      <a href="/index.html" class="active">🏠 Início</a>
+      <a href="/perfil.html">👤 Perfil</a>
+      <a href="/carteira.html">💰 Carteira</a>
+      <a href="#">🧩 Testes</a>
+        <div class="submenu">
+          <a href="/teste-qi.html">Cognitivos</a><br>
+          <a href="/teste-tdah.html">Psicológicos</a><br>
+          <a href="#">Jogos</a><br>
+          <a href="#">Diversos</a>
+        </div>
+      <a href="#">🎮 Jogos</a>
+      <a href="#">⭐ Assinaturas</a>
+      <a href="/faq.html">❓ FAQ</a>
+      <a href="/sobre.html">ℹ️ Sobre</a>
+    </div>
+    <div style="color:#6b7280">Versão 1.0</div>
+  </nav>
+
+  <main class="main">
+    <div class="headerTop">
+      <h2>Bem-vindo à sua central, <span id="userName">usuário</span></h2>
+      <div class="user-info">
+        <span id="userEmail">carregando...</span>
+        <span id="saldoTop">-- 🧠</span>
+      </div>
     </div>
 
-    <div class="topbar-center">
-      <input type="search" id="searchBox" placeholder="Buscar testes ou jogos..." />
+    <div class="card-grid">
+      <div class="card">
+        <h3>Teste de TDAH</h3>
+        <p>Avalie seus níveis de atenção e impulsividade em poucos minutos.</p>
+        <a href="/teste-tdah.html" class="btn">Fazer teste</a>
+      </div>
+      <div class="card">
+        <h3>Teste de Burnout</h3>
+        <p>Entenda se o estresse está impactando seu bem-estar.</p>
+        <a href="/teste-burnout.html" class="btn">Fazer teste</a>
+      </div>
+      <div class="card">
+        <h3>Teste de QI</h3>
+        <p>Descubra seu quociente de inteligência com base em raciocínio lógico.</p>
+        <a href="/teste-qi.html" class="btn">Fazer teste</a>
+      </div>
     </div>
 
-    <div class="topbar-right">
-      <span id="userEmail">Carregando...</span>
-      <span id="walletBalance">0 🧠</span>
+    <div class="card" style="margin-top:2rem;">
+      <h3>🎮 Jogos Cognitivos (em breve)</h3>
+      <p>Treine sua mente com desafios divertidos e mensure seu progresso.</p>
     </div>
-  </header>
 
-  <main class="main-container">
-    <section class="intro">
-      <h1>Bem-vindo(a) à Braintest</h1>
-      <p>Explore testes de autoconhecimento, cognitivos e emocionais. Tudo em um só lugar.</p>
-    </section>
-
-    <section class="tests-grid">
-      <a href="/teste-tdah.html" class="test-card">
-        <h3>TDAH</h3>
-        <p>Descubra seu nível de atenção e foco</p>
-      </a>
-      <a href="/teste-burnout.html" class="test-card">
-        <h3>Burnout</h3>
-        <p>Analise seu nível de estresse e exaustão</p>
-      </a>
-      <a href="/teste-qi.html" class="test-card">
-        <h3>Q.I.</h3>
-        <p>Teste sua capacidade lógica e raciocínio</p>
-      </a>
-    </section>
+    <div class="card">
+      <h3>⭐ Planos e Assinaturas</h3>
+      <p>Assinaturas premium trarão acesso ilimitado a relatórios e novas funcionalidades.</p>
+    </div>
   </main>
+</div>
 
-  <footer class="footer">
-    <a href="/faq.html">FAQ</a> •
-    <a href="/termos.html">Termos</a> •
-    <a href="/sobre.html">Sobre</a>
-  </footer>
-
-  <!-- Inicialização robusta do Supabase -->
-  <script src="/assets/supabase-init.js"></script>
-
-  <!-- Script principal (carregado após Supabase estar pronto) -->
-  <script>
-    window.addEventListener("braintest-ready", async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session?.user) {
-        document.getElementById("userEmail").textContent = session.user.email;
-      } else {
-        document.getElementById("userEmail").textContent = "Entrar com Google";
-        document.getElementById("userEmail").onclick = async () => {
-          const { data, error } = await sb.auth.signInWithOAuth({
-            provider: "google",
-            options: { redirectTo: window.location.origin }
-          });
-          if (error) alert("Erro ao logar: " + error.message);
-        };
-      }
-
-      // Atualiza saldo
-      try {
-        const { data: { user } } = await sb.auth.getUser();
-        const { data: wallet } = await sb
-          .from("wallets")
-          .select("balance")
-          .eq("user_id", user?.id)
-          .single();
-        document.getElementById("walletBalance").textContent =
-          (wallet?.balance ?? 0) + " 🧠";
-      } catch {
-        document.getElementById("walletBalance").textContent = "0 🧠";
-      }
-
-      // Busca simples (redireciona)
-      document.getElementById("searchBox").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          const q = e.target.value.trim().toLowerCase();
-          if (q.includes("tdah")) location.href = "/teste-tdah.html";
-          else if (q.includes("burnout")) location.href = "/teste-burnout.html";
-          else if (q.includes("qi")) location.href = "/teste-qi.html";
-          else alert("Nenhum teste encontrado com esse termo.");
-        }
-      });
-    });
-  </script>
+<script src="/assets/supabase-init.js"></script>
+<script>
+window.addEventListener("braintest-ready", async()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){location.href="/";return;}
+  const {data:{user}} = await sb.auth.getUser();
+  document.getElementById("userName").textContent = user.email.split("@")[0];
+  document.getElementById("userEmail").textContent = user.email;
+  document.getElementById("userEmail").onclick = ()=>location.href="/perfil.html";
+  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
+  const saldo = wallet?.balance ?? 0;
+  const saldoEl = document.getElementById("saldoTop");
+  saldoEl.textContent = `${saldo} 🧠`;
+  saldoEl.onclick = ()=>location.href="/carteira.html";
+});
+</script>
 </body>
 </html>
