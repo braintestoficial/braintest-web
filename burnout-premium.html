@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relatório Premium – Burnout | BrainTest</title>
-  <link rel="stylesheet" href="assets/ui.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório Premium - Burnout</title>
+  <link rel="stylesheet" href="assets/ui.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
 </head>
@@ -13,59 +13,88 @@
     <h2>🧠 BrainTest</h2>
     <a href="index.html">🏠 Início</a>
     <a href="testes.html">🧩 Testes</a>
-    <a href="jogos.html">🎮 Jogos</a>
-    <a href="assinaturas.html">💎 Assinaturas</a>
     <a href="carteira.html">💰 Carteira</a>
-    <a href="historico.html">📜 Histórico</a>
     <a href="perfil.html">👤 Perfil</a>
-    <a href="faq.html">❓ FAQ</a>
-    <a href="sobre.html">ℹ️ Sobre</a>
-    <a id="logout" class="logout-btn">🚪 Sair</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a id="logout" class="logout-btn" onclick="logout()">🚪 Sair</a>
   </nav>
 
   <header>
-    <div class="logo">Relatório Premium – Burnout</div>
-    <div class="user-info">
-      <span id="userEmail"></span>
-      <span id="walletBalance"></span>
-    </div>
+    <div class="logo">Relatório Premium - Burnout</div>
   </header>
 
-  <main>
-    <div id="relatorioPremium" class="card fade-in" style="max-width:900px;margin:auto;">
-      <h1>Carregando relatório...</h1>
-    </div>
+  <main class="fade-in">
+    <section class="card" id="reportCard">
+      <h1>Carregando seu relatório...</h1>
+      <p>Estamos analisando suas respostas.</p>
+    </section>
   </main>
 
   <script>
-    (async () => {
+    async function salvarRelatorio(testKey, score, nivel, descricao, sugestoes) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
+      const userId = session.user.id;
+      const { error } = await sb.from("test_reports").insert({
+        user_id: userId,
+        test_key: testKey,
+        score: score,
+        level: nivel,
+        summary: descricao,
+        recommendations: sugestoes
+      });
+      if (error) console.warn("Falha ao salvar relatório:", error.message);
+      else console.log("✅ Relatório salvo com sucesso!");
+    }
+
+    async function gerarRelatorio() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) return window.location.href = "login.html";
-      const user = session.user;
-      document.getElementById("userEmail").textContent = user.email;
-      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
-      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      const score = parseInt(sessionStorage.getItem("burnout_score") || "0");
+      const report = document.getElementById("reportCard");
+      report.innerHTML = "";
 
-      window.addEventListener("braintest-ready", () => {
-        const rel = document.getElementById("relatorioPremium");
-        rel.innerHTML = `
-          <h2>Relatório Premium – Burnout</h2>
-          <p><strong>Usuário:</strong> ${user.email}</p>
-          <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
-          <p>Seu resultado indica sinais de sobrecarga emocional e exaustão. É importante identificar gatilhos de estresse e buscar estratégias de descanso.</p>
-          <ul>
-            <li>Estabeleça limites claros entre vida pessoal e profissional.</li>
-            <li>Reserve tempo para atividades que lhe trazem prazer e equilíbrio.</li>
-            <li>Se os sintomas persistirem, busque apoio psicológico.</li>
-          </ul>
-          <p class="note">* Este relatório não substitui avaliação médica ou psicológica.</p>`;
-      });
+      let nivel = "", descricao = "", sugestoes = [];
 
-      document.getElementById("logout").onclick = async () => {
-        await sb.auth.signOut();
-        window.location.href = "login.html";
-      };
-    })();
+      if (score < 10) {
+        nivel = "Baixo";
+        descricao = "Seu nível de esgotamento é baixo. Indica boa adaptação às demandas cotidianas.";
+        sugestoes = [
+          "Mantenha atividades que recarreguem sua energia emocional.",
+          "Pratique gratidão e descanso ativo.",
+          "Aproveite momentos de lazer e contato social."
+        ];
+      } else if (score < 20) {
+        nivel = "Moderado";
+        descricao = "Há sinais leves de cansaço emocional. Cuide de pausas e do equilíbrio entre trabalho e descanso.";
+        sugestoes = [
+          "Evite sobrecarga de tarefas consecutivas.",
+          "Reavalie prazos e prioridades com calma.",
+          "Busque momentos curtos de desconexão durante o dia."
+        ];
+      } else {
+        nivel = "Elevado";
+        descricao = "Seu nível de exaustão é alto. Isso requer atenção e possivelmente apoio profissional.";
+        sugestoes = [
+          "Considere conversar com um terapeuta ou médico.",
+          "Evite longas jornadas e ambientes tóxicos.",
+          "Reestruture seu tempo entre descanso e responsabilidades."
+        ];
+      }
+
+      report.innerHTML = `
+        <h1>Relatório Premium - Burnout</h1>
+        <h3>Nível de estresse: <span style="color:#2563eb">${nivel}</span></h3>
+        <p>${descricao}</p>
+        <h4>Recomendações</h4>
+        <ul>${sugestoes.map(i => `<li>${i}</li>`).join('')}</ul>
+        <p><em>Este relatório é informativo e não substitui orientação médica.</em></p>
+      `;
+
+      await salvarRelatorio("burnout", score, nivel, descricao, sugestoes);
+    }
+
+    gerarRelatorio();
   </script>
 </body>
 </html>

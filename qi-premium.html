@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relatório Premium – QI | BrainTest</title>
-  <link rel="stylesheet" href="assets/ui.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório Premium - QI</title>
+  <link rel="stylesheet" href="assets/ui.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
 </head>
@@ -13,59 +13,88 @@
     <h2>🧠 BrainTest</h2>
     <a href="index.html">🏠 Início</a>
     <a href="testes.html">🧩 Testes</a>
-    <a href="jogos.html">🎮 Jogos</a>
-    <a href="assinaturas.html">💎 Assinaturas</a>
     <a href="carteira.html">💰 Carteira</a>
-    <a href="historico.html">📜 Histórico</a>
     <a href="perfil.html">👤 Perfil</a>
-    <a href="faq.html">❓ FAQ</a>
-    <a href="sobre.html">ℹ️ Sobre</a>
-    <a id="logout" class="logout-btn">🚪 Sair</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a id="logout" class="logout-btn" onclick="logout()">🚪 Sair</a>
   </nav>
 
   <header>
-    <div class="logo">Relatório Premium – QI</div>
-    <div class="user-info">
-      <span id="userEmail"></span>
-      <span id="walletBalance"></span>
-    </div>
+    <div class="logo">Relatório Premium - QI</div>
   </header>
 
-  <main>
-    <div id="relatorioPremium" class="card fade-in" style="max-width:900px;margin:auto;">
-      <h1>Carregando relatório...</h1>
-    </div>
+  <main class="fade-in">
+    <section class="card" id="reportCard">
+      <h1>Carregando seu relatório...</h1>
+      <p>Estamos analisando suas respostas.</p>
+    </section>
   </main>
 
   <script>
-    (async () => {
+    async function salvarRelatorio(testKey, score, nivel, descricao, sugestoes) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
+      const userId = session.user.id;
+      const { error } = await sb.from("test_reports").insert({
+        user_id: userId,
+        test_key: testKey,
+        score: score,
+        level: nivel,
+        summary: descricao,
+        recommendations: sugestoes
+      });
+      if (error) console.warn("Falha ao salvar relatório:", error.message);
+      else console.log("✅ Relatório salvo com sucesso!");
+    }
+
+    async function gerarRelatorio() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) return window.location.href = "login.html";
-      const user = session.user;
-      document.getElementById("userEmail").textContent = user.email;
-      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
-      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      const score = parseInt(sessionStorage.getItem("qi_score") || "0");
+      const report = document.getElementById("reportCard");
+      report.innerHTML = "";
 
-      window.addEventListener("braintest-ready", () => {
-        const rel = document.getElementById("relatorioPremium");
-        rel.innerHTML = `
-          <h2>Relatório Premium – QI</h2>
-          <p><strong>Usuário:</strong> ${user.email}</p>
-          <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
-          <p>Seu teste de QI indica bons níveis de raciocínio lógico e memória de trabalho. Continue estimulando sua mente com novos desafios intelectuais.</p>
-          <ul>
-            <li>Pratique jogos de estratégia e lógica.</li>
-            <li>Mantenha uma rotina de leitura variada.</li>
-            <li>Explore novos estudos e habilidades analíticas.</li>
-          </ul>
-          <p class="note">* Este relatório não mede potencial intelectual completo nem substitui testes clínicos.</p>`;
-      });
+      let nivel = "", descricao = "", sugestoes = [];
 
-      document.getElementById("logout").onclick = async () => {
-        await sb.auth.signOut();
-        window.location.href = "login.html";
-      };
-    })();
+      if (score < 90) {
+        nivel = "Abaixo da média";
+        descricao = "Seu raciocínio lógico está em desenvolvimento, com potencial de aprimoramento constante.";
+        sugestoes = [
+          "Treine o foco com exercícios mentais diários.",
+          "Experimente jogos de lógica e quebra-cabeças.",
+          "Aprenda algo novo para estimular novas conexões cognitivas."
+        ];
+      } else if (score < 110) {
+        nivel = "Médio";
+        descricao = "Você apresenta equilíbrio cognitivo, com boa capacidade analítica e atenção a detalhes.";
+        sugestoes = [
+          "Continue praticando desafios lógicos regularmente.",
+          "Mantenha uma rotina de leitura e aprendizado contínuo.",
+          "Exercite a curiosidade: pergunte, explore e conecte ideias."
+        ];
+      } else {
+        nivel = "Acima da média";
+        descricao = "Excelente raciocínio lógico e agilidade mental. Indica forte domínio de abstração e resolução de problemas.";
+        sugestoes = [
+          "Participe de desafios intelectuais e discussões construtivas.",
+          "Explore áreas criativas que estimulem pensamento divergente.",
+          "Busque equilibrar análise com empatia e sensibilidade."
+        ];
+      }
+
+      report.innerHTML = `
+        <h1>Relatório Premium - QI</h1>
+        <h3>Faixa de QI estimada: <span style="color:#2563eb">${nivel}</span></h3>
+        <p>${descricao}</p>
+        <h4>Recomendações</h4>
+        <ul>${sugestoes.map(i => `<li>${i}</li>`).join('')}</ul>
+        <p><em>Este relatório é informativo e não substitui avaliação formal.</em></p>
+      `;
+
+      await salvarRelatorio("qi", score, nivel, descricao, sugestoes);
+    }
+
+    gerarRelatorio();
   </script>
 </body>
 </html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testes | BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <link rel="stylesheet" href="assets/animations.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
+</head>
+<body>
+  <nav class="sidebar">
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
+  </nav>
+
+  <header>
+    <div class="logo">🧩 Testes BrainTest</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
+    </div>
+  </header>
+
+  <main class="fade-in">
+    <section class="card" style="max-width:900px;">
+      <h1>Testes Disponíveis</h1>
+      <p>Selecione a categoria que mais combina com seu objetivo:</p>
+
+      <h2>🧠 Cognitivos</h2>
+      <div class="options" style="margin-bottom:20px;">
+        <div class="card glow" style="cursor:pointer;" onclick="window.location.href='teste-qi.html'">
+          <h3>Teste de QI</h3>
+          <p>Mede raciocínio lógico e pensamento analítico.</p>
+        </div>
+      </div>
+
+      <h2>🧩 Psicológicos</h2>
+      <div class="options" style="margin-bottom:20px;">
+        <div class="card glow" style="cursor:pointer;" onclick="window.location.href='teste-tdah.html'">
+          <h3>Teste de TDAH</h3>
+          <p>Investiga possíveis traços de desatenção e impulsividade.</p>
+        </div>
+        <div class="card glow" style="cursor:pointer;" onclick="window.location.href='teste-burnout.html'">
+          <h3>Teste de Burnout</h3>
+          <p>Analisa níveis de estresse e exaustão profissional.</p>
+        </div>
+      </div>
+
+      <h2>🎯 Diversos</h2>
+      <div class="options">
+        <div class="card glow" style="cursor:pointer;" onclick="alert('Mais testes em breve!')">
+          <h3>Novos Testes</h3>
+          <p>Fique atento — novos testes estão a caminho.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return (window.location.href = "login.html");
+      const user = session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      document.getElementById("walletBalance").onclick = () => (window.location.href = "carteira.html");
+      document.getElementById("userEmail").onclick = () => (window.location.href = "perfil.html");
+      document.getElementById("logout").onclick = async () => {
+        await sb.auth.signOut();
+        window.location.href = "login.html";
+      };
+    })();
+  </script>
+</body>
+</html>

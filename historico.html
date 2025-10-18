@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Histórico - BrainTest</title>
+  <title>Histórico de Relatórios | BrainTest</title>
   <link rel="stylesheet" href="assets/ui.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
@@ -16,58 +16,92 @@
     <a href="jogos.html">🎮 Jogos</a>
     <a href="assinaturas.html">💎 Assinaturas</a>
     <a href="carteira.html">💰 Carteira</a>
-    <a href="historico.html">📜 Histórico</a>
+    <a href="historico.html" class="active">📜 Histórico</a>
     <a href="perfil.html">👤 Perfil</a>
     <a href="faq.html">❓ FAQ</a>
     <a href="sobre.html">ℹ️ Sobre</a>
-    <a id="logout" class="logout-btn">🚪 Sair</a>
+    <a id="logout" class="logout-btn" onclick="logout()">🚪 Sair</a>
   </nav>
 
   <header>
-    <div class="logo">Histórico</div>
+    <div class="logo">Histórico de Relatórios</div>
     <div class="user-info">
       <span id="userEmail"></span>
       <span id="walletBalance"></span>
     </div>
   </header>
 
-  <main>
-    <h1>Histórico de Ações</h1>
-    <div class="card fade-in">
-      <table id="tableHist">
-        <thead>
-          <tr><th>Data</th><th>Descrição</th><th>Valor</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <main class="fade-in">
+    <section class="card" id="historyContainer">
+      <h1>Seus Relatórios Premium</h1>
+      <p>Visualize abaixo seus resultados salvos em nossa base:</p>
+      <div id="reportsList" style="margin-top:20px;"></div>
+    </section>
   </main>
 
   <script>
-    async function carregarHistorico(user) {
-      const { data } = await sb.from("wallet_logs").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-      const tbody = document.querySelector("#tableHist tbody");
-      tbody.innerHTML = data.map(l => `
-        <tr>
-          <td>${new Date(l.created_at).toLocaleDateString("pt-BR")}</td>
-          <td>${l.description}</td>
-          <td>${l.amount > 0 ? "+" : ""}${l.amount} 🪙</td>
-        </tr>`).join("");
-    }
-
-    (async () => {
+    async function carregarUsuario() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) return (window.location.href = "login.html");
       const user = session.user;
       document.getElementById("userEmail").textContent = user.email;
-      await carregarHistorico(user);
-      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+
+      const { data: wallet } = await sb
+        .from("wallets")
+        .select("balance")
+        .eq("user_id", user.id)
+        .single();
+
       document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
-      document.getElementById("logout").onclick = async () => {
-        await sb.auth.signOut();
-        window.location.href = "login.html";
-      };
-    })();
+      carregarRelatorios(user.id);
+    }
+
+    async function carregarRelatorios(userId) {
+      const container = document.getElementById("reportsList");
+      container.innerHTML = `<p>Carregando relatórios...</p>`;
+
+      const { data, error } = await sb
+        .from("test_reports")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        container.innerHTML = `<p style="color:red;">Erro ao carregar relatórios: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `<p>Você ainda não possui relatórios Premium. Realize um teste e adquira o relatório completo!</p>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      data.forEach(r => {
+        const date = new Date(r.created_at).toLocaleDateString("pt-BR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.style.marginBottom = "20px";
+        card.innerHTML = `
+          <h3>${r.test_key.toUpperCase()} — ${r.level}</h3>
+          <p><strong>Pontuação:</strong> ${r.score}</p>
+          <p>${r.summary}</p>
+          <h4>Recomendações</h4>
+          <ul>${r.recommendations.map(i => `<li>${i}</li>`).join("")}</ul>
+          <p><em>Gerado em ${date}</em></p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    carregarUsuario();
   </script>
 </body>
 </html>

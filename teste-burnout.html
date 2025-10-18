@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teste de Burnout - BrainTest</title>
+  <title>Teste de Burnout | BrainTest</title>
   <link rel="stylesheet" href="assets/ui.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
@@ -20,7 +20,7 @@
     <a href="perfil.html">👤 Perfil</a>
     <a href="faq.html">❓ FAQ</a>
     <a href="sobre.html">ℹ️ Sobre</a>
-    <a id="logout" class="logout-btn">🚪 Sair</a>
+    <a id="logout" class="logout-btn" onclick="logout()">🚪 Sair</a>
   </nav>
 
   <header>
@@ -31,47 +31,70 @@
     </div>
   </header>
 
-  <main>
-    <h1>Triagem gratuita - Burnout</h1>
-    <div id="questions"></div>
-    <button id="submitBtn" class="btn-primary">Enviar respostas</button>
-    <div id="result"></div>
+  <main class="fade-in">
+    <section class="card" id="testContainer">
+      <h1>Avaliação de Esgotamento Profissional</h1>
+      <form id="quizForm"></form>
+      <button id="submitQuiz">Enviar Respostas</button>
+      <div id="resultArea"></div>
+    </section>
   </main>
 
   <script>
-    async function loadQuestions() {
+    let userId = null;
+
+    async function carregarUsuario() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) return (window.location.href = "login.html");
-      const { data, error } = await sb.rpc("get_random_questions", { test_name: "burnout", count: 15 });
+      const user = session.user;
+      userId = user.id;
+      document.getElementById("userEmail").textContent = user.email;
+      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+    }
+
+    async function carregarPerguntas() {
+      const { data, error } = await sb.rpc('get_random_questions', { test_key: 'burnout', q_limit: 15 });
       if (error) {
-        document.getElementById("questions").innerHTML = "<p>Erro ao carregar perguntas.</p>";
+        document.getElementById('quizForm').innerHTML = `<p>Erro ao carregar perguntas.</p>`;
         return;
       }
-      const container = document.getElementById("questions");
-      container.innerHTML = "";
-      data.forEach((q, i) => {
+
+      const form = document.getElementById("quizForm");
+      form.innerHTML = "";
+      data.forEach(q => {
         const div = document.createElement("div");
-        div.className = "question";
+        div.classList.add("question");
         div.innerHTML = `
-          <h3>${i + 1}. ${q.prompt}</h3>
+          <p><strong>${q.prompt}</strong></p>
           <div class="options">
-            <label><input type="radio" name="q${i}" value="0"> Raramente</label>
-            <label><input type="radio" name="q${i}" value="1"> Às vezes</label>
-            <label><input type="radio" name="q${i}" value="2"> Frequentemente</label>
+            <label><input type="radio" name="q${q.id}" value="0"> Raramente</label>
+            <label><input type="radio" name="q${q.id}" value="1"> Às vezes</label>
+            <label><input type="radio" name="q${q.id}" value="2"> Frequentemente</label>
           </div>`;
-        container.appendChild(div);
+        form.appendChild(div);
       });
     }
 
-    document.getElementById("submitBtn").onclick = async () => {
-      const answers = [...document.querySelectorAll("input[type=radio]:checked")].map(el => Number(el.value));
-      const score = answers.reduce((a, b) => a + b, 0);
-      document.getElementById("result").innerHTML = `
-        <p>Sua pontuação: <strong>${score}</strong></p>
-        <button onclick="window.location.href='burnout-premium.html'">🔓 Liberar Relatório Premium (10 🪙)</button>`;
-    };
+    document.getElementById("submitQuiz").addEventListener("click", async () => {
+      const respostas = [...document.querySelectorAll("input[type='radio']:checked")];
+      if (respostas.length < 15) return alert("Responda todas as perguntas!");
+      const score = respostas.reduce((sum, r) => sum + parseInt(r.value), 0);
+      const resultArea = document.getElementById("resultArea");
+      resultArea.innerHTML = `<h3>Resultado preliminar:</h3><p>Sua pontuação foi <strong>${score}</strong>.</p>
+        <button id="premiumBtn">Obter Relatório Premium (10 🪙)</button>`;
 
-    loadQuestions();
+      // ✅ Salva o score no sessionStorage
+      document.getElementById("premiumBtn").onclick = async () => {
+        sessionStorage.setItem("burnout_score", score);
+        const { error } = await sb.rpc('wallet_buy', { p_user_id: userId, p_amount: 10, p_product: 'Relatório Premium: Burnout' });
+        if (error) alert("Erro ao debitar: " + error.message);
+        else window.location.href = "burnout-premium.html";
+      };
+    });
+
+    carregarUsuario();
+    carregarPerguntas();
   </script>
 </body>
 </html>

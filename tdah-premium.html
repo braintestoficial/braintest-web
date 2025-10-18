@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relatório Premium – TDAH | BrainTest</title>
-  <link rel="stylesheet" href="assets/ui.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório Premium - TDAH</title>
+  <link rel="stylesheet" href="assets/ui.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
 </head>
@@ -13,60 +13,88 @@
     <h2>🧠 BrainTest</h2>
     <a href="index.html">🏠 Início</a>
     <a href="testes.html">🧩 Testes</a>
-    <a href="jogos.html">🎮 Jogos</a>
-    <a href="assinaturas.html">💎 Assinaturas</a>
     <a href="carteira.html">💰 Carteira</a>
-    <a href="historico.html">📜 Histórico</a>
     <a href="perfil.html">👤 Perfil</a>
-    <a href="faq.html">❓ FAQ</a>
-    <a href="sobre.html">ℹ️ Sobre</a>
-    <a id="logout" class="logout-btn">🚪 Sair</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a id="logout" class="logout-btn" onclick="logout()">🚪 Sair</a>
   </nav>
 
   <header>
-    <div class="logo">Relatório Premium – TDAH</div>
-    <div class="user-info">
-      <span id="userEmail"></span>
-      <span id="walletBalance"></span>
-    </div>
+    <div class="logo">Relatório Premium - TDAH</div>
   </header>
 
-  <main>
-    <div id="relatorioPremium" class="card fade-in" style="max-width:900px;margin:auto;">
-      <h1>Carregando relatório...</h1>
-    </div>
+  <main class="fade-in">
+    <section class="card" id="reportCard">
+      <h1>Carregando seu relatório...</h1>
+      <p>Estamos analisando suas respostas.</p>
+    </section>
   </main>
 
   <script>
-    (async () => {
+    async function salvarRelatorio(testKey, score, nivel, descricao, sugestoes) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
+      const userId = session.user.id;
+      const { error } = await sb.from("test_reports").insert({
+        user_id: userId,
+        test_key: testKey,
+        score: score,
+        level: nivel,
+        summary: descricao,
+        recommendations: sugestoes
+      });
+      if (error) console.warn("Falha ao salvar relatório:", error.message);
+      else console.log("✅ Relatório salvo com sucesso!");
+    }
+
+    async function gerarRelatorio() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) return window.location.href = "login.html";
-      const user = session.user;
-      document.getElementById("userEmail").textContent = user.email;
-      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
-      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      const score = parseInt(sessionStorage.getItem("tdah_score") || "0");
+      const report = document.getElementById("reportCard");
+      report.innerHTML = "";
 
-      // Garante renderização após o carregamento do Supabase
-      window.addEventListener("braintest-ready", () => {
-        const rel = document.getElementById("relatorioPremium");
-        rel.innerHTML = `
-          <h2>Relatório Premium – TDAH</h2>
-          <p><strong>Usuário:</strong> ${user.email}</p>
-          <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
-          <p>Seu teste aponta níveis significativos de desatenção e/ou impulsividade. Estes resultados sugerem possível presença de traços associados ao TDAH.</p>
-          <ul>
-            <li>Utilize listas de tarefas e cronômetros para manter a atenção.</li>
-            <li>Organize ambientes de trabalho com menos estímulos.</li>
-            <li>Procure apoio de um profissional especializado.</li>
-          </ul>
-          <p class="note">* Este relatório não substitui avaliação médica ou psicológica.</p>`;
-      });
+      let nivel = "", descricao = "", sugestoes = [];
 
-      document.getElementById("logout").onclick = async () => {
-        await sb.auth.signOut();
-        window.location.href = "login.html";
-      };
-    })();
+      if (score < 10) {
+        nivel = "Baixo";
+        descricao = "Seu perfil indica boa capacidade de foco e organização. Pequenas distrações são naturais no dia a dia.";
+        sugestoes = [
+          "Mantenha uma rotina previsível e bem estruturada.",
+          "Evite multitarefas desnecessárias.",
+          "Use listas e alarmes como suporte, sem rigidez excessiva."
+        ];
+      } else if (score < 20) {
+        nivel = "Moderado";
+        descricao = "Alguns sinais de dispersão surgem em contextos repetitivos ou estressantes.";
+        sugestoes = [
+          "Técnicas de mindfulness ajudam na regulação da atenção.",
+          "Faça pausas breves entre tarefas longas.",
+          "Evite sobrecarga sensorial e notificações excessivas."
+        ];
+      } else {
+        nivel = "Elevado";
+        descricao = "Você demonstrou padrões de impulsividade e desorganização que merecem atenção. Isso não é diagnóstico, mas sugere procurar suporte especializado.";
+        sugestoes = [
+          "Busque avaliação profissional para compreensão aprofundada.",
+          "Adote ferramentas visuais de planejamento (kanban, apps).",
+          "Priorize sono, alimentação e pausas regulares."
+        ];
+      }
+
+      report.innerHTML = `
+        <h1>Relatório Premium - TDAH</h1>
+        <h3>Nível de atenção: <span style="color:#2563eb">${nivel}</span></h3>
+        <p>${descricao}</p>
+        <h4>Recomendações</h4>
+        <ul>${sugestoes.map(i => `<li>${i}</li>`).join('')}</ul>
+        <p><em>Este relatório é apenas informativo e não substitui avaliação médica.</em></p>
+      `;
+
+      await salvarRelatorio("tdah", score, nivel, descricao, sugestoes);
+    }
+
+    gerarRelatorio();
   </script>
 </body>
 </html>
