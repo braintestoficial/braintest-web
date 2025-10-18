@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teste de QI | BrainTest</title>
+  <title>Teste de QI - BrainTest</title>
   <link rel="stylesheet" href="assets/ui.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
@@ -12,55 +12,71 @@
   <nav class="sidebar">
     <h2>🧠 BrainTest</h2>
     <a href="index.html">🏠 Início</a>
-    <a href="#" id="toggleTests">🧩 Testes</a>
-    <div class="submenu" id="testsSubmenu">
-      <a href="teste-tdah.html">TDAH</a>
-      <a href="teste-burnout.html">Burnout</a>
-      <a href="teste-qi.html">Q.I</a>
-    </div>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
     <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
     <a href="perfil.html">👤 Perfil</a>
-    <div class="logout-btn" id="logout">🚪 Sair</div>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
   </nav>
 
-  <main style="margin-left:250px;padding:40px;">
-    <h1>Teste de QI</h1>
-    <form id="formQi"></form>
-    <div id="resultado"></div>
-    <div id="premiumSection" style="display:none;margin-top:30px;">
-      <button onclick="liberarPremium('QI','qi-premium.html')">🔓 Liberar Relatório Premium (10 🧠)</button>
-      <p id="buyMessage"></p>
+  <header>
+    <div class="logo">Teste de QI</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
     </div>
+  </header>
+
+  <main>
+    <h1>Triagem gratuita - QI</h1>
+    <div id="questions"></div>
+    <button id="submitBtn" class="btn-primary">Enviar respostas</button>
+    <div id="result"></div>
   </main>
 
   <script>
-    (async()=>{const {data:{session}}=await sb.auth.getSession();if(!session)window.location.href="login.html";})();
-    document.getElementById("toggleTests").onclick=(e)=>{e.preventDefault();const s=document.getElementById("testsSubmenu");s.style.display=s.style.display==="flex"?"none":"flex";};
-    document.getElementById("logout").onclick=async()=>{await sb.auth.signOut();window.location.href="login.html";};
-
-    async function carregar(){const {data}=await sb.from("test_questions").select("id,prompt").eq("test_key","qi").limit(15);
-      const f=document.getElementById("formQi");f.innerHTML="";data.forEach(q=>{
-        f.innerHTML+=`<div class='pergunta'><label>${q.prompt}</label>
-        <select><option value="0">Errada</option><option value="2">Certa</option></select></div>`;});
-      f.innerHTML+=`<button type='button' onclick='avaliar()'>Enviar</button>`;
+    async function loadQuestions() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return (window.location.href = "login.html");
+      const { data, error } = await sb.rpc("get_random_questions", { test_name: "qi", count: 15 });
+      if (error) {
+        document.getElementById("questions").innerHTML = "<p>Erro ao carregar perguntas.</p>";
+        return;
+      }
+      const container = document.getElementById("questions");
+      container.innerHTML = "";
+      data.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        let optionsHTML = "";
+        if (q.kind === "likert") {
+          optionsHTML = `
+            <label><input type="radio" name="q${i}" value="0"> Raramente</label>
+            <label><input type="radio" name="q${i}" value="1"> Às vezes</label>
+            <label><input type="radio" name="q${i}" value="2"> Frequentemente</label>`;
+        } else {
+          optionsHTML = (q.options || []).map(o => `
+            <label><input type="radio" name="q${i}" value="${o.is_correct ? 1 : 0}"> ${o.label}</label>
+          `).join("");
+        }
+        div.innerHTML = `<h3>${i + 1}. ${q.prompt}</h3><div class="options">${optionsHTML}</div>`;
+        container.appendChild(div);
+      });
     }
 
-    function avaliar(){const vals=[...document.querySelectorAll("select")].map(s=>parseInt(s.value));
-      const score=vals.reduce((a,b)=>a+b,0);
-      document.getElementById("resultado").innerHTML=`<h3>Sua pontuação: ${score}</h3>`;
-      document.getElementById("premiumSection").style.display="block";
-    }
+    document.getElementById("submitBtn").onclick = async () => {
+      const answers = [...document.querySelectorAll("input[type=radio]:checked")].map(el => Number(el.value));
+      const score = answers.reduce((a, b) => a + b, 0);
+      document.getElementById("result").innerHTML = `
+        <p>Sua pontuação: <strong>${score}</strong></p>
+        <button onclick="window.location.href='qi-premium.html'">🔓 Liberar Relatório Premium (10 🪙)</button>`;
+    };
 
-    async function liberarPremium(produto,destino){const msg=document.getElementById("buyMessage");
-      const {data:{session}}=await sb.auth.getSession();
-      const {error}=await sb.rpc("wallet_buy",{p_user:session.user.id,p_amount:10,p_desc:"Relatório Premium: "+produto});
-      if(error){msg.textContent="Erro: "+error.message;msg.style.color="#ef4444";return;}
-      const saldoSpan=parent.document.getElementById("userBalance");
-      if(saldoSpan){const {data}=await sb.from("wallets").select("balance").eq("user_id",session.user.id).single();
-        saldoSpan.textContent=`${data.balance} 🧠`;}
-      msg.style.color="#16a34a";msg.textContent="Compra concluída!";setTimeout(()=>window.location.href=destino,1500);
-    }
-    carregar();
+    loadQuestions();
   </script>
 </body>
 </html>

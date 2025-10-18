@@ -1,97 +1,73 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Histórico | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<link rel="stylesheet" href="/assets/ui-dashboard.css">
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-.layout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
-.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
-.submenu{margin:.4rem 0 .2rem 1rem;display:none}
-.main{flex:1;padding:2rem;max-width:1000px;margin:0 auto}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-table{width:100%;border-collapse:collapse}
-th,td{border-bottom:1px solid #e5e7eb;padding:.6rem .5rem;text-align:left}
-th{background:#f9fafb}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histórico - BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<div class="layout">
   <nav class="sidebar">
-    <div>
-      <h1>🧠 Braintest</h1>
-      <a href="/index.html">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html">💰 Carteira</a>
-      <a href="#" id="testsToggle">🧩 Testes</a>
-      <div class="submenu" id="testsMenu">
-        <a href="/teste-qi.html">Cognitivos</a>
-        <a href="/teste-tdah.html">Psicológicos</a>
-        <a href="#">Jogos</a>
-        <a href="#">Diversos</a>
-      </div>
-      <a href="#">🎮 Jogos</a>
-      <a href="#">⭐ Assinaturas</a>
-      <a href="/faq.html">❓ FAQ</a>
-      <a href="/sobre.html">ℹ️ Sobre</a>
-    </div>
-    <div>
-      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
-      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
-    </div>
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
   </nav>
 
-  <main class="main">
-    <div class="card">
-      <h2>Histórico de Testes</h2>
-      <div id="box">Carregando…</div>
+  <header>
+    <div class="logo">Histórico</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
+    </div>
+  </header>
+
+  <main>
+    <h1>Histórico de Ações</h1>
+    <div class="card fade-in">
+      <table id="tableHist">
+        <thead>
+          <tr><th>Data</th><th>Descrição</th><th>Valor</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </main>
-</div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-function setupSidebar(session){
-  const toggle=document.getElementById("testsToggle");
-  const menu=document.getElementById("testsMenu");
-  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
-  const authBtn=document.getElementById("authBtn");
-  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
-  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
-}
-window.addEventListener("braintest-ready", async()=>{
-  const {data:{session}}=await sb.auth.getSession();
-  setupSidebar(session);
-  if(!session){location.href="/";return;}
-  const {data:{user}}=await sb.auth.getUser();
+  <script>
+    async function carregarHistorico(user) {
+      const { data } = await sb.from("wallet_logs").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      const tbody = document.querySelector("#tableHist tbody");
+      tbody.innerHTML = data.map(l => `
+        <tr>
+          <td>${new Date(l.created_at).toLocaleDateString("pt-BR")}</td>
+          <td>${l.description}</td>
+          <td>${l.amount > 0 ? "+" : ""}${l.amount} 🪙</td>
+        </tr>`).join("");
+    }
 
-  const {data:wallet}=await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
-
-  const {data:rows}=await sb.from("test_sessions")
-    .select("test_key,score_likert,score_qi,created_at")
-    .eq("user_id",user.id).order("created_at",{ascending:false});
-  const box=document.getElementById("box");
-  if(!rows?.length){box.textContent="Nenhum teste ainda.";return;}
-  box.innerHTML=`<table>
-    <thead><tr><th>Data</th><th>Teste</th><th>Pontuação</th><th>Relatório</th></tr></thead>
-    <tbody>
-      ${rows.map(r=>{
-        const score = r.score_likert ?? r.score_qi ?? 0;
-        const link = r.test_key==="tdah"?"/tdah-premium.html":r.test_key==="burnout"?"/burnout-premium.html":"/qi-premium.html";
-        return `<tr>
-          <td>${new Date(r.created_at).toLocaleString()}</td>
-          <td>${r.test_key.toUpperCase()}</td>
-          <td>${score}</td>
-          <td><a href="${link}">abrir</a></td>
-        </tr>`;
-      }).join("")}
-    </tbody>
-  </table>`;
-});
-</script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return (window.location.href = "login.html");
+      const user = session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      await carregarHistorico(user);
+      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      document.getElementById("logout").onclick = async () => {
+        await sb.auth.signOut();
+        window.location.href = "login.html";
+      };
+    })();
+  </script>
 </body>
 </html>

@@ -1,83 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sobre | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<link rel="stylesheet" href="/assets/ui-dashboard.css">
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-.layout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
-.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
-.submenu{margin:.4rem 0 .2rem 1rem;display:none}
-.main{flex:1;padding:2rem;max-width:900px;margin:0 auto}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sobre - BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<div class="layout">
   <nav class="sidebar">
-    <div>
-      <h1>🧠 Braintest</h1>
-      <a href="/index.html">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html">💰 Carteira</a>
-      <a href="#" id="testsToggle">🧩 Testes</a>
-      <div class="submenu" id="testsMenu">
-        <a href="/teste-qi.html">Cognitivos</a>
-        <a href="/teste-tdah.html">Psicológicos</a>
-        <a href="/teste-burnout.html">Diversos</a>
-      </div>
-      <a href="#">🎮 Jogos</a>
-      <a href="#">⭐ Assinaturas</a>
-      <a href="/faq.html">❓ FAQ</a>
-      <a href="/sobre.html" class="active">ℹ️ Sobre</a>
-    </div>
-    <div>
-      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
-      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
-    </div>
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
   </nav>
 
-  <main class="main">
-    <h2>Sobre a Braintest</h2>
-    <div class="card">
-      <p>A <b>Braintest</b> nasceu da ideia de tornar o autoconhecimento acessível e divertido. Nosso objetivo é unir ciência, psicologia e tecnologia para ajudar pessoas a compreender melhor suas emoções, decisões e padrões de comportamento.</p>
-      <p>Além dos testes psicológicos e cognitivos, estamos construindo um ecossistema completo de jogos mentais e planos corporativos, onde inteligência emocional e lógica caminham juntas.</p>
-      <p>Nosso compromisso é com a ética, a privacidade e o bem-estar dos nossos usuários.</p>
+  <header>
+    <div class="logo">Sobre</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
     </div>
+  </header>
 
-    <div class="card">
-      <h3>🚀 Nossa Missão</h3>
-      <p>Desenvolver ferramentas digitais que promovam o equilíbrio entre mente, emoção e desempenho humano.</p>
-    </div>
-
-    <div class="card">
-      <h3>🤝 Parceiros e Colaboradores</h3>
-      <p>Psicólogos, neurocientistas, desenvolvedores e artistas fazem parte da nossa comunidade, contribuindo para experiências mais humanas e imersivas.</p>
+  <main>
+    <h1>Sobre a BrainTest</h1>
+    <div class="card fade-in" style="max-width:900px;">
+      <p>A BrainTest nasceu da missão de democratizar o autoconhecimento cognitivo e emocional. Nossa plataforma utiliza tecnologia de ponta para criar experiências acessíveis e cientificamente fundamentadas.</p>
+      <p>Com testes de lógica, inteligência emocional e desempenho cognitivo, oferecemos insights valiosos para indivíduos e empresas, ajudando na tomada de decisões mais conscientes.</p>
+      <p>Valorizamos privacidade, ética e bem-estar. Por isso, nenhum dado sensível é compartilhado com terceiros, e todo conteúdo é projetado com responsabilidade.</p>
+      <h3>Nosso objetivo</h3>
+      <p>Ser a principal referência digital em inteligência mental e emocional no Brasil, tornando simples o que é complexo e transformando dados em aprendizado.</p>
     </div>
   </main>
-</div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-function setupSidebar(session){
-  const toggle=document.getElementById("testsToggle");
-  const menu=document.getElementById("testsMenu");
-  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
-  const authBtn=document.getElementById("authBtn");
-  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
-  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
-}
-window.addEventListener("braintest-ready", async()=>{
-  const {data:{session}}=await sb.auth.getSession();
-  setupSidebar(session);
-  if(!session){return;}
-  const {data:{user}}=await sb.auth.getUser();
-  const {data:wallet}=await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
-});
-</script>
+  <script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return (window.location.href = "login.html");
+      const user = session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      document.getElementById("logout").onclick = async () => { await sb.auth.signOut(); window.location.href = "login.html"; };
+    })();
+  </script>
 </body>
 </html>

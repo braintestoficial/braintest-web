@@ -1,150 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Carteira | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css" />
-<link rel="stylesheet" href="/assets/ui-dashboard.css" />
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-.layout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
-.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
-.submenu{margin:.4rem 0 .2rem 1rem;display:none}
-.main{flex:1;padding:2rem;max-width:1000px;margin:0 auto}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-.saldo{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.saldo .valor{font-size:1.8rem;font-weight:700;color:#111827}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-.packs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem}
-.pack{display:flex;align-items:center;justify-content:space-between;border:1px solid #e5e7eb;border-radius:10px;padding:.8rem 1rem;background:#fafafa}
-.pack .btn{padding:.45rem .8rem}
-table{width:100%;border-collapse:collapse;font-size:.95rem}
-th,td{border-bottom:1px solid #e5e7eb;padding:.55rem .4rem;text-align:left}
-.tag{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem}
-.tag.credit{background:#ecfdf5;color:#065f46}.tag.debit{background:#fef2f2;color:#991b1b}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carteira - BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<div class="layout">
   <nav class="sidebar">
-    <div>
-      <h1>🧠 Braintest</h1>
-      <a href="/index.html">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html" class="active">💰 Carteira</a>
-      <a href="#" id="testsToggle">🧩 Testes</a>
-      <div class="submenu" id="testsMenu">
-        <a href="/teste-qi.html">Cognitivos</a>
-        <a href="/teste-tdah.html">Psicológicos</a>
-        <a href="#">Jogos</a>
-        <a href="#">Diversos</a>
-      </div>
-      <a href="#">🎮 Jogos</a>
-      <a href="#">⭐ Assinaturas</a>
-      <a href="/faq.html">❓ FAQ</a>
-      <a href="/sobre.html">ℹ️ Sobre</a>
-    </div>
-    <div>
-      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
-      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
-    </div>
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
   </nav>
 
-  <main class="main">
-    <div class="card saldo">
-      <div>
-        <div style="color:#6b7280">Saldo disponível</div>
-        <div class="valor"><span id="saldo">--</span> 🧠</div>
-      </div>
-      <div style="margin-left:auto">
-        <a class="btn" href="/historico.html" style="background:#111827">Ver histórico completo</a>
-      </div>
+  <header>
+    <div class="logo">Carteira</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
     </div>
+  </header>
 
-    <div class="grid">
-      <div class="card">
-        <h3 style="margin-bottom:.6rem">Adicionar Braincoins</h3>
-        <div class="packs" id="packs"></div>
-        <p style="margin-top:.6rem;color:#6b7280;font-size:.9rem">
-          * Pagamento via Stripe. As moedas entram automaticamente após confirmação.
-        </p>
-      </div>
-      <div class="card">
-        <h3 style="margin-bottom:.6rem">Transações recentes</h3>
-        <div id="txBox">Carregando…</div>
+  <main>
+    <h1>Minha Carteira BrainTest</h1>
+    <div class="card fade-in">
+      <h3>Saldo Atual</h3>
+      <p id="saldo" style="font-size:1.5em;font-weight:700;">Carregando...</p>
+      <h4>Adicionar BrainCoins</h4>
+      <div class="grid">
+        <button onclick="buy(10)">+10 🪙</button>
+        <button onclick="buy(30)">+30 🪙</button>
+        <button onclick="buy(50)">+50 🪙</button>
+        <button onclick="buy(100)">+100 🪙</button>
       </div>
     </div>
   </main>
-</div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-function setupSidebar(session){
-  const toggle=document.getElementById("testsToggle");
-  const menu=document.getElementById("testsMenu");
-  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
-  const authBtn=document.getElementById("authBtn");
-  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
-  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
-}
-
-window.addEventListener("braintest-ready", async ()=>{
-  const {data:{session}} = await sb.auth.getSession();
-  setupSidebar(session);
-  if(!session){ location.href="/"; return; }
-  const {data:{user}} = await sb.auth.getUser();
-
-  const {data:wallet} = await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  const saldo = wallet?.balance ?? 0;
-  document.getElementById("saldo").textContent = saldo;
-  document.getElementById("saldoBox").textContent = `Saldo: ${saldo} 🧠`;
-
-  const pacotes = [
-    {q:10, link:"https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04"},
-    {q:30, link:"https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05"},
-    {q:50, link:"https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06"},
-    {q:100, link:"https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07"},
-    {q:500, link:"https://buy.stripe.com/test_00wfZ9fHVcn28dnfRt4Rq08"},
-    {q:1000, link:"https://buy.stripe.com/test_9B6eV58ft2Ms1OZgVx4Rq09"},
-    {q:3000, link:"https://buy.stripe.com/test_bJedR1anBcn23X7fRt4Rq0a"},
-  ];
-  document.getElementById("packs").innerHTML = pacotes.map(p=>`
-    <div class="pack"><div><b>${p.q}</b> Braincoins</div><a class="btn" href="${p.link}" target="_blank" rel="noopener">Comprar</a></div>
-  `).join("");
-
-  async function loadTx(){
-    try{
-      const {data:txs,error} = await sb.from("wallet_transactions")
-        .select("kind,amount,description,created_at").eq("user_id",user.id)
-        .order("created_at",{ascending:false}).limit(8);
-      if(error) throw error;
-      if(!txs?.length){document.getElementById("txBox").innerHTML="<p>Sem transações ainda.</p>";return;}
-      document.getElementById("txBox").innerHTML =
-        `<table><thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>` +
-        txs.map(t=>`<tr>
-            <td>${new Date(t.created_at).toLocaleString()}</td>
-            <td><span class="tag ${t.kind}">${t.kind}</span></td>
-            <td>${(t.amount>0?"+":"") + t.amount} BC</td>
-            <td>${t.description||"-"}</td>
-          </tr>`).join("") + `</tbody></table>`;
-    }catch(_){
-      const {data:logs}=await sb.from("wallet_logs")
-        .select("description,amount,created_at").eq("user_id",user.id)
-        .order("created_at",{ascending:false}).limit(8);
-      if(!logs?.length){document.getElementById("txBox").innerHTML="<p>Sem transações ainda.</p>";return;}
-      document.getElementById("txBox").innerHTML =
-        `<table><thead><tr><th>Data</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>` +
-        logs.map(t=>`<tr>
-            <td>${new Date(t.created_at).toLocaleString()}</td>
-            <td>${(t.amount>0?"+":"") + t.amount} BC</td>
-            <td>${t.description||"-"}</td>
-          </tr>`).join("") + `</tbody></table>`;
+  <script>
+    async function atualizarSaldo(user) {
+      const { data } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("saldo").textContent = data ? `${data.balance} 🪙` : "0 🪙";
+      document.getElementById("walletBalance").textContent = data ? `${data.balance} 🪙` : "0 🪙";
     }
-  }
-  loadTx();
-});
-</script>
+
+    async function buy(amount) {
+      const links = {
+        10: "https://buy.stripe.com/test_fZu8wH67levadxH48L4Rq04",
+        30: "https://buy.stripe.com/test_28E3cn53h1Io79j0Wz4Rq05",
+        50: "https://buy.stripe.com/test_aFa8wHcvJ0Ek0KV48L4Rq06",
+        100: "https://buy.stripe.com/test_28EdR19jxaeUeBL9t54Rq07"
+      };
+      window.open(links[amount], "_blank");
+    }
+
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return (window.location.href = "login.html");
+      const user = session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      await atualizarSaldo(user);
+      document.getElementById("walletBalance").onclick = () => (window.location.href = "carteira.html");
+      document.getElementById("userEmail").onclick = () => (window.location.href = "perfil.html");
+      document.getElementById("logout").onclick = async () => {
+        await sb.auth.signOut();
+        window.location.href = "login.html";
+      };
+    })();
+  </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relatório Premium - QI</title>
+  <title>Relatório Premium – QI | BrainTest</title>
   <link rel="stylesheet" href="assets/ui.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-init.js"></script>
@@ -12,47 +12,60 @@
   <nav class="sidebar">
     <h2>🧠 BrainTest</h2>
     <a href="index.html">🏠 Início</a>
-    <a href="teste-qi.html">🔁 Refazer Teste</a>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
     <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
     <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
     <a id="logout" class="logout-btn">🚪 Sair</a>
   </nav>
 
-  <main style="margin-left:250px;padding:40px;">
-    <h1>Relatório Premium - Teste de QI</h1>
-    <div id="relatorioPremium" style="margin-top:30px;color:#334155;">Carregando...</div>
+  <header>
+    <div class="logo">Relatório Premium – QI</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
+    </div>
+  </header>
+
+  <main>
+    <div id="relatorioPremium" class="card fade-in" style="max-width:900px;margin:auto;">
+      <h1>Carregando relatório...</h1>
+    </div>
   </main>
 
   <script>
     (async () => {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        window.location.href = "login.html";
-        return;
-      }
+      if (!session) return window.location.href = "login.html";
+      const user = session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
 
-      window.addEventListener("braintest-ready", async () => {
-        const user = session.user;
-        const div = document.getElementById("relatorioPremium");
-        div.innerHTML = `
-          <h2>Análise personalizada</h2>
+      window.addEventListener("braintest-ready", () => {
+        const rel = document.getElementById("relatorioPremium");
+        rel.innerHTML = `
+          <h2>Relatório Premium – QI</h2>
           <p><strong>Usuário:</strong> ${user.email}</p>
           <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
-          <p>Seu teste avalia o raciocínio lógico e a percepção de padrões. Este resultado
-          demonstra sua capacidade de abstração e resolução de problemas em contextos variados.</p>
-          <p><strong>Recomendações:</strong></p>
+          <p>Seu teste de QI indica bons níveis de raciocínio lógico e memória de trabalho. Continue estimulando sua mente com novos desafios intelectuais.</p>
           <ul>
-            <li>Continue estimulando o cérebro com leitura e jogos de lógica.</li>
-            <li>Evite comparar resultados absolutos, foque em seu progresso.</li>
+            <li>Pratique jogos de estratégia e lógica.</li>
+            <li>Mantenha uma rotina de leitura variada.</li>
+            <li>Explore novos estudos e habilidades analíticas.</li>
           </ul>
-        `;
+          <p class="note">* Este relatório não mede potencial intelectual completo nem substitui testes clínicos.</p>`;
       });
-    })();
 
-    document.getElementById("logout").onclick = async () => {
-      await sb.auth.signOut();
-      window.location.href = "login.html";
-    };
+      document.getElementById("logout").onclick = async () => {
+        await sb.auth.signOut();
+        window.location.href = "login.html";
+      };
+    })();
   </script>
 </body>
 </html>

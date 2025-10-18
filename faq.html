@@ -1,93 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FAQ | Braintest</title>
-<link rel="stylesheet" href="/assets/ui.css">
-<link rel="stylesheet" href="/assets/ui-dashboard.css">
-<script async src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-.layout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;padding:1rem;display:flex;flex-direction:column;justify-content:space-between}
-.sidebar a{display:block;margin:.5rem 0;color:#374151;font-weight:500}
-.submenu{margin:.4rem 0 .2rem 1rem;display:none}
-.main{flex:1;padding:2rem;max-width:900px;margin:0 auto}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-.card h3{margin-bottom:.5rem}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ - BrainTest</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-init.js"></script>
 </head>
 <body>
-<div class="layout">
   <nav class="sidebar">
-    <div>
-      <h1>🧠 Braintest</h1>
-      <a href="/index.html">🏠 Início</a>
-      <a href="/perfil.html">👤 Perfil</a>
-      <a href="/carteira.html">💰 Carteira</a>
-      <a href="#" id="testsToggle">🧩 Testes</a>
-      <div class="submenu" id="testsMenu">
-        <a href="/teste-qi.html">Cognitivos</a>
-        <a href="/teste-tdah.html">Psicológicos</a>
-        <a href="/teste-burnout.html">Diversos</a>
-      </div>
-      <a href="#">🎮 Jogos</a>
-      <a href="#">⭐ Assinaturas</a>
-      <a href="/faq.html" class="active">❓ FAQ</a>
-      <a href="/sobre.html">ℹ️ Sobre</a>
-    </div>
-    <div>
-      <div id="saldoBox" style="margin-bottom:.5rem;color:#6b7280">Saldo: -- 🧠</div>
-      <button id="authBtn" class="btn" style="width:100%">Entrar</button>
-    </div>
+    <h2>🧠 BrainTest</h2>
+    <a href="index.html">🏠 Início</a>
+    <a href="testes.html">🧩 Testes</a>
+    <a href="jogos.html">🎮 Jogos</a>
+    <a href="assinaturas.html">💎 Assinaturas</a>
+    <a href="carteira.html">💰 Carteira</a>
+    <a href="historico.html">📜 Histórico</a>
+    <a href="perfil.html">👤 Perfil</a>
+    <a href="faq.html">❓ FAQ</a>
+    <a href="sobre.html">ℹ️ Sobre</a>
+    <a id="logout" class="logout-btn">🚪 Sair</a>
   </nav>
 
-  <main class="main">
-    <h2>Perguntas Frequentes</h2>
-    <div class="card">
-      <h3>🧠 O que é a Braintest?</h3>
-      <p>A Braintest é uma plataforma de autoconhecimento e aprimoramento cognitivo, oferecendo testes psicológicos e lógicos que ajudam a compreender melhor como você pensa e reage ao mundo.</p>
+  <header>
+    <div class="logo">FAQ</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <span id="walletBalance"></span>
     </div>
+  </header>
 
-    <div class="card">
-      <h3>💰 O que são Braincoins?</h3>
-      <p>As Braincoins são a moeda interna da plataforma. Com elas, você pode desbloquear relatórios premium, realizar novos testes ou assinar planos mensais.</p>
-    </div>
+  <main>
+    <h1>Perguntas Frequentes</h1>
+    <div class="card fade-in" style="max-width:900px;">
+      <h3>Como funciona a BrainCoin?</h3>
+      <p>A BrainCoin é a moeda virtual da plataforma BrainTest. Você adiciona créditos à sua carteira e usa para adquirir testes, relatórios premium e assinaturas.</p>
 
-    <div class="card">
-      <h3>🔐 Meus dados estão seguros?</h3>
-      <p>Sim. Todos os dados são armazenados com segurança no Supabase e não são compartilhados com terceiros. Você tem total controle sobre o que mantém salvo na plataforma.</p>
-    </div>
+      <h3>Os testes substituem uma avaliação médica?</h3>
+      <p>Não. Nossos testes são baseados em metodologias reconhecidas, mas servem apenas como ferramenta de autoconhecimento. Recomendamos sempre a consulta a profissionais qualificados.</p>
 
-    <div class="card">
-      <h3>📊 Os resultados substituem um diagnóstico médico?</h3>
-      <p>Não. Os relatórios da Braintest têm caráter informativo e educacional. Eles não substituem consultas com profissionais de saúde mental.</p>
-    </div>
+      <h3>O que ganho com o relatório premium?</h3>
+      <p>Um resultado aprofundado, com interpretações mais detalhadas e orientações personalizadas baseadas nas suas respostas.</p>
 
-    <div class="card">
-      <h3>🧾 Posso usar a Braintest na minha empresa?</h3>
-      <p>Sim. Estamos desenvolvendo módulos corporativos para avaliação e mapeamento de equipes. Em breve, o modo “empresa” estará disponível.</p>
+      <h3>Posso acessar novamente meus resultados?</h3>
+      <p>Sim. Todo seu histórico de testes e relatórios fica disponível na aba <strong>Histórico</strong>.</p>
+
+      <h3>Como entrar em contato?</h3>
+      <p>Envie um e-mail para <strong>suporte@braintest.com.br</strong>.</p>
     </div>
   </main>
-</div>
 
-<script src="/assets/supabase-init.js"></script>
-<script>
-function setupSidebar(session){
-  const toggle=document.getElementById("testsToggle");
-  const menu=document.getElementById("testsMenu");
-  toggle.addEventListener("click",(e)=>{e.preventDefault();menu.style.display=(menu.style.display==="block"?"none":"block")});
-  const authBtn=document.getElementById("authBtn");
-  if(session){authBtn.textContent="Logout";authBtn.onclick=async()=>{await sb.auth.signOut();location.href="/";}}
-  else{authBtn.textContent="Entrar com Google";authBtn.onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin}});}
-}
-window.addEventListener("braintest-ready", async()=>{
-  const {data:{session}}=await sb.auth.getSession();
-  setupSidebar(session);
-  if(!session){return;}
-  const {data:{user}}=await sb.auth.getUser();
-  const {data:wallet}=await sb.from("wallets").select("balance").eq("user_id",user.id).single();
-  document.getElementById("saldoBox").textContent=`Saldo: ${wallet?.balance ?? 0} 🧠`;
-});
-</script>
+  <script>
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return (window.location.href = "login.html");
+      const user = session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      const { data: wallet } = await sb.from("wallets").select("balance").eq("user_id", user.id).single();
+      document.getElementById("walletBalance").textContent = wallet ? `${wallet.balance} 🪙` : "0 🪙";
+      document.getElementById("logout").onclick = async () => { await sb.auth.signOut(); window.location.href = "login.html"; };
+    })();
+  </script>
 </body>
 </html>
